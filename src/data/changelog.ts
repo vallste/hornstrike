@@ -14,13 +14,21 @@ export interface ChangelogEntry {
  */
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
-  { type: 'feat', text: 'Spieler können im Kader als inaktiv markiert werden (z.B. bei Verletzung) – erscheinen dann nicht mehr bei der Spieltag-Planung' },
-  { type: 'fix', text: 'Splash Screen: Titel und Schrift auf kleinen Mobilgeräten nicht mehr abgeschnitten (responsive clamp-Schriftgröße)' },
-  { type: 'improve', text: 'Inaktiv-Toggle und Löschen-Button in den Spieler-Editor verschoben (war in der Spielerliste)' },
-  { type: 'feat', text: 'Einstellungen: „App neu laden"-Button als manueller Fallback für SW-Updates' },
+  { type: 'fix', text: 'PWA-Updates auf Chrome Android: autoUpdate-Modus mit controllerchange-Listener – App lädt automatisch neu wenn neue Version aktiv wird' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
+  {
+    version: '0.1.5',
+    date: '2026-05-28',
+    changes: [
+      { type: 'feat', text: 'Spieler können im Kader als inaktiv markiert werden (z.B. bei Verletzung) – erscheinen dann nicht mehr bei der Spieltag-Planung' },
+      { type: 'feat', text: 'Einstellungen: „App neu laden"-Button als manueller Fallback für SW-Updates' },
+      { type: 'improve', text: 'Inaktiv-Toggle und Löschen-Button in den Spieler-Editor verschoben' },
+      { type: 'fix', text: 'Splash Screen: Titel auf kleinen Mobilgeräten nicht mehr abgeschnitten (responsive Schriftgröße)' },
+      { type: 'fix', text: 'Zurück-Button aus Einstellungen-Header entfernt' },
+    ],
+  },
   {
     version: '0.1.4',
     date: '2026-05-28',
@@ -82,11 +90,11 @@ const HISTORY: ChangelogEntry[] = [
 const CURRENT_DATE = '2026-05-28'
 
 export const CHANGELOG: ChangelogEntry[] = [
-  {
+  ...(CURRENT_CHANGES.length > 0 ? [{
     version: CURRENT_VERSION,
     date: CURRENT_DATE,
     changes: CURRENT_CHANGES,
-  },
+  }] : []),
   ...HISTORY,
 ]
 

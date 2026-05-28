@@ -185,7 +185,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
             <span className="w-9 h-9 rounded-xl bg-unicorn-violet/40 flex items-center justify-center text-xl">📋</span>
             <div className="flex-1 text-left">
               <p className="text-white font-semibold text-[15px]">Changelog</p>
-              <p className="text-white/40 text-xs mt-0.5">Aktuell v{CHANGELOG[0]?.version} · {CHANGELOG[0]?.changes.length} Einträge</p>
+              <p className="text-white/40 text-xs mt-0.5">v{APP_VERSION} · {CHANGELOG[0]?.changes.length} neue Einträge</p>
             </div>
             <span className="text-white/25 text-lg">›</span>
           </button>
