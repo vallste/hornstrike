@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 export default function UpdateBanner() {
   const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
     onRegisteredSW(_swUrl: string, r: { update: () => void } | undefined) {
-      if (r) setInterval(() => r.update(), 60 * 60 * 1000)
+      if (r) setInterval(() => r.update(), 10 * 60 * 1000)
     },
   })
 
