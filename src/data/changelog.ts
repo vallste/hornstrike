@@ -15,6 +15,7 @@ export interface ChangelogEntry {
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'feat', text: 'Spieler können im Kader als inaktiv markiert werden (z.B. bei Verletzung) – erscheinen dann nicht mehr bei der Spieltag-Planung' },
+  { type: 'fix', text: 'Splash Screen: Titel und Schrift auf kleinen Mobilgeräten nicht mehr abgeschnitten (responsive clamp-Schriftgröße)' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
