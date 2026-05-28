@@ -41,12 +41,10 @@ function gameTypeLabel(t: Player['preferences']['gameType']): string {
 
 // ── Sortierbare Karte ──────────────────────────────────────────────────────
 
-function SortablePlayerCard({ player, idx, onEdit, onDelete, onToggleActive }: {
+function SortablePlayerCard({ player, idx, onEdit }: {
   player: Player
   idx: number
   onEdit: () => void
-  onDelete: () => void
-  onToggleActive: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: player.id })
   const color = AVATAR_COLORS[idx % AVATAR_COLORS.length]
@@ -97,21 +95,8 @@ function SortablePlayerCard({ player, idx, onEdit, onDelete, onToggleActive }: {
         </div>
       </button>
 
-      {/* Active toggle + delete + chevron */}
-      <div className="flex items-center gap-1 flex-shrink-0">
-        <button
-          onClick={e => { e.stopPropagation(); onToggleActive() }}
-          className={`text-sm p-1 transition-colors ${isActive ? 'text-white/20 hover:text-amber-400' : 'text-amber-400'}`}
-          title={isActive ? 'Als inaktiv markieren' : 'Wieder aktivieren'}
-        >
-          {isActive ? '⏸' : '▶'}
-        </button>
-        <button
-          onClick={e => { e.stopPropagation(); onDelete() }}
-          className="text-white/20 hover:text-red-400 text-lg transition-colors p-1"
-        >✕</button>
-        <button onClick={onEdit} className="text-white/25 text-xl px-1">›</button>
-      </div>
+      {/* Chevron */}
+      <button onClick={onEdit} className="text-white/25 text-xl px-1 flex-shrink-0">›</button>
     </div>
   )
 }
@@ -120,7 +105,7 @@ function SortablePlayerCard({ player, idx, onEdit, onDelete, onToggleActive }: {
 
 export default function PlayersPage() {
   const navigate = useNavigate()
-  const { players, deletePlayer, reorder, updatePlayer } = usePlayers()
+  const { players, reorder } = usePlayers()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -168,8 +153,6 @@ export default function PlayersPage() {
                   player={player}
                   idx={idx}
                   onEdit={() => navigate(`/players/${player.id}`)}
-                  onDelete={() => deletePlayer(player.id)}
-                  onToggleActive={() => updatePlayer({ ...player, active: !(player.active !== false) })}
                 />
               ))}
             </div>

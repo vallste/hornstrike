@@ -100,12 +100,14 @@ const AVATAR_COLORS = ['#00e5ff', '#e040fb', '#ffd700', '#00e5ff', '#7c3aed', '#
 export default function PlayerEditorPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { players, addPlayer, updatePlayer } = usePlayers()
+  const { players, addPlayer, updatePlayer, deletePlayer } = usePlayers()
   const isNew = id === 'new'
   const existing = players.find(p => p.id === id)
 
   const [name, setName] = useState(existing?.name ?? '')
   const [prefs, setPrefs] = useState(existing?.preferences ?? defaultPrefs())
+  const [active, setActive] = useState(existing?.active !== false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   useEffect(() => {
     if (!isNew && !existing) navigate('/players', { replace: true })
@@ -115,8 +117,9 @@ export default function PlayerEditorPage() {
     if (!name.trim()) return
     if (isNew) {
       addPlayer({ id: uuid(), name: name.trim(), active: true, preferences: prefs })
+
     } else if (existing) {
-      updatePlayer({ ...existing, name: name.trim(), preferences: prefs })
+      updatePlayer({ ...existing, name: name.trim(), active, preferences: prefs })
     }
     navigate('/players')
   }
@@ -172,7 +175,7 @@ export default function PlayerEditorPage() {
         {/* Goalie */}
         <ToggleSwitch
           label="🥅 Goalie"
-          description="Spielt gerne Torwart im Einzel (E5/E6)"
+          description="Spielt gerne Goalie"
           value={prefs.goaliePreference}
           onChange={v => setPref('goaliePreference', v)}
         />
@@ -286,6 +289,50 @@ export default function PlayerEditorPage() {
           )}
         </div>
       </div>
+
+      {/* Inaktiv + Löschen (nur bei bestehendem Spieler) */}
+      {!isNew && (
+        <div className="space-y-3">
+          {/* Inaktiv-Toggle */}
+          <button
+            onClick={() => setActive(v => !v)}
+            className="w-full bg-[#2b0b4c] rounded-2xl px-4 py-3.5 flex items-center justify-between"
+          >
+            <div className="text-left">
+              <p className="text-white font-semibold text-[15px]">⏸ Inaktiv setzen</p>
+              <p className="text-white/40 text-xs mt-0.5">
+                {active ? 'Spieler erscheint aktuell bei der Spieltag-Planung' : 'Spieler ist inaktiv und wird nicht angezeigt'}
+              </p>
+            </div>
+            <div className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${!active ? 'bg-amber-500' : 'bg-[#391060]'}`}>
+              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${!active ? 'translate-x-6' : 'translate-x-0.5'}`} />
+            </div>
+          </button>
+
+          {/* Löschen */}
+          {!confirmDelete ? (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="w-full bg-[#2b0b4c] rounded-2xl px-4 py-3.5 flex items-center gap-3"
+            >
+              <span className="w-9 h-9 rounded-xl bg-red-500/15 flex items-center justify-center text-xl flex-shrink-0">🗑</span>
+              <p className="text-red-400 font-semibold text-[15px]">Spieler löschen</p>
+            </button>
+          ) : (
+            <div className="bg-red-900/30 border border-red-500/30 rounded-2xl px-4 py-4">
+              <p className="text-red-300 font-semibold text-[14px] mb-1">Wirklich löschen?</p>
+              <p className="text-red-200/60 text-xs mb-3">Diese Aktion kann nicht rückgängig gemacht werden.</p>
+              <div className="flex gap-2">
+                <button onClick={() => setConfirmDelete(false)} className="flex-1 py-2.5 rounded-xl bg-[#391060] text-white/60 text-sm font-semibold">Abbrechen</button>
+                <button
+                  onClick={() => { deletePlayer(existing!.id); navigate('/players') }}
+                  className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-bold"
+                >Ja, löschen</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Save CTA */}
       <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-4 bg-gradient-to-t from-unicorn-purple via-unicorn-purple/95 to-transparent">
