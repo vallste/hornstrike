@@ -23,7 +23,7 @@ export default function BottomNav() {
             <>
               <span className="text-2xl">{tab.icon}</span>
               <span className="text-[11px] font-medium">{tab.label}</span>
-              {isActive && <span className="w-1 h-1 rounded-full bg-unicorn-pink" />}
+              <span className={`w-1 h-1 rounded-full bg-unicorn-pink transition-opacity ${isActive ? 'opacity-100' : 'opacity-0'}`} />
             </>
           )}
         </NavLink>
