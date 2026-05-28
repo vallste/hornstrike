@@ -17,6 +17,8 @@ export interface PlayerPreferences {
   position: Position
   gameType: GameTypePreference
   goaliePreference: boolean
+  avoidsOpening: boolean   // spielt ungern E1/E2
+  avoidsClosing: boolean   // spielt ungern die letzten Spiele
   partnerPreferences: PartnerPreference[]
 }
 

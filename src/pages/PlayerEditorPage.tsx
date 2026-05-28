@@ -7,7 +7,7 @@ import type { Player, Position, GameTypePreference } from '../types'
 import { uuid } from '../utils/uuid'
 
 function defaultPrefs(): Player['preferences'] {
-  return { position: 'both', gameType: 'both', goaliePreference: false, partnerPreferences: [] }
+  return { position: 'both', gameType: 'both', goaliePreference: false, avoidsOpening: false, avoidsClosing: false, partnerPreferences: [] }
 }
 
 // ── Preference Scale ──────────────────────────────────────────────────────────
@@ -176,6 +176,33 @@ export default function PlayerEditorPage() {
           value={prefs.goaliePreference}
           onChange={v => setPref('goaliePreference', v)}
         />
+
+        {/* Erstes / Letztes Spiel */}
+        <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
+          <div className="px-4 pt-4 pb-1">
+            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Spielposition im Ablauf</p>
+          </div>
+          <div className="px-4 py-3 flex items-center justify-between border-t border-white/5">
+            <div>
+              <p className="text-white font-semibold text-[15px]">🚀 Kein Starter</p>
+              <p className="text-white/40 text-xs mt-0.5">Spielt ungern E1 oder E2</p>
+            </div>
+            <button onClick={() => setPref('avoidsOpening', !prefs.avoidsOpening)}
+              className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${prefs.avoidsOpening ? 'bg-unicorn-pink' : 'bg-[#391060]'}`}>
+              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${prefs.avoidsOpening ? 'translate-x-6' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+          <div className="px-4 py-3 flex items-center justify-between border-t border-white/5">
+            <div>
+              <p className="text-white font-semibold text-[15px]">🏁 Kein Finisher</p>
+              <p className="text-white/40 text-xs mt-0.5">Spielt ungern die letzten Spiele</p>
+            </div>
+            <button onClick={() => setPref('avoidsClosing', !prefs.avoidsClosing)}
+              className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${prefs.avoidsClosing ? 'bg-unicorn-pink' : 'bg-[#391060]'}`}>
+              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${prefs.avoidsClosing ? 'translate-x-6' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+        </div>
 
         {/* Partner preferences */}
         <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">

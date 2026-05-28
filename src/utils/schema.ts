@@ -47,13 +47,15 @@ const migrations: Record<number, () => void> = {
     }))
     save(MATCHDAYS_KEY, migrated)
 
-    // Spieler: partnerPreferences sicherstellen
+    // Spieler: neue Felder sicherstellen
     const players = load<Player[]>(PLAYERS_KEY, [])
     const migratedPlayers = players.map(p => ({
       ...p,
       preferences: {
         ...p.preferences,
         partnerPreferences: p.preferences.partnerPreferences ?? [],
+        avoidsOpening: p.preferences.avoidsOpening ?? false,
+        avoidsClosing: p.preferences.avoidsClosing ?? false,
       },
     }))
     save(PLAYERS_KEY, migratedPlayers)

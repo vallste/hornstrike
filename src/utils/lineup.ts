@@ -22,29 +22,36 @@ function preferenceScore(
   slot: GameSlot,
   position: 'attack' | 'defense',
   partner: Player | null,
+  totalGames: number,
 ): number {
   let score = 0
   const prefs = player.preferences
   const isSingles = slot.type === 'singles'
 
   // Position
-  if (prefs.position === position)                                     score += 10
-  else if (prefs.position === 'both')                                  score += 5
-  else if (prefs.position === 'attack_preferred' && position === 'attack') score += 8
+  if (prefs.position === position)                                          score += 10
+  else if (prefs.position === 'both')                                       score += 5
+  else if (prefs.position === 'attack_preferred' && position === 'attack')  score += 8
   else if (prefs.position === 'defense_preferred' && position === 'defense') score += 8
   else if (prefs.position === 'attack_preferred' || prefs.position === 'defense_preferred') score += 2
 
   // Goalie
-  if (slot.isGoalieSingles)  score += prefs.goaliePreference ? 12 : -8
+  if (slot.isGoalieSingles) score += prefs.goaliePreference ? 12 : -8
 
   // Spieltyp
-  if ( isSingles && prefs.gameType === 'singles_only')    score += 8
-  if (!isSingles && prefs.gameType === 'doubles_only')    score += 8
+  if ( isSingles && prefs.gameType === 'singles_only')      score += 8
+  if (!isSingles && prefs.gameType === 'doubles_only')      score += 8
   if ( isSingles && prefs.gameType === 'singles_preferred') score += 5
   if (!isSingles && prefs.gameType === 'doubles_preferred') score += 5
-  if (prefs.gameType === 'both')                          score += 3
-  if ( isSingles && prefs.gameType === 'doubles_only')    score -= 6
-  if (!isSingles && prefs.gameType === 'singles_only')    score -= 6
+  if (prefs.gameType === 'both')                            score += 3
+  if ( isSingles && prefs.gameType === 'doubles_only')      score -= 6
+  if (!isSingles && prefs.gameType === 'singles_only')      score -= 6
+
+  // Erstes / Letztes Spiel
+  const isOpening = slot.gameIndex <= 2
+  const isClosing = slot.gameIndex >= totalGames - 1
+  if (prefs.avoidsOpening && isOpening) score -= 14
+  if (prefs.avoidsClosing && isClosing) score -= 14
 
   // Partnerwunsch
   if (partner) {
@@ -73,8 +80,9 @@ function totalScore(
   position: 'attack' | 'defense',
   partner: Player | null,
   context: Context,
+  totalGames: number,
 ): number {
-  return preferenceScore(player, slot, position, partner) - loadPenalty(player.id, context)
+  return preferenceScore(player, slot, position, partner, totalGames) - loadPenalty(player.id, context)
 }
 
 // ─── Verfügbarkeits-Filter ────────────────────────────────────────────────────
@@ -145,7 +153,7 @@ export function generateLineup(
       }
       const mockSlot: GameSlot = { gameIndex: game.gameIndex, type: 'singles', isGoalieSingles: isGoalie, players: [], positions: [] }
       const scored = avail
-        .map(p => ({ player: p, score: totalScore(p, mockSlot, 'attack', null, context) }))
+        .map(p => ({ player: p, score: totalScore(p, mockSlot, 'attack', null, context, maxGames) }))
         .sort((a, b) => b.score - a.score)
 
       const chosen = scored[0].player
@@ -170,13 +178,13 @@ export function generateLineup(
           // Teste beide Positions-Kombinationen
           const combos: [number, 'attack' | 'defense', 'attack' | 'defense'][] = [
             [
-              totalScore(p1, mockSlot, 'attack',   p2, context) +
-              totalScore(p2, mockSlot, 'defense',  p1, context),
+              totalScore(p1, mockSlot, 'attack',   p2, context, maxGames) +
+              totalScore(p2, mockSlot, 'defense',  p1, context, maxGames),
               'attack', 'defense',
             ],
             [
-              totalScore(p1, mockSlot, 'defense',  p2, context) +
-              totalScore(p2, mockSlot, 'attack',   p1, context),
+              totalScore(p1, mockSlot, 'defense',  p2, context, maxGames) +
+              totalScore(p2, mockSlot, 'attack',   p1, context, maxGames),
               'defense', 'attack',
             ],
           ]
