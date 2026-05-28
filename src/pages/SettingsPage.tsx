@@ -4,9 +4,10 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { usePlayers, useMatchDays } from '../store'
 import { exportBackup, parseBackup, CURRENT_VERSION, type BackupFile } from '../utils/backup'
+import { resetOnboarding } from '../components/OnboardingGuide'
 import { version as APP_VERSION } from '../../package.json'
 
-export default function SettingsPage() {
+export default function SettingsPage({ onStartTour }: { onStartTour?: () => void }) {
   const { players, replaceAll: replacePlayers } = usePlayers()
   const { matchDays, replaceAll: replaceMatchDays } = useMatchDays()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -168,6 +169,24 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+
+        {/* Tour */}
+        <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/5">
+            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Einführung</p>
+          </div>
+          <button
+            onClick={() => { resetOnboarding(); onStartTour?.() }}
+            className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors"
+          >
+            <span className="w-9 h-9 rounded-xl bg-unicorn-pink/15 flex items-center justify-center text-xl">🦄</span>
+            <div className="flex-1 text-left">
+              <p className="text-white font-semibold text-[15px]">Tour neu starten</p>
+              <p className="text-white/40 text-xs mt-0.5">Einführung durch alle Funktionen</p>
+            </div>
+            <span className="text-white/25 text-lg">›</span>
+          </button>
+        </div>
 
         {/* Danger zone */}
         <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">

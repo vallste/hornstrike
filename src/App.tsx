@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import SplashScreen from './pages/SplashScreen'
 import HomePage from './pages/HomePage'
@@ -8,9 +9,12 @@ import MatchDaySetupPage from './pages/MatchDaySetupPage'
 import MatchDayEditPage from './pages/MatchDayEditPage'
 import SettingsPage from './pages/SettingsPage'
 import UpdateBanner from './components/UpdateBanner'
+import OnboardingGuide, { shouldShowOnboarding } from './components/OnboardingGuide'
 import LineupPage from './pages/LineupPage'
 
 export default function App() {
+  const [showOnboarding, setShowOnboarding] = useState(shouldShowOnboarding)
+
   return (
     <>
       <Routes>
@@ -21,11 +25,12 @@ export default function App() {
         <Route path="/matchday" element={<MatchDayListPage />} />
         <Route path="/matchday/new" element={<MatchDaySetupPage />} />
         <Route path="/matchday/:id/edit" element={<MatchDayEditPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings" element={<SettingsPage onStartTour={() => setShowOnboarding(true)} />} />
         <Route path="/lineup/:id" element={<LineupPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <UpdateBanner />
+      {showOnboarding && <OnboardingGuide onDone={() => setShowOnboarding(false)} />}
     </>
   )
 }
