@@ -18,7 +18,10 @@ const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'feat', text: 'Aufstellung teilen via Web Share API (WhatsApp, Telegram, …) oder Zwischenablage' },
   { type: 'feat', text: 'Onboarding-Guide für neue Nutzer (6 Slides), jederzeit neu startbar' },
   { type: 'feat', text: 'Changelog als eigene Seite in den Einstellungen' },
+  { type: 'feat', text: 'Home-Tab in der Bottom-Navigation' },
+  { type: 'feat', text: 'Spieler-Pills in der Aufstellung in individuellen Farben pro Spieler (8-er Palette, unabhängig von Einzel/Doppel-Farbkodierung)' },
   { type: 'improve', text: 'Gleichverteilungs-Algorithmus zählt jetzt Sätze statt Spiele – dominiert alle Präferenzen' },
+  { type: 'improve', text: 'Einheitliches Seiten-Layout: Header-Abstände, Content-Spacing und Glow-Positionen vereinheitlicht' },
   { type: 'fix', text: 'Satz-Zähler aktualisiert sich sofort nach Drag & Drop' },
   { type: 'fix', text: 'Clipboard-Fallback für non-HTTPS Umgebungen beim Teilen' },
 ]
