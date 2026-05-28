@@ -8,6 +8,7 @@ import MatchDayListPage from './pages/MatchDayListPage'
 import MatchDaySetupPage from './pages/MatchDaySetupPage'
 import MatchDayEditPage from './pages/MatchDayEditPage'
 import SettingsPage from './pages/SettingsPage'
+import ChangelogPage from './pages/ChangelogPage'
 import UpdateBanner from './components/UpdateBanner'
 import OnboardingGuide, { shouldShowOnboarding } from './components/OnboardingGuide'
 import LineupPage from './pages/LineupPage'
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/matchday/new" element={<MatchDaySetupPage />} />
         <Route path="/matchday/:id/edit" element={<MatchDayEditPage />} />
         <Route path="/settings" element={<SettingsPage onStartTour={() => setShowOnboarding(true)} />} />
+      <Route path="/changelog" element={<ChangelogPage />} />
         <Route path="/lineup/:id" element={<LineupPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

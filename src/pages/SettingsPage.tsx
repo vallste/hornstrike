@@ -4,10 +4,13 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { usePlayers, useMatchDays } from '../store'
 import { exportBackup, parseBackup, CURRENT_VERSION, type BackupFile } from '../utils/backup'
+import { useNavigate } from 'react-router-dom'
 import { resetOnboarding } from '../components/OnboardingGuide'
+import { CHANGELOG } from '../data/changelog'
 import { version as APP_VERSION } from '../../package.json'
 
 export default function SettingsPage({ onStartTour }: { onStartTour?: () => void }) {
+  const navigate = useNavigate()
   const { players, replaceAll: replacePlayers } = usePlayers()
   const { matchDays, replaceAll: replaceMatchDays } = useMatchDays()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -170,11 +173,23 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           </div>
         )}
 
-        {/* Tour */}
+        {/* Changelog + Tour */}
         <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
           <div className="px-4 py-3 border-b border-white/5">
-            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Einführung</p>
+            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Info</p>
           </div>
+          <button
+            onClick={() => navigate('/changelog')}
+            className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors"
+          >
+            <span className="w-9 h-9 rounded-xl bg-unicorn-violet/40 flex items-center justify-center text-xl">📋</span>
+            <div className="flex-1 text-left">
+              <p className="text-white font-semibold text-[15px]">Changelog</p>
+              <p className="text-white/40 text-xs mt-0.5">Aktuell v{CHANGELOG[0]?.version} · {CHANGELOG[0]?.changes.length} Einträge</p>
+            </div>
+            <span className="text-white/25 text-lg">›</span>
+          </button>
+          <div className="h-px bg-white/5" />
           <button
             onClick={() => { resetOnboarding(); onStartTour?.() }}
             className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors"
