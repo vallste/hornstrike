@@ -69,7 +69,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
     <div className="min-h-screen bg-unicorn-purple pb-24">
       <div className="absolute w-[360px] h-[360px] rounded-full bg-unicorn-violet/35 blur-[140px] -top-20 right-0 pointer-events-none" />
 
-      <Header title="Einstellungen" back="/home" />
+      <Header title="Einstellungen" />
 
       <div className="relative px-6 space-y-3 mt-4">
 
