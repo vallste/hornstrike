@@ -21,7 +21,7 @@ export default function MatchDayListPage() {
 
   return (
     <div className="min-h-screen bg-unicorn-purple pb-24">
-      <div className="absolute w-[380px] h-[380px] rounded-full bg-unicorn-pink/20 blur-[130px] top-0 right-0 pointer-events-none" />
+      <div className="absolute w-[380px] h-[380px] rounded-full bg-unicorn-violet/35 blur-[130px] -top-20 right-0 pointer-events-none" />
 
       <Header
         title="Spieltage"
