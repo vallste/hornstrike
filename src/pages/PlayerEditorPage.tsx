@@ -288,11 +288,9 @@ export default function PlayerEditorPage() {
             </p>
           )}
         </div>
-      </div>
 
-      {/* Inaktiv + Löschen (nur bei bestehendem Spieler) */}
-      {!isNew && (
-        <div className="space-y-3">
+        {/* Inaktiv + Löschen (nur bei bestehendem Spieler) */}
+        {!isNew && (<>
           {/* Inaktiv-Toggle */}
           <button
             onClick={() => setActive(v => !v)}
@@ -331,8 +329,8 @@ export default function PlayerEditorPage() {
               </div>
             </div>
           )}
-        </div>
-      )}
+        </>)}
+      </div>
 
       {/* Save CTA */}
       <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-4 bg-gradient-to-t from-unicorn-purple via-unicorn-purple/95 to-transparent">
