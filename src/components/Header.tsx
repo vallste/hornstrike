@@ -9,7 +9,7 @@ interface Props {
 export default function Header({ title, back, right }: Props) {
   const navigate = useNavigate()
   return (
-    <div className="flex items-center gap-3 px-6 pt-16 pb-4">
+    <div className="flex items-center gap-3 px-6 pt-12 pb-2">
       {back && (
         <button
           onClick={() => typeof back === 'string' ? navigate(back) : navigate(-1)}

@@ -28,14 +28,12 @@ export default function MatchDayListPage() {
         right={
           <button
             onClick={() => navigate('/matchday/new')}
-            className="flex items-center gap-1.5 bg-unicorn-pink text-white text-sm font-semibold px-4 py-1.5 rounded-full shadow-lg shadow-unicorn-pink/40"
-          >
-            + Neu
-          </button>
+            className="w-9 h-9 rounded-full bg-unicorn-pink flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-unicorn-pink/40"
+          >+</button>
         }
       />
 
-      <div className="relative px-6 space-y-3 mt-2">
+      <div className="relative px-6 space-y-3 mt-4">
         {sorted.length === 0 && (
           <div className="bg-[#2b0b4c] rounded-2xl p-6 text-center">
             <p className="text-4xl mb-3">⚽</p>

@@ -18,11 +18,11 @@ export default function HomePage() {
       {/* Ambient glow */}
       <div className="absolute w-[420px] h-[420px] rounded-full bg-unicorn-violet/50 blur-[140px] -top-24 -left-14 pointer-events-none" />
 
-      <div className="relative px-6 pt-16 pb-4">
+      <div className="relative px-6 pt-12 pb-2">
         <h1 className="text-[26px] font-bold text-white">Hornstrike 🦄</h1>
       </div>
 
-      <div className="relative px-6 mt-2">
+      <div className="relative px-6 mt-4">
         <p className="text-[22px] font-bold text-white">Bereit für den Spieltag?</p>
         <p className="text-unicorn-pink text-sm mt-1">
           {new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}

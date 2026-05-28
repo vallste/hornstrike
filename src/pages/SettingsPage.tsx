@@ -71,7 +71,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
 
       <Header title="Einstellungen" back="/home" />
 
-      <div className="relative px-6 space-y-3 mt-2">
+      <div className="relative px-6 space-y-3 mt-4">
 
         {/* App info */}
         <div className="bg-[#2b0b4c] rounded-2xl px-4 py-4 flex items-center gap-4">

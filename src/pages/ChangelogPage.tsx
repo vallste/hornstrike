@@ -14,7 +14,7 @@ export default function ChangelogPage() {
 
       <Header title="Changelog" back="/settings" />
 
-      <div className="relative px-6 space-y-3 mt-2">
+      <div className="relative px-6 space-y-3 mt-4">
         {CHANGELOG.map((entry, idx) => {
           const isOpen = open === entry.version
           const isLatest = idx === 0

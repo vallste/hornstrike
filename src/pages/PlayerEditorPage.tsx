@@ -134,7 +134,7 @@ export default function PlayerEditorPage() {
 
       <Header title={isNew ? 'Neuer Spieler' : (existing?.name ?? 'Spieler')} back />
 
-      <div className="relative px-6 space-y-3 mt-2">
+      <div className="relative px-6 space-y-3 mt-4">
 
         {/* Name */}
         <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">

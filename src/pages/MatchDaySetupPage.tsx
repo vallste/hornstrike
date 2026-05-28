@@ -53,7 +53,7 @@ export default function MatchDaySetupPage() {
 
       <Header title="Spieltag planen" back="/matchday" />
 
-      <div className="relative px-6 space-y-4 mt-2">
+      <div className="relative px-6 space-y-3 mt-4">
         {/* Date */}
         <div className="relative bg-[#2b0b4c] rounded-2xl px-4 py-3.5 flex items-center justify-between">
           <div>

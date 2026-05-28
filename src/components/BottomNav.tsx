@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 
 const tabs = [
+  { to: '/home', icon: '🏠', label: 'Home' },
   { to: '/players', icon: '👥', label: 'Spieler' },
   { to: '/matchday', icon: '⚽', label: 'Spieltag' },
   { to: '/settings', icon: '⚙', label: 'Einstellungen' },
