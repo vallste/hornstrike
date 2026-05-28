@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#4a0e8f"/>
+      <stop offset="100%" stop-color="#1a0533"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e040fb" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#e040fb" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Glow -->
+  <ellipse cx="256" cy="220" rx="190" ry="180" fill="url(#glow)"/>
+
+  <!-- Outer ring -->
+  <circle cx="256" cy="220" r="155" fill="none" stroke="#e040fb" stroke-width="3" stroke-opacity="0.7"/>
+
+  <!-- Inner circle -->
+  <circle cx="256" cy="220" r="108" fill="#4a0e8f" fill-opacity="0.85"/>
+
+  <!-- Unicorn horn (upward triangle) -->
+  <polygon points="256,96 210,248 302,248" fill="#ffd700"/>
+  <!-- Horn shine -->
+  <polygon points="256,96 235,200 256,185" fill="#ffffff" fill-opacity="0.25"/>
+
+  <!-- Sparkles -->
+  <circle cx="140" cy="155" r="7" fill="#00e5ff" fill-opacity="0.9"/>
+  <circle cx="372" cy="168" r="5" fill="#ffd700" fill-opacity="0.9"/>
+  <circle cx="150" cy="310" r="4" fill="#e040fb" fill-opacity="0.8"/>
+  <circle cx="362" cy="302" r="6" fill="#00e5ff" fill-opacity="0.9"/>
+  <circle cx="256" cy="84"  r="5" fill="#ffd700" fill-opacity="0.85"/>
+  <circle cx="120" cy="240" r="4" fill="#ffd700" fill-opacity="0.7"/>
+  <circle cx="392" cy="245" r="5" fill="#e040fb" fill-opacity="0.75"/>
+
+  <!-- "HS" wordmark -->
+  <text x="256" y="430" text-anchor="middle"
+        font-family="Arial Black, Arial, sans-serif"
+        font-size="96" font-weight="900" letter-spacing="6"
+        fill="white" fill-opacity="0.95">HS</text>
+</svg>
