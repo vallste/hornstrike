@@ -15,6 +15,7 @@ export interface ChangelogEntry {
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'fix', text: 'PWA-Updates auf Chrome Android: autoUpdate-Modus mit controllerchange-Listener – App lädt automatisch neu wenn neue Version aktiv wird' },
+  { type: 'fix', text: 'Bottom-Navigation springt nicht mehr beim Tab-Wechsel (Dot-Indikator immer vorhanden, nur Sichtbarkeit togglet)' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
