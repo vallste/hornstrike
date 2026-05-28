@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -74,16 +74,16 @@ export default function LineupPage() {
   const violations = validateLineup(matchDay.lineup, playerName, activePlayerIds)
   const violatingIndices = new Set(violations.flatMap(v => v.gameIndices))
 
-  // Sätze pro Spieler: Einzel = 1, Doppel = 2
-  const setsPerPlayer: Record<string, number> = {}
-  for (const slot of matchDay.lineup) {
-    if (slot.forfeit || slot.players.length === 0) continue
-    const sets = slot.type === 'singles' ? 1 : 2
-    for (const pid of slot.players) {
-      setsPerPlayer[pid] = (setsPerPlayer[pid] ?? 0) + sets
+  // Sätze pro Spieler: Einzel = 1, Doppel = 2 – useMemo stellt sicher dass DnD-Swaps sofort reflektiert werden
+  const setEntries = useMemo(() => {
+    const acc: Record<string, number> = {}
+    for (const slot of matchDay.lineup) {
+      if (slot.forfeit || slot.players.length === 0) continue
+      const sets = slot.type === 'singles' ? 1 : 2
+      for (const pid of slot.players) acc[pid] = (acc[pid] ?? 0) + sets
     }
-  }
-  const setEntries = Object.entries(setsPerPlayer).sort((a, b) => b[1] - a[1])
+    return Object.entries(acc).sort((a, b) => b[1] - a[1])
+  }, [matchDay.lineup])
   const formatDate = (iso: string) => new Date(iso).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'long' })
 
   const regenerate = () => {
