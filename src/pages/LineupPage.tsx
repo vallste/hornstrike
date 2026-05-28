@@ -120,8 +120,24 @@ export default function LineupPage() {
     if (navigator.share) {
       await navigator.share({ title: 'Hornstrike Aufstellung', text })
     } else {
-      await navigator.clipboard.writeText(text)
-      alert('Aufstellung in Zwischenablage kopiert ✓')
+      // Fallback: textarea + execCommand (funktioniert auch ohne HTTPS)
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text)
+        } else {
+          const el = document.createElement('textarea')
+          el.value = text
+          el.style.cssText = 'position:fixed;opacity:0;top:0;left:0'
+          document.body.appendChild(el)
+          el.select()
+          document.execCommand('copy')
+          document.body.removeChild(el)
+        }
+        alert('Aufstellung in Zwischenablage kopiert ✓')
+      } catch {
+        // Letzter Ausweg: Text in Dialog anzeigen zum manuellen Kopieren
+        prompt('Aufstellung kopieren (Strg+A, Strg+C):', text)
+      }
     }
   }
 
