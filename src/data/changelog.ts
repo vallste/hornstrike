@@ -15,6 +15,7 @@ export interface ChangelogEntry {
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'improve', text: 'Beim Seitenwechsel wird automatisch nach oben gescrollt' },
+  { type: 'fix', text: 'Bottom-Navigation Höhe springt nicht mehr beim Tab-Wechsel auf Mobilgeräten (feste Item-Dimensionen, Aktivierungs-Dot absolut positioniert, whitespace-nowrap)' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
