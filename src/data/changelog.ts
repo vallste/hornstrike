@@ -24,6 +24,7 @@ const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'improve', text: 'Einheitliches Seiten-Layout: Header-Abstände, Content-Spacing und Glow-Positionen vereinheitlicht' },
   { type: 'fix', text: 'Satz-Zähler aktualisiert sich sofort nach Drag & Drop' },
   { type: 'fix', text: 'Clipboard-Fallback für non-HTTPS Umgebungen beim Teilen' },
+  { type: 'fix', text: 'Update-Banner auf Android PWA zeigt sich jetzt zuverlässig (Service Worker auf prompt-Modus umgestellt, Polling alle 10 Min)' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
