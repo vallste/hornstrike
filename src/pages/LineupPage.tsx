@@ -17,15 +17,29 @@ import LineupDetailModal from './LineupDetailModal'
 
 const GAME_LABELS = ['E1','E2','D1','E3','E4','D2','E5','E6','D3','E7','E8','D4','D5']
 
+// Farbpalette für Spieler-Pills – bewusst ohne Cyan (#00e5ff) und Pink (#e040fb),
+// da diese für Einzel/Doppel-Zeilenborders reserviert sind.
+const PILL_COLORS = [
+  { bg: 'rgba(255,215,0,0.18)',   text: '#ffd700' },  // gold
+  { bg: 'rgba(251,146,60,0.18)',  text: '#fb923c' },  // orange
+  { bg: 'rgba(52,211,153,0.18)',  text: '#34d399' },  // emerald
+  { bg: 'rgba(56,189,248,0.18)',  text: '#38bdf8' },  // sky (klar ≠ cyan)
+  { bg: 'rgba(163,230,53,0.18)',  text: '#a3e635' },  // lime
+  { bg: 'rgba(251,113,133,0.18)', text: '#fb7185' },  // rose (klar ≠ pink)
+  { bg: 'rgba(139,92,246,0.18)',  text: '#8b5cf6' },  // violet
+  { bg: 'rgba(20,184,166,0.18)',  text: '#14b8a6' },  // teal
+]
+
 // ── Draggable pill ──────────────────────────────────────────────────────────
-function DraggablePill({ id, label, accent }: { id: string; label: string; accent: string }) {
+function DraggablePill({ id, label, color }: { id: string; label: string; color: { bg: string; text: string } }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id })
   return (
     <span
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-semibold cursor-grab active:cursor-grabbing select-none touch-none transition-opacity ${accent} ${isDragging ? 'opacity-30' : 'opacity-100'}`}
+      style={{ background: color.bg, color: color.text }}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-semibold cursor-grab active:cursor-grabbing select-none touch-none transition-opacity ${isDragging ? 'opacity-30' : 'opacity-100'}`}
     >
       {label}
     </span>
@@ -51,6 +65,7 @@ export default function LineupPage() {
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
   const [animKey, setAnimKey] = useState(0)
   const [dragLabel, setDragLabel] = useState<string | null>(null)
+  const [dragPlayerId, setDragPlayerId] = useState<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -69,6 +84,12 @@ export default function LineupPage() {
   }
 
   const playerName = (pid: string) => players.find(p => p.id === pid)?.name ?? '?'
+
+  // Konsistente Farbe pro Spieler (Index in der Spielerliste → Farbpalette)
+  const playerColor = (pid: string) => {
+    const idx = players.findIndex(p => p.id === pid)
+    return PILL_COLORS[(idx >= 0 ? idx : 0) % PILL_COLORS.length]
+  }
 
   const activePlayerIds = matchDay.players.map(p => p.playerId)
   const violations = validateLineup(matchDay.lineup, playerName, activePlayerIds)
@@ -168,10 +189,12 @@ export default function LineupPage() {
     const slot = matchDay.lineup.find(s => s.gameIndex === parsed.gameIndex)
     const pid = slot?.players[parsed.playerIndex]
     setDragLabel(pid ? playerName(pid) : null)
+    setDragPlayerId(pid ?? null)
   }
 
   const handleDragEnd = (e: DragEndEvent) => {
     setDragLabel(null)
+    setDragPlayerId(null)
     const from = parseDragId(String(e.active.id))
     const to = parseDragId(String(e.over?.id ?? ''))
     if (!from || !to || (from.gameIndex === to.gameIndex && from.playerIndex === to.playerIndex)) return
@@ -269,7 +292,6 @@ export default function LineupPage() {
             const label = GAME_LABELS[idx] ?? `${game.type === 'singles' ? 'E' : 'D'}?`
             const isDouble = game.type === 'doubles'
             const isEmpty = !slot || slot.players.length === 0
-            const pillAccent = isDouble ? 'bg-unicorn-pink/20 text-unicorn-pink' : 'bg-unicorn-cyan/20 text-unicorn-cyan'
 
             return (
               <motion.div
@@ -305,7 +327,7 @@ export default function LineupPage() {
                   <div className="flex-1 flex flex-wrap gap-1 items-center">
                     {slot.players.map((pid, pi) => (
                       <DroppableSlot key={pi} id={`g${game.gameIndex}-p${pi}`}>
-                        <DraggablePill id={`g${game.gameIndex}-p${pi}`} label={playerName(pid)} accent={pillAccent} />
+                        <DraggablePill id={`g${game.gameIndex}-p${pi}`} label={playerName(pid)} color={playerColor(pid)} />
                         {isDouble && slot.positions?.[pi] && (
                           <span className="text-white/35 text-[10px] mr-1">
                             {slot.positions[pi] === 'attack' ? 'St' : 'To'}
@@ -332,8 +354,11 @@ export default function LineupPage() {
         </div>
 
         <DragOverlay dropAnimation={null}>
-          {dragLabel && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-[13px] font-semibold bg-unicorn-pink text-white shadow-xl shadow-unicorn-pink/50">
+          {dragLabel && dragPlayerId && (
+            <span
+              style={{ background: playerColor(dragPlayerId).text, color: '#1a0533' }}
+              className="inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold shadow-xl"
+            >
               {dragLabel}
             </span>
           )}
