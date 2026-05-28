@@ -67,11 +67,21 @@ function preferenceScore(
  * dem Ziel-Durchschnitt liegt. Verhindert, dass ein bevorzugter Spieler
  * alle Spiele dominiert.
  */
+/**
+ * Satz-basierte Gleichverteilungs-Penalty.
+ * Einzel = 1 Satz, Doppel = 2 Sätze – konsistent mit targetLoad.
+ * Gewicht 65 pro Satz Abweichung vom Durchschnitt dominiert alle
+ * Präferenz-Boni (max ~45), sodass Gleichverteilung immer Vorrang hat
+ * und Präferenzen nur als Tiebreaker unter gleichbelasteten Spielern wirken.
+ */
 function loadPenalty(playerId: string, context: Context): number {
-  const current = (context.singlesCount[playerId] ?? 0) + (context.doublesCount[playerId] ?? 0)
-  // Sigmoid-artiger Anstieg: unterhalb targetLoad wenig Penalty, darüber stark
-  const ratio = (current + 1) / (context.targetLoad + 1)
-  return ratio * 35
+  const currentSets =
+    (context.singlesCount[playerId] ?? 0) * 1 +
+    (context.doublesCount[playerId] ?? 0) * 2
+  // Abweichung vom Ziel: negativ = weniger als Durchschnitt (Bonus),
+  // positiv = mehr als Durchschnitt (Penalty)
+  const deviation = currentSets - context.targetLoad
+  return deviation * 65
 }
 
 function totalScore(
