@@ -51,6 +51,7 @@ const migrations: Record<number, () => void> = {
     const players = load<Player[]>(PLAYERS_KEY, [])
     const migratedPlayers = players.map(p => ({
       ...p,
+      active: p.active ?? true,
       preferences: {
         ...p.preferences,
         partnerPreferences: p.preferences.partnerPreferences ?? [],

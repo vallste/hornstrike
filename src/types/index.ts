@@ -25,6 +25,7 @@ export interface PlayerPreferences {
 export interface Player {
   id: string
   name: string
+  active: boolean   // false = langfristig nicht verfügbar (verletzt, pausiert etc.)
   preferences: PlayerPreferences
 }
 

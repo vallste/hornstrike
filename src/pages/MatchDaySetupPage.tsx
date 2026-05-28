@@ -32,7 +32,8 @@ export default function MatchDaySetupPage() {
       return { ...av, [id]: { ...current, [key]: val } }
     })
 
-  const activePlayers = players.filter(p => selected[p.id])
+  const rosterPlayers = players.filter(p => p.active !== false)
+  const activePlayers = rosterPlayers.filter(p => selected[p.id])
 
   const calculate = () => {
     if (activePlayers.length < 2) return
@@ -121,18 +122,18 @@ export default function MatchDaySetupPage() {
             </p>
             <button
               onClick={() => {
-                const allSelected = players.every(p => selected[p.id])
+                const allSelected = rosterPlayers.every(p => selected[p.id])
                 const next: Record<string, boolean> = {}
-                players.forEach(p => { next[p.id] = !allSelected })
+                rosterPlayers.forEach(p => { next[p.id] = !allSelected })
                 setSelected(next)
               }}
               className="text-unicorn-cyan text-[13px] font-semibold"
             >
-              {players.every(p => selected[p.id]) ? 'Alle abwählen' : 'Alle auswählen'}
+              {rosterPlayers.every(p => selected[p.id]) ? 'Alle abwählen' : 'Alle auswählen'}
             </button>
           </div>
 
-          {players.length === 0 && (
+          {rosterPlayers.length === 0 && (
             <p className="text-white/40 text-sm bg-[#2b0b4c] rounded-xl p-4">
               Noch keine Spieler angelegt.{' '}
               <button className="text-unicorn-cyan underline" onClick={() => navigate('/players')}>
@@ -142,7 +143,7 @@ export default function MatchDaySetupPage() {
           )}
 
           <div className="space-y-2">
-            {players.map(player => {
+            {rosterPlayers.map(player => {
               const isChecked = !!selected[player.id]
               const avail = availability[player.id]
               const isExpanded = expanded === player.id && isChecked

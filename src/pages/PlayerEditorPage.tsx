@@ -114,7 +114,7 @@ export default function PlayerEditorPage() {
   const save = () => {
     if (!name.trim()) return
     if (isNew) {
-      addPlayer({ id: uuid(), name: name.trim(), preferences: prefs })
+      addPlayer({ id: uuid(), name: name.trim(), active: true, preferences: prefs })
     } else if (existing) {
       updatePlayer({ ...existing, name: name.trim(), preferences: prefs })
     }

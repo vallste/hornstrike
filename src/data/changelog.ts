@@ -14,10 +14,17 @@ export interface ChangelogEntry {
  */
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
-  { type: 'fix', text: 'Update-Banner auf Android PWA jetzt zuverlässig (Service Worker auf prompt-Modus, Polling alle 10 Min)' },
+  { type: 'feat', text: 'Spieler können im Kader als inaktiv markiert werden (z.B. bei Verletzung) – erscheinen dann nicht mehr bei der Spieltag-Planung' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
+  {
+    version: '0.1.4',
+    date: '2026-05-28',
+    changes: [
+      { type: 'fix', text: 'Update-Banner auf Android PWA jetzt zuverlässig (Service Worker auf prompt-Modus, Polling alle 10 Min)' },
+    ],
+  },
   {
     version: '0.1.3',
     date: '2026-05-28',

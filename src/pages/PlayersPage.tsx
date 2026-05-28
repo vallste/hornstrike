@@ -41,21 +41,25 @@ function gameTypeLabel(t: Player['preferences']['gameType']): string {
 
 // ── Sortierbare Karte ──────────────────────────────────────────────────────
 
-function SortablePlayerCard({ player, idx, onEdit, onDelete }: {
+function SortablePlayerCard({ player, idx, onEdit, onDelete, onToggleActive }: {
   player: Player
   idx: number
   onEdit: () => void
   onDelete: () => void
+  onToggleActive: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: player.id })
   const color = AVATAR_COLORS[idx % AVATAR_COLORS.length]
   const initials = player.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
+  const isActive = player.active !== false  // default true für alte Datensätze
 
   return (
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`bg-[#2b0b4c] rounded-2xl px-4 py-3.5 flex items-center gap-3 transition-shadow ${isDragging ? 'shadow-2xl shadow-unicorn-pink/30 opacity-90 z-10 relative' : ''}`}
+      className={`rounded-2xl px-4 py-3.5 flex items-center gap-3 transition-all ${
+        isDragging ? 'shadow-2xl shadow-unicorn-pink/30 opacity-90 z-10 relative' : ''
+      } ${isActive ? 'bg-[#2b0b4c]' : 'bg-[#2b0b4c]/50'}`}
     >
       {/* Drag handle */}
       <button
@@ -71,23 +75,37 @@ function SortablePlayerCard({ player, idx, onEdit, onDelete }: {
       {/* Avatar */}
       <button onClick={onEdit} className="flex items-center gap-3 flex-1 min-w-0 text-left">
         <div
-          className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-[13px] font-bold"
+          className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-[13px] font-bold transition-opacity ${isActive ? '' : 'opacity-35'}`}
           style={{ background: `${color}22`, color }}
         >
           {initials}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-[15px] truncate">{player.name}</p>
-          <div className="flex gap-1.5 mt-1 flex-wrap">
-            <Badge label={positionLabel(player.preferences.position)} color={positionColor(player.preferences.position)} />
-            <Badge label={gameTypeLabel(player.preferences.gameType)} />
-            {player.preferences.goaliePreference && <Badge label="🥅 Goalie" color="gold" />}
+          <div className="flex items-center gap-2">
+            <p className={`font-semibold text-[15px] truncate ${isActive ? 'text-white' : 'text-white/40'}`}>{player.name}</p>
+            {!isActive && (
+              <span className="text-[10px] font-semibold bg-white/10 text-white/35 px-1.5 py-0.5 rounded-md flex-shrink-0">Inaktiv</span>
+            )}
           </div>
+          {isActive && (
+            <div className="flex gap-1.5 mt-1 flex-wrap">
+              <Badge label={positionLabel(player.preferences.position)} color={positionColor(player.preferences.position)} />
+              <Badge label={gameTypeLabel(player.preferences.gameType)} />
+              {player.preferences.goaliePreference && <Badge label="🥅 Goalie" color="gold" />}
+            </div>
+          )}
         </div>
       </button>
 
-      {/* Delete + chevron */}
+      {/* Active toggle + delete + chevron */}
       <div className="flex items-center gap-1 flex-shrink-0">
+        <button
+          onClick={e => { e.stopPropagation(); onToggleActive() }}
+          className={`text-sm p-1 transition-colors ${isActive ? 'text-white/20 hover:text-amber-400' : 'text-amber-400'}`}
+          title={isActive ? 'Als inaktiv markieren' : 'Wieder aktivieren'}
+        >
+          {isActive ? '⏸' : '▶'}
+        </button>
         <button
           onClick={e => { e.stopPropagation(); onDelete() }}
           className="text-white/20 hover:text-red-400 text-lg transition-colors p-1"
@@ -102,7 +120,7 @@ function SortablePlayerCard({ player, idx, onEdit, onDelete }: {
 
 export default function PlayersPage() {
   const navigate = useNavigate()
-  const { players, deletePlayer, reorder } = usePlayers()
+  const { players, deletePlayer, reorder, updatePlayer } = usePlayers()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -151,6 +169,7 @@ export default function PlayersPage() {
                   idx={idx}
                   onEdit={() => navigate(`/players/${player.id}`)}
                   onDelete={() => deletePlayer(player.id)}
+                  onToggleActive={() => updatePlayer({ ...player, active: !(player.active !== false) })}
                 />
               ))}
             </div>
