@@ -4,6 +4,7 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { usePlayers, useMatchDays } from '../store'
 import { exportBackup, parseBackup, CURRENT_VERSION, type BackupFile } from '../utils/backup'
+import { version as APP_VERSION } from '../../package.json'
 
 export default function SettingsPage() {
   const { players, replaceAll: replacePlayers } = usePlayers()
@@ -73,7 +74,8 @@ export default function SettingsPage() {
           <div className="w-12 h-12 rounded-2xl bg-unicorn-violet/50 flex items-center justify-center text-2xl">🦄</div>
           <div>
             <p className="text-white font-bold text-[16px]">Hornstrike</p>
-            <p className="text-white/45 text-xs mt-0.5">Fellow Unicorns · Hamburger Liga · Datenformat v{CURRENT_VERSION}</p>
+            <p className="text-white/45 text-xs mt-0.5">Fellow Unicorns · Hamburger Liga</p>
+            <p className="text-white/30 text-xs mt-0.5">v{APP_VERSION} · Datenformat v{CURRENT_VERSION}</p>
           </div>
         </div>
 
