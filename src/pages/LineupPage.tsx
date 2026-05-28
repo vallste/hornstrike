@@ -86,6 +86,45 @@ export default function LineupPage() {
   }, [matchDay.lineup])
   const formatDate = (iso: string) => new Date(iso).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'long' })
 
+  const share = async () => {
+    const gameLabels = ['E1','E2','D1','E3','E4','D2','E5','E6','D3','E7','E8','D4','D5']
+    const lines: string[] = [
+      `🦄 Hornstrike – Fellow Unicorns`,
+      `${formatDate(matchDay.date)}${matchDay.opponent ? ` vs. ${matchDay.opponent}` : ''}`,
+      '',
+    ]
+    gameSequence.forEach((game, idx) => {
+      const slot = matchDay.lineup.find(s => s.gameIndex === game.gameIndex)
+      const label = gameLabels[idx] ?? game.label
+      if (slot?.forfeit) {
+        lines.push(`${label}: –`)
+        return
+      }
+      if (!slot || slot.players.length === 0) {
+        lines.push(`${label}: (nicht besetzt)`)
+        return
+      }
+      if (game.type === 'singles') {
+        const goalie = slot.isGoalieSingles ? ' 🥅' : ''
+        lines.push(`${label}: ${playerName(slot.players[0])}${goalie}`)
+      } else {
+        const pos = slot.positions?.length === 2
+          ? ` (${slot.positions[0] === 'attack' ? 'St' : 'Tor'}/${slot.positions[1] === 'attack' ? 'St' : 'Tor'})`
+          : ''
+        lines.push(`${label}: ${playerName(slot.players[0])} + ${playerName(slot.players[1] ?? '?')}${pos}`)
+      }
+    })
+    lines.push('', 'Erstellt mit Hornstrike 🦄')
+    const text = lines.join('\n')
+
+    if (navigator.share) {
+      await navigator.share({ title: 'Hornstrike Aufstellung', text })
+    } else {
+      await navigator.clipboard.writeText(text)
+      alert('Aufstellung in Zwischenablage kopiert ✓')
+    }
+  }
+
   const regenerate = () => {
     const lineup = generateLineup(players, matchDay.players, matchDay.useGoalie ?? true, matchDay.useFifthDouble ?? false)
     updateMatchDay({ ...matchDay, lineup })
@@ -151,6 +190,13 @@ export default function LineupPage() {
         back="/matchday"
         right={
           <div className="flex gap-2">
+            <button
+              onClick={share}
+              className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
+              title="Aufstellung teilen"
+            >
+              ↑
+            </button>
             <button
               onClick={() => navigate(`/matchday/${matchDay.id}/edit`)}
               className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
