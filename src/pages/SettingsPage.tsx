@@ -191,6 +191,28 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           </button>
           <div className="h-px bg-white/5" />
           <button
+            onClick={async () => {
+              if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations()
+                for (const reg of regs) {
+                  // Wartenden SW aktivieren (skip waiting)
+                  if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' })
+                  // Auf neue Version prüfen
+                  await reg.update().catch(() => {})
+                }
+              }
+              window.location.reload()
+            }}
+            className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors"
+          >
+            <span className="w-9 h-9 rounded-xl bg-unicorn-cyan/15 flex items-center justify-center text-xl">⟳</span>
+            <div className="flex-1 text-left">
+              <p className="text-white font-semibold text-[15px]">App neu laden</p>
+              <p className="text-white/40 text-xs mt-0.5">Auf neue Version prüfen und neu starten</p>
+            </div>
+          </button>
+          <div className="h-px bg-white/5" />
+          <button
             onClick={() => { resetOnboarding(); onStartTour?.() }}
             className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors"
           >

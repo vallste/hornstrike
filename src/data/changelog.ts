@@ -17,6 +17,7 @@ const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'feat', text: 'Spieler können im Kader als inaktiv markiert werden (z.B. bei Verletzung) – erscheinen dann nicht mehr bei der Spieltag-Planung' },
   { type: 'fix', text: 'Splash Screen: Titel und Schrift auf kleinen Mobilgeräten nicht mehr abgeschnitten (responsive clamp-Schriftgröße)' },
   { type: 'improve', text: 'Inaktiv-Toggle und Löschen-Button in den Spieler-Editor verschoben (war in der Spielerliste)' },
+  { type: 'feat', text: 'Einstellungen: „App neu laden"-Button als manueller Fallback für SW-Updates' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
