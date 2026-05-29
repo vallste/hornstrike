@@ -16,6 +16,9 @@ export interface ChangelogEntry {
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'improve', text: 'Beim Seitenwechsel wird automatisch nach oben gescrollt' },
   { type: 'fix', text: 'Bottom-Navigation Höhe springt nicht mehr beim Tab-Wechsel auf Mobilgeräten (feste Item-Dimensionen, Aktivierungs-Dot absolut positioniert, whitespace-nowrap)' },
+  { type: 'fix', text: 'Goalie-Badge (🥅) wird auch nach nachträglicher Goalie-Aktivierung korrekt angezeigt' },
+  { type: 'fix', text: 'Warnung wenn Spielfolge (Standard ↔ 5. Doppel) nachträglich geändert wurde und Aufstellung neu berechnet werden muss' },
+  { type: 'improve', text: 'Spieler mit Goalie-Präferenz werden mit sehr hoher Priorität auf E5/E6 gesetzt (Score +50 statt +12)' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
