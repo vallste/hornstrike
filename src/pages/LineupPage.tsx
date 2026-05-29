@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -67,6 +67,7 @@ export default function LineupPage() {
   const [dragLabel, setDragLabel] = useState<string | null>(null)
   const [dragPlayerId, setDragPlayerId] = useState<string | null>(null)
   const [sequenceMismatchDismissed, setSequenceMismatchDismissed] = useState(false)
+  const [violationsDismissed, setViolationsDismissed] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -99,6 +100,10 @@ export default function LineupPage() {
   const activePlayerIds = matchDay.players.map(p => p.playerId)
   const violations = validateLineup(matchDay.lineup, playerName, activePlayerIds)
   const violatingIndices = new Set(violations.flatMap(v => v.gameIndices))
+
+  // Banner wieder einblenden wenn sich Verstöße geändert haben
+  const violationsKey = violations.map(v => v.message).join('|')
+  useEffect(() => { setViolationsDismissed(false) }, [violationsKey])
 
   // Sätze pro Spieler: Einzel = 1, Doppel = 2 – useMemo stellt sicher dass DnD-Swaps sofort reflektiert werden
   const setEntries = useMemo(() => {
@@ -243,7 +248,14 @@ export default function LineupPage() {
         title="Aufstellung"
         back="/matchday"
         right={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            {violations.length > 0 && (
+              <span
+                title="Regelverstoß vorhanden"
+                className="text-amber-400 text-lg leading-none"
+                onClick={() => setViolationsDismissed(false)}
+              >⚠</span>
+            )}
             <button
               onClick={share}
               className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
@@ -402,17 +414,22 @@ export default function LineupPage() {
 
       {/* Validation banner */}
       <AnimatePresence>
-        {violations.length > 0 && (
+        {violations.length > 0 && !violationsDismissed && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             className="fixed bottom-20 left-4 right-4 z-30 bg-amber-900/80 backdrop-blur-sm border border-amber-500/40 rounded-2xl px-4 py-3"
           >
-            <p className="text-amber-300 text-[12px] font-bold tracking-wider uppercase mb-1.5">⚠ Regelverstoß</p>
-            {violations.map((v, i) => (
-              <p key={i} className="text-amber-200/80 text-[13px] leading-snug">· {v.message}</p>
-            ))}
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-amber-300 text-[12px] font-bold tracking-wider uppercase mb-1.5">⚠ Regelverstoß</p>
+                {violations.map((v, i) => (
+                  <p key={i} className="text-amber-200/80 text-[13px] leading-snug">· {v.message}</p>
+                ))}
+              </div>
+              <button onClick={() => setViolationsDismissed(true)} className="text-amber-300/60 text-lg leading-none flex-shrink-0 mt-0.5">×</button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
