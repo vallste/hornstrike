@@ -66,6 +66,7 @@ export default function LineupPage() {
   const [animKey, setAnimKey] = useState(0)
   const [dragLabel, setDragLabel] = useState<string | null>(null)
   const [dragPlayerId, setDragPlayerId] = useState<string | null>(null)
+  const [sequenceMismatchDismissed, setSequenceMismatchDismissed] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -381,15 +382,20 @@ export default function LineupPage() {
 
       {/* Sequenzwechsel-Banner (Standard ↔ D5) */}
       <AnimatePresence>
-        {sequenceMismatch && violations.length === 0 && (
+        {sequenceMismatch && !sequenceMismatchDismissed && violations.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             className="fixed bottom-20 left-4 right-4 z-30 bg-amber-900/80 backdrop-blur-sm border border-amber-500/40 rounded-2xl px-4 py-3"
           >
-            <p className="text-amber-300 text-[12px] font-bold tracking-wider uppercase mb-1">⚠ Spielfolge geändert</p>
-            <p className="text-amber-200/80 text-[13px]">Aufstellung passt nicht zur aktuellen Spielfolge – bitte neu berechnen.</p>
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-amber-300 text-[12px] font-bold tracking-wider uppercase mb-1">⚠ Spielfolge geändert</p>
+                <p className="text-amber-200/80 text-[13px]">Aufstellung passt nicht zur aktuellen Spielfolge – bitte neu berechnen oder manuell anpassen.</p>
+              </div>
+              <button onClick={() => setSequenceMismatchDismissed(true)} className="text-amber-300/60 text-lg leading-none flex-shrink-0 mt-0.5">×</button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
