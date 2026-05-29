@@ -91,6 +91,10 @@ export default function LineupPage() {
     return PILL_COLORS[(idx >= 0 ? idx : 0) % PILL_COLORS.length]
   }
 
+  // Goalie-Status auch für retroaktiv geänderte useGoalie-Einstellung korrekt anzeigen
+  const effectiveIsGoalie = (slot: GameSlot) =>
+    slot.isGoalieSingles || (!!matchDay.useGoalie && (slot.gameIndex === 7 || slot.gameIndex === 8) && slot.type === 'singles')
+
   const activePlayerIds = matchDay.players.map(p => p.playerId)
   const violations = validateLineup(matchDay.lineup, playerName, activePlayerIds)
   const violatingIndices = new Set(violations.flatMap(v => v.gameIndices))
@@ -126,7 +130,7 @@ export default function LineupPage() {
         return
       }
       if (game.type === 'singles') {
-        const goalie = slot.isGoalieSingles ? ' 🥅' : ''
+        const goalie = effectiveIsGoalie(slot) ? ' 🥅' : ''
         lines.push(`${label}: ${playerName(slot.players[0])}${goalie}`)
       } else {
         const pos = slot.positions?.length === 2
@@ -176,6 +180,16 @@ export default function LineupPage() {
 
   const gameSequence = getGameSequence(matchDay.useFifthDouble ?? false)
   const visibleGames = gameSequence
+
+  // Prüfe ob Spielfolge (Standard vs. D5) mit der gespeicherten Aufstellung übereinstimmt
+  const sequenceMismatch = useMemo(() => {
+    const currentSeqTypes = new Map(gameSequence.map(g => [g.gameIndex, g.type]))
+    return matchDay.lineup.some(s => {
+      if (s.forfeit || s.players.length === 0) return false
+      const expectedType = currentSeqTypes.get(s.gameIndex)
+      return expectedType !== undefined && expectedType !== s.type
+    })
+  }, [matchDay.lineup, gameSequence])
 
   // drag id format: "g{gameIndex}-p{playerIndex}"
   const parseDragId = (id: string) => {
@@ -339,7 +353,7 @@ export default function LineupPage() {
                 )}
 
                 {/* Goalie badge */}
-                {slot?.isGoalieSingles && (
+                {slot && effectiveIsGoalie(slot) && (
                   <span className="text-[10px] font-semibold bg-unicorn-gold/15 text-unicorn-gold px-1.5 py-0.5 rounded-md flex-shrink-0">
                     🥅
                   </span>
@@ -364,6 +378,21 @@ export default function LineupPage() {
           )}
         </DragOverlay>
       </DndContext>
+
+      {/* Sequenzwechsel-Banner (Standard ↔ D5) */}
+      <AnimatePresence>
+        {sequenceMismatch && violations.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            className="fixed bottom-20 left-4 right-4 z-30 bg-amber-900/80 backdrop-blur-sm border border-amber-500/40 rounded-2xl px-4 py-3"
+          >
+            <p className="text-amber-300 text-[12px] font-bold tracking-wider uppercase mb-1">⚠ Spielfolge geändert</p>
+            <p className="text-amber-200/80 text-[13px]">Aufstellung passt nicht zur aktuellen Spielfolge – bitte neu berechnen.</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Validation banner */}
       <AnimatePresence>
