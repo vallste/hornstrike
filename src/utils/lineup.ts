@@ -35,8 +35,9 @@ function preferenceScore(
   else if (prefs.position === 'defense_preferred' && position === 'defense') score += 8
   else if (prefs.position === 'attack_preferred' || prefs.position === 'defense_preferred') score += 2
 
-  // Goalie
-  if (slot.isGoalieSingles) score += prefs.goaliePreference ? 12 : -8
+  // Goalie – sehr hohe Priorität: Goalie-Präferenz dominiert alle anderen Präferenzen,
+  // verliert nur gegen Spieler die bei der Lastverteilung deutlich besser stehen
+  if (slot.isGoalieSingles) score += prefs.goaliePreference ? 50 : -20
 
   // Spieltyp
   if ( isSingles && prefs.gameType === 'singles_only')      score += 8
