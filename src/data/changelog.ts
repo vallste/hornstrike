@@ -14,14 +14,22 @@ export interface ChangelogEntry {
  */
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
-  { type: 'improve', text: 'Beim Seitenwechsel wird automatisch nach oben gescrollt' },
-  { type: 'fix', text: 'Bottom-Navigation Höhe springt nicht mehr beim Tab-Wechsel auf Mobilgeräten (feste Item-Dimensionen, Aktivierungs-Dot absolut positioniert, whitespace-nowrap)' },
-  { type: 'fix', text: 'Goalie-Badge (🥅) wird auch nach nachträglicher Goalie-Aktivierung korrekt angezeigt' },
-  { type: 'fix', text: 'Warnung wenn Spielfolge (Standard ↔ 5. Doppel) nachträglich geändert wurde und Aufstellung neu berechnet werden muss' },
-  { type: 'improve', text: 'Spieler mit Goalie-Präferenz werden mit sehr hoher Priorität auf E5/E6 gesetzt (Score +50 statt +12)' },
+  { type: 'fix', text: 'GitHub Actions: Node.js 24 Runtime für alle Actions erzwungen (Node 20 Deprecation)' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
+  {
+    version: '0.1.7',
+    date: '2026-05-29',
+    changes: [
+      { type: 'improve', text: 'Beim Seitenwechsel wird automatisch nach oben gescrollt' },
+      { type: 'fix', text: 'Bottom-Navigation Höhe springt nicht mehr beim Tab-Wechsel auf Mobilgeräten (feste Item-Dimensionen, Aktivierungs-Dot absolut positioniert, whitespace-nowrap)' },
+      { type: 'fix', text: 'Goalie-Badge (🥅) wird auch nach nachträglicher Goalie-Aktivierung korrekt angezeigt' },
+      { type: 'fix', text: 'Warnung wenn Spielfolge (Standard ↔ 5. Doppel) nachträglich geändert wurde und Aufstellung neu berechnet werden muss' },
+      { type: 'improve', text: 'Regelverstoß- und Spielfolge-Banner sind schließbar; ⚠-Icon im Header zeigt aktive Regelverstöße dauerhaft an' },
+      { type: 'improve', text: 'Spieler mit Goalie-Präferenz werden mit sehr hoher Priorität auf E5/E6 gesetzt' },
+    ],
+  },
   {
     version: '0.1.6',
     date: '2026-05-28',
