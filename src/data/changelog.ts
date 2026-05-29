@@ -99,7 +99,7 @@ const HISTORY: ChangelogEntry[] = [
 ]
 
 // Datum des aktuellen Releases – beim `npm version`-Bump auf das Datum setzen
-const CURRENT_DATE = '2026-05-28'
+const CURRENT_DATE = '2026-05-29'
 
 export const CHANGELOG: ChangelogEntry[] = [
   ...(CURRENT_CHANGES.length > 0 ? [{
