@@ -179,7 +179,9 @@ export default function LineupPage() {
     if (!shareCardRef.current) return
     const { toBlob } = await import('html-to-image')
     await document.fonts.ready
-    const blob = await toBlob(shareCardRef.current, { pixelRatio: 2, backgroundColor: '#1a0533' })
+    // fontEmbedCSS: '' verhindert den CORS-Fehler beim Lesen von Google Fonts CSS-Regeln;
+    // LineupShareCard nutzt ohnehin System-Fonts (inline styles)
+    const blob = await toBlob(shareCardRef.current, { pixelRatio: 2, backgroundColor: '#1a0533', fontEmbedCSS: '' })
     if (!blob) return
     const file = new File([blob], 'hornstrike-aufstellung.png', { type: 'image/png' })
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
