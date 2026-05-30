@@ -68,6 +68,7 @@ export default function LineupPage() {
   const [dragLabel, setDragLabel] = useState<string | null>(null)
   const [dragPlayerId, setDragPlayerId] = useState<string | null>(null)
   const [sequenceMismatchDismissed, setSequenceMismatchDismissed] = useState(false)
+  const [shareMenuOpen, setShareMenuOpen] = useState(false)
   const shareCardRef = useRef<HTMLDivElement>(null)
   const [violationsDismissed, setViolationsDismissed] = useState(false)
 
@@ -273,24 +274,40 @@ export default function LineupPage() {
             {violations.length > 0 && (
               <span
                 title="Regelverstoß vorhanden"
-                className="text-amber-400 text-lg leading-none"
+                className="text-amber-400 text-lg leading-none cursor-pointer"
                 onClick={() => setViolationsDismissed(false)}
               >⚠</span>
             )}
-            <button
-              onClick={share}
-              className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
-              title="Als Text teilen"
-            >
-              ↑
-            </button>
-            <button
-              onClick={shareAsImage}
-              className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
-              title="Als Bild teilen"
-            >
-              🖼
-            </button>
+
+            {/* Share-Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShareMenuOpen(v => !v)}
+                className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
+              >
+                ↑
+              </button>
+              {shareMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShareMenuOpen(false)} />
+                  <div className="absolute right-0 top-9 z-50 bg-[#2b0b4c] border border-white/10 rounded-xl shadow-xl overflow-hidden min-w-[130px]">
+                    <button
+                      onClick={() => { setShareMenuOpen(false); share() }}
+                      className="flex items-center gap-2 w-full px-4 py-2.5 text-white/70 text-sm hover:bg-white/5 text-left"
+                    >
+                      <span>↑</span> Als Text
+                    </button>
+                    <button
+                      onClick={() => { setShareMenuOpen(false); shareAsImage() }}
+                      className="flex items-center gap-2 w-full px-4 py-2.5 text-white/70 text-sm hover:bg-white/5 text-left border-t border-white/5"
+                    >
+                      <span>🖼</span> Als Bild
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
             <button
               onClick={() => navigate(`/matchday/${matchDay.id}/edit`)}
               className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
