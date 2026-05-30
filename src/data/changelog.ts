@@ -15,6 +15,7 @@ export interface ChangelogEntry {
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'fix', text: 'GitHub Actions: Node.js 24 Runtime für alle Actions erzwungen (Node 20 Deprecation)' },
+  { type: 'feat', text: 'Aufstellung als Bild teilen oder herunterladen (🖼-Button) – via Web Share API oder PNG-Download' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
