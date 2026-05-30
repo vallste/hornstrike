@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -14,6 +14,7 @@ import { validateLineup } from '../utils/validateLineup'
 import { getGameSequence } from '../types'
 import type { GameSlot } from '../types'
 import LineupDetailModal from './LineupDetailModal'
+import LineupShareCard from '../components/LineupShareCard'
 
 const GAME_LABELS = ['E1','E2','D1','E3','E4','D2','E5','E6','D3','E7','E8','D4','D5']
 
@@ -67,6 +68,7 @@ export default function LineupPage() {
   const [dragLabel, setDragLabel] = useState<string | null>(null)
   const [dragPlayerId, setDragPlayerId] = useState<string | null>(null)
   const [sequenceMismatchDismissed, setSequenceMismatchDismissed] = useState(false)
+  const shareCardRef = useRef<HTMLDivElement>(null)
   const [violationsDismissed, setViolationsDismissed] = useState(false)
 
   const sensors = useSensors(
@@ -172,6 +174,25 @@ export default function LineupPage() {
     }
   }
 
+  const shareAsImage = async () => {
+    if (!shareCardRef.current) return
+    const { toBlob } = await import('html-to-image')
+    await document.fonts.ready
+    const blob = await toBlob(shareCardRef.current, { pixelRatio: 2, backgroundColor: '#1a0533' })
+    if (!blob) return
+    const file = new File([blob], 'hornstrike-aufstellung.png', { type: 'image/png' })
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Hornstrike Aufstellung' })
+    } else {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'hornstrike-aufstellung.png'
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+  }
+
   const regenerate = () => {
     const lineup = generateLineup(players, matchDay.players, matchDay.useGoalie ?? true, matchDay.useFifthDouble ?? false)
     updateMatchDay({ ...matchDay, lineup })
@@ -259,9 +280,16 @@ export default function LineupPage() {
             <button
               onClick={share}
               className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
-              title="Aufstellung teilen"
+              title="Als Text teilen"
             >
               ↑
+            </button>
+            <button
+              onClick={shareAsImage}
+              className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
+              title="Als Bild teilen"
+            >
+              🖼
             </button>
             <button
               onClick={() => navigate(`/matchday/${matchDay.id}/edit`)}
@@ -433,6 +461,11 @@ export default function LineupPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Off-screen card for image export */}
+      <div style={{ position: 'fixed', left: -9999, top: -9999, zIndex: -1, pointerEvents: 'none' }}>
+        <LineupShareCard ref={shareCardRef} matchDay={matchDay} players={players} />
+      </div>
 
       <BottomNav />
 
