@@ -154,7 +154,7 @@ export function generateLineup(
       continue
     }
 
-    const isGoalie = useGoalie && (game.gameIndex === 7 || game.gameIndex === 8)
+    const isGoalie = useGoalie && (game.label === 'E5' || game.label === 'E6')
     const avail = availablePlayers(game.gameIndex, game.type, context)
 
     if (game.type === 'singles') {

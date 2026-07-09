@@ -1,8 +1,6 @@
 import { forwardRef } from 'react'
 import type { MatchDay, Player } from '../types'
-import { getGameSequence } from '../types'
-
-const GAME_LABELS = ['E1','E2','D1','E3','E4','D2','E5','E6','D3','E7','E8','D4','D5']
+import { getGameSequence, isGoalieGameIndex } from '../types'
 
 const PLAYER_COLORS = [
   '#ffd700', '#fb923c', '#34d399', '#38bdf8',
@@ -23,7 +21,7 @@ const LineupShareCard = forwardRef<HTMLDivElement, Props>(({ matchDay, players }
     return PLAYER_COLORS[(idx >= 0 ? idx : 0) % PLAYER_COLORS.length]
   }
   const isGoalie = (slot: { isGoalieSingles?: boolean; gameIndex: number; type: string }) =>
-    slot.isGoalieSingles || (!!matchDay.useGoalie && (slot.gameIndex === 7 || slot.gameIndex === 8) && slot.type === 'singles')
+    slot.isGoalieSingles || (!!matchDay.useGoalie && slot.type === 'singles' && isGoalieGameIndex(slot.gameIndex, matchDay.useFifthDouble ?? false))
 
   const formatDate = (iso: string) =>
     new Date(iso + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'long' })
@@ -70,9 +68,9 @@ const LineupShareCard = forwardRef<HTMLDivElement, Props>(({ matchDay, players }
 
       {/* Game rows */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        {gameSequence.map((game, idx) => {
+        {gameSequence.map((game) => {
           const slot = matchDay.lineup.find(s => s.gameIndex === game.gameIndex)
-          const label = GAME_LABELS[idx] ?? game.label
+          const label = game.label
           const isDouble = game.type === 'doubles'
           const accent = slot?.forfeit ? 'rgba(255,255,255,0.1)' : isDouble ? '#00e5ff' : '#e040fb'
 

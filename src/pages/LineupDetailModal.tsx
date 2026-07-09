@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import ToggleGroup from '../components/ToggleGroup'
 import type { Player, MatchDayPlayer, GameSlot } from '../types'
-import { GAME_SEQUENCE } from '../types'
+import { getGameSequence, isGoalieGameIndex } from '../types'
 
 interface Props {
   gameIndex: number
@@ -10,14 +10,15 @@ interface Props {
   slot: GameSlot | null
   matchDayPlayers: MatchDayPlayer[]
   allPlayers: Player[]
+  useFifthDouble: boolean
   onSave: (slot: GameSlot) => void
   onClose: () => void
 }
 
-export default function LineupDetailModal({ gameIndex, gameLabel, slot, matchDayPlayers, allPlayers, onSave, onClose }: Props) {
-  const game = GAME_SEQUENCE.find(g => g.gameIndex === gameIndex)!
+export default function LineupDetailModal({ gameIndex, gameLabel, slot, matchDayPlayers, allPlayers, useFifthDouble, onSave, onClose }: Props) {
+  const game = getGameSequence(useFifthDouble).find(g => g.gameIndex === gameIndex)!
   const isDouble = game.type === 'doubles'
-  const isGoalie = slot?.isGoalieSingles ?? (gameIndex === 7 || gameIndex === 8)
+  const isGoalie = slot?.isGoalieSingles ?? isGoalieGameIndex(gameIndex, useFifthDouble)
 
   const activePlayers = allPlayers.filter(p => matchDayPlayers.find(m => m.playerId === p.id))
 

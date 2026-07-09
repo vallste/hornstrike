@@ -11,12 +11,11 @@ import BottomNav from '../components/BottomNav'
 import { usePlayers, useMatchDays } from '../store'
 import { generateLineup } from '../utils/lineup'
 import { validateLineup } from '../utils/validateLineup'
-import { getGameSequence } from '../types'
+import { getGameSequence, isGoalieGameIndex } from '../types'
 import type { GameSlot } from '../types'
 import LineupDetailModal from './LineupDetailModal'
 import LineupShareCard from '../components/LineupShareCard'
 
-const GAME_LABELS = ['E1','E2','D1','E3','E4','D2','E5','E6','D3','E7','E8','D4','D5']
 
 // Farbpalette für Spieler-Pills – bewusst ohne Cyan (#00e5ff) und Pink (#e040fb),
 // da diese für Einzel/Doppel-Zeilenborders reserviert sind.
@@ -98,7 +97,7 @@ export default function LineupPage() {
 
   // Goalie-Status auch für retroaktiv geänderte useGoalie-Einstellung korrekt anzeigen
   const effectiveIsGoalie = (slot: GameSlot) =>
-    slot.isGoalieSingles || (!!matchDay.useGoalie && (slot.gameIndex === 7 || slot.gameIndex === 8) && slot.type === 'singles')
+    slot.isGoalieSingles || (!!matchDay.useGoalie && slot.type === 'singles' && isGoalieGameIndex(slot.gameIndex, matchDay.useFifthDouble ?? false))
 
   const activePlayerIds = matchDay.players.map(p => p.playerId)
   const violations = validateLineup(matchDay.lineup, playerName, activePlayerIds)
@@ -121,15 +120,14 @@ export default function LineupPage() {
   const formatDate = (iso: string) => new Date(iso).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'long' })
 
   const share = async () => {
-    const gameLabels = ['E1','E2','D1','E3','E4','D2','E5','E6','D3','E7','E8','D4','D5']
     const lines: string[] = [
       `🦄 Hornstrike – Fellow Unicorns`,
       `${formatDate(matchDay.date)}${matchDay.opponent ? ` vs. ${matchDay.opponent}` : ''}`,
       '',
     ]
-    gameSequence.forEach((game, idx) => {
+    gameSequence.forEach((game) => {
       const slot = matchDay.lineup.find(s => s.gameIndex === game.gameIndex)
-      const label = gameLabels[idx] ?? game.label
+      const label = game.label
       if (slot?.forfeit) {
         lines.push(`${label}: –`)
         return
@@ -363,7 +361,7 @@ export default function LineupPage() {
         <div key={animKey} className="relative px-6 space-y-1.5">
           {visibleGames.map((game, idx) => {
             const slot = matchDay.lineup.find(s => s.gameIndex === game.gameIndex)
-            const label = GAME_LABELS[idx] ?? `${game.type === 'singles' ? 'E' : 'D'}?`
+            const label = game.label
             const isDouble = game.type === 'doubles'
             const isEmpty = !slot || slot.players.length === 0
 
@@ -495,7 +493,8 @@ export default function LineupPage() {
             slot={matchDay.lineup.find(s => s.gameIndex === editingSlot) ?? null}
             matchDayPlayers={matchDay.players}
             allPlayers={players}
-            gameLabel={GAME_LABELS[gameSequence.findIndex(g => g.gameIndex === editingSlot)] ?? ''}
+            gameLabel={gameSequence.find(g => g.gameIndex === editingSlot)?.label ?? ''}
+            useFifthDouble={matchDay.useFifthDouble ?? false}
             onSave={updateSlot}
             onClose={() => setEditingSlot(null)}
           />

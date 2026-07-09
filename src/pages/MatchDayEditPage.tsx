@@ -115,7 +115,7 @@ export default function MatchDayEditPage() {
           <div className="text-left">
             <p className="text-white font-semibold text-[15px]">🎯 5. Doppel (D5)</p>
             <p className="text-white/40 text-xs mt-0.5">
-              {activePlayers.length < 5 ? 'Mindestens 5 Spieler erforderlich' : 'E7 + E8 werden durch D5 ersetzt'}
+              {activePlayers.length < 5 ? 'Mindestens 5 Spieler erforderlich' : 'E3 + E4 werden durch D5 ersetzt'}
             </p>
           </div>
           <div className={`w-12 h-6 rounded-full transition-colors relative ${useFifthDouble ? 'bg-unicorn-cyan' : 'bg-[#391060]'}`}>
