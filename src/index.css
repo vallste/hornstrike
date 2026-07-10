@@ -6,10 +6,27 @@
   html {
     font-family: 'Outfit', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
+    /* Form-Controls (input, Autofill, date-picker …) im Dark-Mode rendern –
+       sonst weißer Default-Hintergrund → weißer Text unsichtbar. */
+    color-scheme: dark;
   }
 
   body {
     @apply bg-unicorn-purple text-white min-h-screen;
     overscroll-behavior: none;
+  }
+
+  /* Browser-Autofill nicht weiß-auf-weiß rendern lassen: heller Text +
+     DECKENDER dunkler Inset-Shadow (muss opak sein, sonst scheint das weiße
+     Autofill-Feld durch). #2c1943 ≈ Optik von bg-white/8 auf #1a0533. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff;
+    -webkit-box-shadow: 0 0 0 1000px #2c1943 inset !important;
+    box-shadow: 0 0 0 1000px #2c1943 inset !important;
+    transition: background-color 9999s ease-in-out 0s;
   }
 }

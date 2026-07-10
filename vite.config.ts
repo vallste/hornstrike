@@ -7,6 +7,12 @@ const BASE = '/hornstrike/'
 export default defineConfig({
   base: BASE,
   server: {
+    // Fester Port: verhindert Drift auf 5174/… (sonst passt der OTP-Redirect
+    // nicht mehr zur Supabase Redirect-Allow-List). Bei belegtem Port bricht
+    // Vite bewusst ab, statt still auf einen anderen Port auszuweichen.
+    port: 5173,
+    strictPort: true,
+    host: true,   // auf allen Interfaces lauschen (IPv4+IPv6) – sonst nur [::1], Browser-127.0.0.1 scheitert
     allowedHosts: ['sw.mladev.phoneresearch.local'],
   },
   plugins: [

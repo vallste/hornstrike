@@ -30,6 +30,11 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          # Öffentliche Supabase-Werte (anon key ist per Design public → RLS schützt).
+          # Im Repo unter Settings → Secrets and variables → Actions → Variables anlegen.
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

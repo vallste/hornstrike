@@ -1,14 +1,26 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useSession } from '../context/SessionProvider'
 
 export default function SplashScreen() {
   const navigate = useNavigate()
+  const { session, loading, configured } = useSession()
+  const [animDone, setAnimDone] = useState(false)
 
+  // Animation läuft mind. ~2,6s
   useEffect(() => {
-    const t = setTimeout(() => navigate('/home', { replace: true }), 3200)
+    const t = setTimeout(() => setAnimDone(true), 2600)
     return () => clearTimeout(t)
-  }, [navigate])
+  }, [])
+
+  // Ziel erst wenn Animation fertig UND Session aufgelöst ist
+  useEffect(() => {
+    if (!animDone) return
+    if (configured && loading) return
+    if (!configured) { navigate('/home', { replace: true }); return }
+    navigate(session ? '/home' : '/login', { replace: true })
+  }, [animDone, loading, session, configured, navigate])
 
   return (
     <div className="relative w-full h-dvh min-h-screen overflow-hidden bg-unicorn-purple flex flex-col items-center justify-center px-6">
