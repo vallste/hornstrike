@@ -15,6 +15,7 @@ import { getGameSequence, isGoalieGameIndex } from '../types'
 import type { GameSlot } from '../types'
 import LineupDetailModal from './LineupDetailModal'
 import LineupShareCard from '../components/LineupShareCard'
+import LoadingScreen from '../components/LoadingScreen'
 
 
 // Farbpalette für Spieler-Pills – bewusst ohne Cyan (#00e5ff) und Pink (#e040fb),
@@ -59,9 +60,28 @@ function DroppableSlot({ id, children }: { id: string; children: React.ReactNode
 export default function LineupPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { matchDays, isLoading } = useMatchDays()
+  const matchDay = matchDays.find(m => m.id === id)
+  if (isLoading) return <LoadingScreen />
+  if (!matchDay) {
+    return (
+      <div className="min-h-screen bg-unicorn-purple flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-white text-lg font-semibold">Spieltag nicht gefunden</p>
+          <button onClick={() => navigate('/matchday')} className="text-unicorn-pink mt-4 block">← Zurück</button>
+        </div>
+      </div>
+    )
+  }
+  return <LineupView key={matchDay.id} />
+}
+
+function LineupView() {
+  const { id } = useParams()
+  const navigate = useNavigate()
   const { players } = usePlayers()
   const { matchDays, updateMatchDay } = useMatchDays()
-  const matchDay = matchDays.find(m => m.id === id)
+  const matchDay = matchDays.find(m => m.id === id)!
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
   const [animKey, setAnimKey] = useState(0)
   const [dragLabel, setDragLabel] = useState<string | null>(null)
@@ -75,17 +95,6 @@ export default function LineupPage() {
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
   )
-
-  if (!matchDay) {
-    return (
-      <div className="min-h-screen bg-unicorn-purple flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-white text-lg font-semibold">Spieltag nicht gefunden</p>
-          <button onClick={() => navigate('/matchday')} className="text-unicorn-pink mt-4 block">← Zurück</button>
-        </div>
-      </div>
-    )
-  }
 
   const playerName = (pid: string) => players.find(p => p.id === pid)?.name ?? '?'
 
