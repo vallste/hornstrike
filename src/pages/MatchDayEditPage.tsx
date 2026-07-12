@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import Header from '../components/Header'
+import LoadingScreen from '../components/LoadingScreen'
 import { usePlayers, useMatchDays } from '../store'
 import type { MatchDayPlayer } from '../types'
 import { GAME_SEQUENCE } from '../types'
@@ -10,26 +11,31 @@ const maxGame = GAME_SEQUENCE.length
 
 export default function MatchDayEditPage() {
   const { id } = useParams()
+  const { matchDays, isLoading } = useMatchDays()
+  const matchDay = matchDays.find(m => m.id === id)
+  if (isLoading) return <LoadingScreen />
+  if (!matchDay) return <Navigate to="/matchday" replace />
+  return <MatchDayEditForm key={matchDay.id} />
+}
+
+function MatchDayEditForm() {
+  const { id } = useParams()
   const navigate = useNavigate()
   const { players } = usePlayers()
   const { matchDays, updateMatchDay } = useMatchDays()
-  const matchDay = matchDays.find(m => m.id === id)
+  const matchDay = matchDays.find(m => m.id === id)!
 
-  const [date, setDate] = useState(matchDay?.date ?? '')
-  const [opponent, setOpponent] = useState(matchDay?.opponent ?? '')
-  const [useGoalie, setUseGoalie] = useState(matchDay?.useGoalie ?? false)
-  const [useFifthDouble, setUseFifthDouble] = useState(matchDay?.useFifthDouble ?? false)
+  const [date, setDate] = useState(matchDay.date ?? '')
+  const [opponent, setOpponent] = useState(matchDay.opponent ?? '')
+  const [useGoalie, setUseGoalie] = useState(matchDay.useGoalie ?? false)
+  const [useFifthDouble, setUseFifthDouble] = useState(matchDay.useFifthDouble ?? false)
   const [selected, setSelected] = useState<Record<string, boolean>>(
-    Object.fromEntries((matchDay?.players ?? []).map(p => [p.playerId, true]))
+    Object.fromEntries((matchDay.players ?? []).map(p => [p.playerId, true]))
   )
   const [availability, setAvailability] = useState<Record<string, { from: number; to: number }>>(
-    Object.fromEntries((matchDay?.players ?? []).map(p => [p.playerId, { from: p.availableFrom, to: p.availableTo }]))
+    Object.fromEntries((matchDay.players ?? []).map(p => [p.playerId, { from: p.availableFrom, to: p.availableTo }]))
   )
   const [expanded, setExpanded] = useState<string | null>(null)
-
-  if (!matchDay) {
-    return null
-  }
 
   const activePlayers = players.filter(p => selected[p.id])
 

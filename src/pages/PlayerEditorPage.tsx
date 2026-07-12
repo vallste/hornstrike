@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Header from '../components/Header'
+import LoadingScreen from '../components/LoadingScreen'
 import { usePlayers } from '../store'
 import type { Player, Position, GameTypePreference } from '../types'
 import { uuid } from '../utils/uuid'
@@ -99,6 +100,16 @@ const AVATAR_COLORS = ['#00e5ff', '#e040fb', '#ffd700', '#00e5ff', '#7c3aed', '#
 
 export default function PlayerEditorPage() {
   const { id } = useParams()
+  const { players, isLoading } = usePlayers()
+  const isNew = id === 'new'
+  const existing = players.find(p => p.id === id)
+  if (!isNew && isLoading) return <LoadingScreen />
+  if (!isNew && !existing) return <Navigate to="/players" replace />
+  return <PlayerEditorForm key={id ?? 'new'} />
+}
+
+function PlayerEditorForm() {
+  const { id } = useParams()
   const navigate = useNavigate()
   const { players, addPlayer, updatePlayer, deletePlayer } = usePlayers()
   const isNew = id === 'new'
@@ -108,10 +119,6 @@ export default function PlayerEditorPage() {
   const [prefs, setPrefs] = useState(existing?.preferences ?? defaultPrefs())
   const [active, setActive] = useState(existing?.active !== false)
   const [confirmDelete, setConfirmDelete] = useState(false)
-
-  useEffect(() => {
-    if (!isNew && !existing) navigate('/players', { replace: true })
-  }, [isNew, existing, navigate])
 
   const save = () => {
     if (!name.trim()) return
