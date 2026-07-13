@@ -5,6 +5,10 @@ import BottomNav from '../components/BottomNav'
 import { usePlayers, useMatchDays } from '../store'
 import { exportBackup, parseBackup, CURRENT_VERSION, type BackupFile } from '../utils/backup'
 import { useNavigate } from 'react-router-dom'
+import { useSession } from '../context/SessionProvider'
+import { useRole, useRealRole, can, ROLE_LABEL } from '../lib/permissions'
+import { usePreviewRole } from '../context/PreviewRoleProvider'
+import Can from '../components/Can'
 import { resetOnboarding } from '../components/OnboardingGuide'
 import { CHANGELOG } from '../data/changelog'
 import { version as APP_VERSION } from '../../package.json'
@@ -14,6 +18,15 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
   const { players, replaceAll: replacePlayers } = usePlayers()
   const { matchDays, replaceAll: replaceMatchDays } = useMatchDays()
   const fileRef = useRef<HTMLInputElement>(null)
+  const { user, signOut } = useSession()
+  const role = useRole()
+  const realRole = useRealRole()
+  const { previewRole, setPreviewRole } = usePreviewRole()
+
+  const handleLogout = async () => {
+    await signOut()
+    navigate('/login', { replace: true })
+  }
 
   const [importPreview, setImportPreview] = useState<BackupFile | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
@@ -83,6 +96,41 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           </div>
         </div>
 
+        {/* Account */}
+        <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/5">
+            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Account</p>
+          </div>
+          <div className="px-4 py-3.5">
+            <p className="text-white font-semibold text-[15px] break-all">{user?.email ?? '—'}</p>
+            <p className="text-white/45 text-xs mt-0.5">Rolle: {role ? ROLE_LABEL[role] : '—'}</p>
+          </div>
+          {can(realRole, 'team:editRoster') && (
+            <div className="px-4 pb-3">
+              <p className="text-white/45 text-xs mb-1.5">Vorschau als Rolle (nur Ansicht)</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPreviewRole(null)}
+                  className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${!previewRole ? 'bg-unicorn-violet text-white' : 'bg-[#391060] text-white/50'}`}
+                >Normal</button>
+                <button
+                  onClick={() => setPreviewRole('player')}
+                  className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${previewRole === 'player' ? 'bg-unicorn-gold text-[#1a0533]' : 'bg-[#391060] text-white/50'}`}
+                >Als Spieler</button>
+              </div>
+            </div>
+          )}
+          <div className="h-px bg-white/5" />
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors">
+            <span className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center text-xl">🚪</span>
+            <div className="flex-1 text-left">
+              <p className="text-white font-semibold text-[15px]">Abmelden</p>
+              <p className="text-white/40 text-xs mt-0.5">Von diesem Gerät ausloggen</p>
+            </div>
+            <span className="text-white/25 text-lg">›</span>
+          </button>
+        </div>
+
         {/* Current data overview */}
         <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
           <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Aktueller Datenbestand</p>
@@ -115,20 +163,22 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
             <span className="text-white/25 text-lg">›</span>
           </button>
 
-          <div className="h-px bg-white/5" />
+          <Can cap="team:editRoster">
+            <div className="h-px bg-white/5" />
 
-          <button
-            onClick={() => fileRef.current?.click()}
-            className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors"
-          >
-            <span className="w-9 h-9 rounded-xl bg-unicorn-pink/15 flex items-center justify-center text-xl">📥</span>
-            <div className="flex-1 text-left">
-              <p className="text-white font-semibold text-[15px]">Importieren</p>
-              <p className="text-white/40 text-xs mt-0.5">Backup-JSON einlesen (ergänzt oder überschreibt)</p>
-            </div>
-            <span className="text-white/25 text-lg">›</span>
-          </button>
-          <input ref={fileRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFileChange} />
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors"
+            >
+              <span className="w-9 h-9 rounded-xl bg-unicorn-pink/15 flex items-center justify-center text-xl">📥</span>
+              <div className="flex-1 text-left">
+                <p className="text-white font-semibold text-[15px]">Importieren</p>
+                <p className="text-white/40 text-xs mt-0.5">Backup-JSON einlesen (ersetzt bestehende Daten)</p>
+              </div>
+              <span className="text-white/25 text-lg">›</span>
+            </button>
+            <input ref={fileRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFileChange} />
+          </Can>
         </div>
 
         {/* Import error */}
@@ -225,7 +275,8 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           </button>
         </div>
 
-        {/* Danger zone */}
+        {/* Danger zone – nur Captain+ */}
+        <Can cap="team:editRoster">
         <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
           <div className="px-4 py-3 border-b border-white/5">
             <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Gefahrenzone</p>
@@ -252,6 +303,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
             </div>
           )}
         </div>
+        </Can>
       </div>
 
       <BottomNav />

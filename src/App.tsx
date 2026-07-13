@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import SplashScreen from './pages/SplashScreen'
 import LoginPage from './pages/LoginPage'
+import JoinPage from './pages/JoinPage'
 import HomePage from './pages/HomePage'
 import PlayersPage from './pages/PlayersPage'
 import PlayerEditorPage from './pages/PlayerEditorPage'
@@ -14,6 +15,7 @@ import UpdateBanner from './components/UpdateBanner'
 import ScrollToTop from './components/ScrollToTop'
 import OnboardingGuide, { shouldShowOnboarding } from './components/OnboardingGuide'
 import ProtectedShell from './components/ProtectedShell'
+import PreviewRoleBanner from './components/PreviewRoleBanner'
 import LineupPage from './pages/LineupPage'
 
 export default function App() {
@@ -25,6 +27,7 @@ export default function App() {
         {/* Öffentlich (außerhalb des Auth-Gates) */}
         <Route path="/" element={<SplashScreen />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/join/:token" element={<JoinPage />} />
 
         {/* Eingeloggter Bereich */}
         <Route element={<ProtectedShell />}>
@@ -42,6 +45,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <ScrollToTop />
+      <PreviewRoleBanner />
       <UpdateBanner />
       {showOnboarding && <OnboardingGuide onDone={() => setShowOnboarding(false)} />}
     </>

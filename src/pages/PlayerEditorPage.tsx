@@ -3,6 +3,8 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Header from '../components/Header'
 import LoadingScreen from '../components/LoadingScreen'
+import Can from '../components/Can'
+import { getSupabase } from '../lib/supabase'
 import { usePlayers } from '../store'
 import type { Player, Position, GameTypePreference } from '../types'
 import { uuid } from '../utils/uuid'
@@ -119,6 +121,10 @@ function PlayerEditorForm() {
   const [prefs, setPrefs] = useState(existing?.preferences ?? defaultPrefs())
   const [active, setActive] = useState(existing?.active !== false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [inviteLink, setInviteLink] = useState<string | null>(null)
+  const [inviteBusy, setInviteBusy] = useState(false)
+  const [inviteErr, setInviteErr] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const save = () => {
     if (!name.trim()) return
@@ -129,6 +135,24 @@ function PlayerEditorForm() {
       updatePlayer({ ...existing, name: name.trim(), active, preferences: prefs })
     }
     navigate('/players')
+  }
+
+  const generateInvite = async () => {
+    if (!existing || inviteBusy) return
+    setInviteBusy(true); setInviteErr(null)
+    const { data, error } = await getSupabase().rpc('create_invite', { p_player: existing.id, p_role: 'player' })
+    setInviteBusy(false)
+    if (error) { setInviteErr(error.message); return }
+    setInviteLink(`${window.location.origin}${import.meta.env.BASE_URL}#/join/${data as string}`)
+  }
+  const copyLink = async () => {
+    if (!inviteLink) return
+    try { await navigator.clipboard.writeText(inviteLink); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch { /* ignore */ }
+  }
+  const shareLink = async () => {
+    if (!inviteLink) return
+    if (navigator.share) { try { await navigator.share({ title: 'Hornstrike Einladung', url: inviteLink }) } catch { /* abgebrochen */ } }
+    else copyLink()
   }
 
   const setPref = <K extends keyof Player['preferences']>(key: K, val: Player['preferences'][K]) =>
@@ -296,8 +320,35 @@ function PlayerEditorForm() {
           )}
         </div>
 
-        {/* Inaktiv + Löschen (nur bei bestehendem Spieler) */}
-        {!isNew && (<>
+        {/* Einladung (nur Captain+, bestehende Spieler) */}
+        {!isNew && (
+          <Can cap="team:invite">
+            <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
+              <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Einladung</p>
+              {!inviteLink ? (
+                <button
+                  onClick={generateInvite}
+                  disabled={inviteBusy}
+                  className="w-full py-2.5 rounded-xl bg-unicorn-cyan/15 text-unicorn-cyan text-sm font-semibold disabled:opacity-50"
+                >{inviteBusy ? 'Erstelle…' : '🔗 Einladungslink erstellen'}</button>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-white/60 text-xs break-all bg-black/20 rounded-lg px-3 py-2">{inviteLink}</p>
+                  <div className="flex gap-2">
+                    <button onClick={copyLink} className="flex-1 py-2.5 rounded-xl bg-unicorn-violet text-white text-sm font-semibold">{copied ? 'Kopiert ✓' : 'Kopieren'}</button>
+                    <button onClick={shareLink} className="flex-1 py-2.5 rounded-xl bg-unicorn-pink text-white text-sm font-semibold">Teilen</button>
+                  </div>
+                  <p className="text-white/35 text-xs">Link an den Spieler schicken (z. B. WhatsApp). 30 Tage gültig, einmalig.</p>
+                </div>
+              )}
+              {inviteErr && <p className="text-red-400 text-xs mt-2">{inviteErr}</p>}
+            </div>
+          </Can>
+        )}
+
+        {/* Inaktiv + Löschen (nur Captain+, bestehende Spieler) */}
+        {!isNew && (
+          <Can cap="team:editRoster">
           {/* Inaktiv-Toggle */}
           <button
             onClick={() => setActive(v => !v)}
@@ -336,7 +387,8 @@ function PlayerEditorForm() {
               </div>
             </div>
           )}
-        </>)}
+          </Can>
+        )}
       </div>
 
       {/* Save CTA */}
