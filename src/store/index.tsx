@@ -4,7 +4,7 @@ import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 import { useSession } from '../context/SessionProvider'
 
 // ─── DB-Zeilen-Typen (snake_case) ───────────────────────────────────────────
-type PlayerRow = { id: string; name: string; active: boolean; sort_order: number }
+type PlayerRow = { id: string; name: string; active: boolean; sort_order: number; user_id: string | null }
 type PrefRow = {
   player_id: string; position: Position; game_type: GameTypePreference
   goalie_preference: boolean; avoids_opening: boolean; avoids_closing: boolean
@@ -42,7 +42,7 @@ function useTeamId(enabled: boolean) {
 async function fetchPlayers(): Promise<Player[]> {
   const sb = getSupabase()
   const [pl, pref, part] = await Promise.all([
-    sb.from('players').select('id,name,active,sort_order').order('sort_order', { ascending: true }),
+    sb.from('players').select('id,name,active,sort_order,user_id').order('sort_order', { ascending: true }),
     sb.from('player_preferences').select('*'),
     sb.from('partner_preferences').select('player_id,partner_player_id,weight'),
   ])
@@ -65,6 +65,7 @@ async function fetchPlayers(): Promise<Player[]> {
       id: row.id,
       name: row.name,
       active: row.active,
+      userId: row.user_id,
       preferences: {
         position: p?.position ?? 'both',
         gameType: p?.game_type ?? 'both',
@@ -152,7 +153,17 @@ export function usePlayers() {
         sb.from('players').update({ sort_order: i }).eq('id', p.id).then(({ error }) => { if (error) throw error }),
       ))
     },
-    onSuccess: invalidate,
+    // optimistisch: neue Reihenfolge sofort anzeigen (kein Zurückspringen/Ruckeln)
+    onMutate: async (list: Player[]) => {
+      await qc.cancelQueries({ queryKey: PLAYERS_KEY })
+      const prev = qc.getQueryData<Player[]>(PLAYERS_KEY)
+      qc.setQueryData<Player[]>(PLAYERS_KEY, list)
+      return { prev }
+    },
+    onError: (_e, _v, ctx: { prev?: Player[] } | undefined) => {
+      if (ctx?.prev) qc.setQueryData(PLAYERS_KEY, ctx.prev)
+    },
+    onSettled: () => { void invalidate() },
   })
   const replaceMut = useMutation({
     mutationFn: async (list: Player[]) => {

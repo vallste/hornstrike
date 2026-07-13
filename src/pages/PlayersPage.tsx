@@ -9,6 +9,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import Header from '../components/Header'
 import Can from '../components/Can'
+import { useCan } from '../lib/permissions'
 import Badge from '../components/Badge'
 import BottomNav from '../components/BottomNav'
 import { usePlayers } from '../store'
@@ -42,12 +43,13 @@ function gameTypeLabel(t: Player['preferences']['gameType']): string {
 
 // ── Sortierbare Karte ──────────────────────────────────────────────────────
 
-function SortablePlayerCard({ player, idx, onEdit }: {
+function SortablePlayerCard({ player, idx, onEdit, canDrag }: {
   player: Player
   idx: number
   onEdit: () => void
+  canDrag: boolean
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: player.id })
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: player.id, disabled: !canDrag })
   const color = AVATAR_COLORS[idx % AVATAR_COLORS.length]
   const initials = player.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
   const isActive = player.active !== false  // default true für alte Datensätze
@@ -56,20 +58,22 @@ function SortablePlayerCard({ player, idx, onEdit }: {
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`rounded-2xl px-4 py-3.5 flex items-center gap-3 transition-all ${
+      className={`rounded-2xl px-4 py-3.5 flex items-center gap-3 transition-shadow ${
         isDragging ? 'shadow-2xl shadow-unicorn-pink/30 opacity-90 z-10 relative' : ''
       } ${isActive ? 'bg-[#2b0b4c]' : 'bg-[#2b0b4c]/50'}`}
     >
       {/* Drag handle */}
-      <button
-        {...listeners}
-        {...attributes}
-        className="text-white/20 text-lg flex-shrink-0 cursor-grab active:cursor-grabbing touch-none select-none px-1 -ml-1"
-        tabIndex={-1}
-        aria-label="Sortieren"
-      >
-        ⠿
-      </button>
+      {canDrag && (
+        <button
+          {...listeners}
+          {...attributes}
+          className="text-white/20 text-lg flex-shrink-0 cursor-grab active:cursor-grabbing touch-none select-none px-1 -ml-1"
+          tabIndex={-1}
+          aria-label="Sortieren"
+        >
+          ⠿
+        </button>
+      )}
 
       {/* Avatar */}
       <button onClick={onEdit} className="flex items-center gap-3 flex-1 min-w-0 text-left">
@@ -107,6 +111,7 @@ function SortablePlayerCard({ player, idx, onEdit }: {
 export default function PlayersPage() {
   const navigate = useNavigate()
   const { players, reorder } = usePlayers()
+  const canReorder = useCan('team:editRoster')
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -147,7 +152,7 @@ export default function PlayersPage() {
           </div>
         )}
 
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext sensors={canReorder ? sensors : []} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={players.map(p => p.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-3">
               {players.map((player, idx) => (
@@ -155,6 +160,7 @@ export default function PlayersPage() {
                   key={player.id}
                   player={player}
                   idx={idx}
+                  canDrag={canReorder}
                   onEdit={() => navigate(`/players/${player.id}`)}
                 />
               ))}

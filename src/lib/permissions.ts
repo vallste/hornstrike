@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getSupabase, isSupabaseConfigured } from './supabase'
 import { useSession } from '../context/SessionProvider'
 import { usePreviewRole } from '../context/PreviewRoleProvider'
+import { usePlayers } from '../store'
 
 // Rollen sind hierarchisch: admin ⊇ club_admin ⊇ team_admin ⊇ player.
 export type Role = 'admin' | 'club_admin' | 'team_admin' | 'player'
@@ -86,4 +87,17 @@ export function useRole(): Role | null {
 
 export function useCan(cap: Capability): boolean {
   return can(useRole(), cap)
+}
+
+/**
+ * ID der Spieler-Zeile, die dem eingeloggten User gehört (bzw. im Vorschaumodus
+ * der ausgewählte Spieler). Basis für „darf nur eigenes Profil bearbeiten".
+ */
+export function useMyPlayerId(): string | null {
+  const { session } = useSession()
+  const { previewRole, previewPlayerId } = usePreviewRole()
+  const { players } = usePlayers()
+  if (previewRole === 'player') return previewPlayerId
+  const uid = session?.user.id
+  return players.find(p => p.userId === uid)?.id ?? null
 }

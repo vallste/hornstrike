@@ -16,6 +16,7 @@ import type { GameSlot } from '../types'
 import LineupDetailModal from './LineupDetailModal'
 import LineupShareCard from '../components/LineupShareCard'
 import LoadingScreen from '../components/LoadingScreen'
+import { useCan } from '../lib/permissions'
 
 
 // Farbpalette für Spieler-Pills – bewusst ohne Cyan (#00e5ff) und Pink (#e040fb),
@@ -41,6 +42,18 @@ function DraggablePill({ id, label, color }: { id: string; label: string; color:
       {...attributes}
       style={{ background: color.bg, color: color.text }}
       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-semibold cursor-grab active:cursor-grabbing select-none touch-none transition-opacity ${isDragging ? 'opacity-30' : 'opacity-100'}`}
+    >
+      {label}
+    </span>
+  )
+}
+
+// Statische (nicht ziehbare) Variante für Spieler / read-only-Ansicht
+function StaticPill({ label, color }: { label: string; color: { bg: string; text: string } }) {
+  return (
+    <span
+      style={{ background: color.bg, color: color.text }}
+      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-semibold select-none"
     >
       {label}
     </span>
@@ -82,6 +95,7 @@ function LineupView() {
   const { players } = usePlayers()
   const { matchDays, updateMatchDay } = useMatchDays()
   const matchDay = matchDays.find(m => m.id === id)!
+  const canEdit = useCan('team:editLineup')
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
   const [animKey, setAnimKey] = useState(0)
   const [dragLabel, setDragLabel] = useState<string | null>(null)
@@ -317,18 +331,22 @@ function LineupView() {
               )}
             </div>
 
-            <button
-              onClick={() => navigate(`/matchday/${matchDay.id}/edit`)}
-              className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
-            >
-              ✎
-            </button>
-            <button
-              onClick={regenerate}
-              className="flex items-center gap-1.5 bg-[#391060] border border-unicorn-cyan/50 text-unicorn-cyan text-sm font-semibold px-3 py-1.5 rounded-full"
-            >
-              ⟳ Neu
-            </button>
+            {canEdit && (
+              <>
+                <button
+                  onClick={() => navigate(`/matchday/${matchDay.id}/edit`)}
+                  className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
+                >
+                  ✎
+                </button>
+                <button
+                  onClick={regenerate}
+                  className="flex items-center gap-1.5 bg-[#391060] border border-unicorn-cyan/50 text-unicorn-cyan text-sm font-semibold px-3 py-1.5 rounded-full"
+                >
+                  ⟳ Neu
+                </button>
+              </>
+            )}
           </div>
         }
       />
@@ -366,7 +384,7 @@ function LineupView() {
       )}
 
       {/* Game rows with DnD */}
-      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext sensors={canEdit ? sensors : []} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div key={animKey} className="relative px-6 space-y-1.5">
           {visibleGames.map((game, idx) => {
             const slot = matchDay.lineup.find(s => s.gameIndex === game.gameIndex)
@@ -408,7 +426,9 @@ function LineupView() {
                   <div className="flex-1 flex flex-wrap gap-1 items-center">
                     {slot.players.map((pid, pi) => (
                       <DroppableSlot key={pi} id={`g${game.gameIndex}-p${pi}`}>
-                        <DraggablePill id={`g${game.gameIndex}-p${pi}`} label={playerName(pid)} color={playerColor(pid)} />
+                        {canEdit
+                          ? <DraggablePill id={`g${game.gameIndex}-p${pi}`} label={playerName(pid)} color={playerColor(pid)} />
+                          : <StaticPill label={playerName(pid)} color={playerColor(pid)} />}
                         {isDouble && slot.positions?.[pi] && (
                           <span className="text-white/35 text-[10px] mr-1">
                             {slot.positions[pi] === 'attack' ? 'St' : 'To'}
@@ -426,7 +446,7 @@ function LineupView() {
                   </span>
                 )}
 
-                {!slot?.forfeit && (
+                {canEdit && !slot?.forfeit && (
                   <button onClick={() => setEditingSlot(game.gameIndex)} className="text-white/20 text-sm flex-shrink-0 pl-1">✎</button>
                 )}
               </motion.div>
