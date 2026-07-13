@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import SplashScreen from './pages/SplashScreen'
 import LoginPage from './pages/LoginPage'
 import JoinPage from './pages/JoinPage'
+import RequestClubPage from './pages/RequestClubPage'
+import AdminClubRequestsPage from './pages/AdminClubRequestsPage'
 import HomePage from './pages/HomePage'
 import PlayersPage from './pages/PlayersPage'
 import PlayerEditorPage from './pages/PlayerEditorPage'
@@ -40,6 +42,8 @@ export default function App() {
           <Route path="/settings" element={<SettingsPage onStartTour={() => setShowOnboarding(true)} />} />
           <Route path="/changelog" element={<ChangelogPage />} />
           <Route path="/lineup/:id" element={<LineupPage />} />
+          <Route path="/request-club" element={<RequestClubPage />} />
+          <Route path="/admin/club-requests" element={<AdminClubRequestsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

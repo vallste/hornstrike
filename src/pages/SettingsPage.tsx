@@ -131,6 +131,32 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           </button>
         </div>
 
+        {/* Verein */}
+        <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/5">
+            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Verein</p>
+          </div>
+          <button onClick={() => navigate('/request-club')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors">
+            <span className="w-9 h-9 rounded-xl bg-unicorn-violet/40 flex items-center justify-center text-xl">➕</span>
+            <div className="flex-1 text-left">
+              <p className="text-white font-semibold text-[15px]">Neuen Verein beantragen</p>
+              <p className="text-white/40 text-xs mt-0.5">Antrag zur Freigabe durch einen Plattform-Admin</p>
+            </div>
+            <span className="text-white/25 text-lg">›</span>
+          </button>
+          <Can cap="app:manageClubs">
+            <div className="h-px bg-white/5" />
+            <button onClick={() => navigate('/admin/club-requests')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors">
+              <span className="w-9 h-9 rounded-xl bg-unicorn-gold/15 flex items-center justify-center text-xl">🗂</span>
+              <div className="flex-1 text-left">
+                <p className="text-white font-semibold text-[15px]">Vereins-Anträge</p>
+                <p className="text-white/40 text-xs mt-0.5">Offene Anträge prüfen &amp; freigeben (Admin)</p>
+              </div>
+              <span className="text-white/25 text-lg">›</span>
+            </button>
+          </Can>
+        </div>
+
         {/* Current data overview */}
         <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
           <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Aktueller Datenbestand</p>

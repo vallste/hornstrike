@@ -52,10 +52,10 @@ type MembershipRow = { role: Role; team_id: string | null; club_id: string | nul
  * Spiegelt die Server-Hierarchie: Plattform-Admin ⊇ Club-Admin ⊇ Captain ⊇ Spieler.
  * Die echte Absicherung macht RLS – das hier steuert nur die UI.
  */
-export function useRealRole(): Role | null {
+function useRoleQuery() {
   const { session } = useSession()
   const uid = session?.user.id
-  const { data } = useQuery({
+  return useQuery({
     queryKey: ['role', uid],
     enabled: isSupabaseConfigured && !!uid,
     staleTime: 5 * 60_000,
@@ -75,7 +75,19 @@ export function useRealRole(): Role | null {
       return null
     },
   })
-  return data ?? null
+}
+
+export function useRealRole(): Role | null {
+  return useRoleQuery().data ?? null
+}
+
+/** Für den Onboarding-Gate: hat der eingeloggte User schon ein Team/eine Rolle? */
+export function useTeamStatus(): 'loading' | 'has' | 'none' {
+  const { session } = useSession()
+  const q = useRoleQuery()
+  if (!session) return 'none'
+  if (q.isLoading) return 'loading'
+  return q.data ? 'has' : 'none'
 }
 
 /** Effektive UI-Rolle inkl. Admin-Vorschaumodus (previewRole überschreibt die echte). */
