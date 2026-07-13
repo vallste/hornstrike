@@ -8,6 +8,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import Header from '../components/Header'
+import Can from '../components/Can'
 import Badge from '../components/Badge'
 import BottomNav from '../components/BottomNav'
 import { usePlayers } from '../store'
@@ -128,10 +129,12 @@ export default function PlayersPage() {
       <Header
         title="Spieler"
         right={
-          <button
-            onClick={() => navigate('/players/new')}
-            className="w-9 h-9 rounded-full bg-unicorn-pink flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-unicorn-pink/40"
-          >+</button>
+          <Can cap="team:editRoster">
+            <button
+              onClick={() => navigate('/players/new')}
+              className="w-9 h-9 rounded-full bg-unicorn-pink flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-unicorn-pink/40"
+            >+</button>
+          </Can>
         }
       />
 
