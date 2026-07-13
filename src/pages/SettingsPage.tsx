@@ -21,7 +21,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
   const { user, signOut } = useSession()
   const role = useRole()
   const realRole = useRealRole()
-  const { previewRole, setPreviewRole } = usePreviewRole()
+  const { previewRole, previewPlayerId, setPreview } = usePreviewRole()
 
   const handleLogout = async () => {
     await signOut()
@@ -107,17 +107,17 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           </div>
           {can(realRole, 'team:editRoster') && (
             <div className="px-4 pb-3">
-              <p className="text-white/45 text-xs mb-1.5">Vorschau als Rolle (nur Ansicht)</p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPreviewRole(null)}
-                  className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${!previewRole ? 'bg-unicorn-violet text-white' : 'bg-[#391060] text-white/50'}`}
-                >Normal</button>
-                <button
-                  onClick={() => setPreviewRole('player')}
-                  className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${previewRole === 'player' ? 'bg-unicorn-gold text-[#1a0533]' : 'bg-[#391060] text-white/50'}`}
-                >Als Spieler</button>
-              </div>
+              <p className="text-white/45 text-xs mb-1.5">Vorschau (nur Ansicht)</p>
+              <select
+                value={previewRole === 'player' && previewPlayerId ? previewPlayerId : ''}
+                onChange={e => (e.target.value ? setPreview('player', e.target.value) : setPreview(null))}
+                className="w-full rounded-xl bg-[#391060] text-white text-sm px-3 py-2.5 outline-none"
+              >
+                <option value="">Normal (als du)</option>
+                {players.map(p => (
+                  <option key={p.id} value={p.id}>Als Spieler: {p.name}</option>
+                ))}
+              </select>
             </div>
           )}
           <div className="h-px bg-white/5" />

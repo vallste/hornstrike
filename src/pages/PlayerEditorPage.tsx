@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Header from '../components/Header'
 import LoadingScreen from '../components/LoadingScreen'
 import Can from '../components/Can'
+import { useCan, useMyPlayerId } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
 import { usePlayers } from '../store'
 import type { Player, Position, GameTypePreference } from '../types'
@@ -116,6 +117,10 @@ function PlayerEditorForm() {
   const { players, addPlayer, updatePlayer, deletePlayer } = usePlayers()
   const isNew = id === 'new'
   const existing = players.find(p => p.id === id)
+  const canEditRoster = useCan('team:editRoster')
+  const myPlayerId = useMyPlayerId()
+  // Captain+ darf jeden bearbeiten; ein Spieler nur sein eigenes Profil.
+  const editable = canEditRoster || (!!existing && existing.id === myPlayerId)
 
   const [name, setName] = useState(existing?.name ?? '')
   const [prefs, setPrefs] = useState(existing?.preferences ?? defaultPrefs())
@@ -168,7 +173,11 @@ function PlayerEditorForm() {
 
       <Header title={isNew ? 'Neuer Spieler' : (existing?.name ?? 'Spieler')} back />
 
-      <div className="relative px-6 space-y-3 mt-4">
+      <div className="relative px-6 mt-4">
+        {!editable && (
+          <p className="text-white/50 text-xs bg-white/5 rounded-xl px-3 py-2 mb-3">👁 Nur Ansicht – du kannst nur dein eigenes Profil bearbeiten.</p>
+        )}
+        <fieldset disabled={!editable} className="space-y-3 block min-w-0 border-0 p-0 m-0 disabled:opacity-60">
 
         {/* Name */}
         <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
@@ -389,18 +398,21 @@ function PlayerEditorForm() {
           )}
           </Can>
         )}
+        </fieldset>
       </div>
 
       {/* Save CTA */}
-      <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-4 bg-gradient-to-t from-unicorn-purple via-unicorn-purple/95 to-transparent">
-        <button
-          onClick={save}
-          disabled={!name.trim()}
-          className="w-full py-4 rounded-3xl bg-unicorn-pink text-white font-bold text-[17px] disabled:opacity-40 shadow-xl shadow-unicorn-pink/40"
-        >
-          {isNew ? 'Spieler anlegen' : 'Änderungen speichern'}
-        </button>
-      </div>
+      {editable && (
+        <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-4 bg-gradient-to-t from-unicorn-purple via-unicorn-purple/95 to-transparent">
+          <button
+            onClick={save}
+            disabled={!name.trim()}
+            className="w-full py-4 rounded-3xl bg-unicorn-pink text-white font-bold text-[17px] disabled:opacity-40 shadow-xl shadow-unicorn-pink/40"
+          >
+            {isNew ? 'Spieler anlegen' : 'Änderungen speichern'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

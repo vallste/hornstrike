@@ -27,6 +27,7 @@ export interface Player {
   name: string
   active: boolean   // false = langfristig nicht verfügbar (verletzt, pausiert etc.)
   preferences: PlayerPreferences
+  userId?: string | null   // verknüpfter Account (auth.users.id); null = Ghost/nicht beansprucht
 }
 
 /** Spieltag-spezifische Einstellungen für einen Spieler */
