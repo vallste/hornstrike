@@ -20,6 +20,8 @@ export default function ManagePage() {
   const [error, setError] = useState<string | null>(null)
   const [renaming, setRenaming] = useState<string | null>(null)
   const [renameVal, setRenameVal] = useState('')
+  const [renamingClub, setRenamingClub] = useState<string | null>(null)
+  const [clubVal, setClubVal] = useState('')
 
   const { data: clubs = [], isLoading } = useQuery({
     queryKey: ['manage', 'clubs'],
@@ -72,6 +74,16 @@ export default function ManagePage() {
     qc.invalidateQueries({ queryKey: ['workspaces'] })
   }
 
+  const doRenameClub = async (clubId: string) => {
+    const name = clubVal.trim()
+    if (!name) return
+    const { error } = await getSupabase().from('clubs').update({ name }).eq('id', clubId)
+    if (error) { setError(error.message); return }
+    setRenamingClub(null)
+    qc.invalidateQueries({ queryKey: ['manage'] })
+    qc.invalidateQueries({ queryKey: ['workspaces'] })
+  }
+
   const switchTo = (teamId: string) => { setCurrentTeam(teamId); navigate('/home') }
 
   return (
@@ -83,8 +95,25 @@ export default function ManagePage() {
         {isLoading && <p className="text-white/50 text-sm text-center py-8">Lädt…</p>}
         {clubs.map(club => (
           <div key={club.id} className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-white/5">
-              <p className="text-white font-bold text-[16px]">{club.name}</p>
+            <div className="px-4 py-3 border-b border-white/5 flex items-center gap-2">
+              {renamingClub === club.id ? (
+                <>
+                  <input
+                    value={clubVal} onChange={e => setClubVal(e.target.value)} autoFocus
+                    onKeyDown={e => e.key === 'Enter' && doRenameClub(club.id)}
+                    className="flex-1 bg-[#391060] rounded-lg px-2.5 py-1.5 text-white text-sm outline-none"
+                  />
+                  <button onClick={() => doRenameClub(club.id)} className="text-unicorn-cyan text-sm font-semibold">Speichern</button>
+                  <button onClick={() => setRenamingClub(null)} className="text-white/40 text-lg px-1">✕</button>
+                </>
+              ) : (
+                <>
+                  <p className="text-white font-bold text-[16px] flex-1 truncate">{club.name}</p>
+                  {canManage(club.id) && (
+                    <button onClick={() => { setRenamingClub(club.id); setClubVal(club.name) }} className="text-white/30 text-sm px-1 flex-shrink-0">✎</button>
+                  )}
+                </>
+              )}
             </div>
             {(club.teams ?? []).map(t => (
               <div key={t.id} className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
