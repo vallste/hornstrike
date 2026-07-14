@@ -83,6 +83,21 @@ export default function HomePage() {
         </button>
       </div>
 
+      {/* Terminfindung */}
+      <div className="relative px-6 mt-3">
+        <button
+          onClick={() => navigate('/terminfindung')}
+          className="w-full bg-[#2b0b4c] rounded-2xl p-4 flex items-center gap-3 text-left"
+        >
+          <div className="w-11 h-11 rounded-full bg-unicorn-gold/20 flex items-center justify-center text-2xl">📅</div>
+          <div className="flex-1">
+            <p className="text-white font-semibold text-lg">Terminfindung</p>
+            <p className="text-white/55 text-xs mt-0.5">Verfügbarkeit fürs Team abfragen</p>
+          </div>
+          <span className="text-white/25 text-lg">›</span>
+        </button>
+      </div>
+
       {/* Last match */}
       <div className="relative px-6 mt-8">
         <p className="text-white/45 text-[13px] font-semibold tracking-wider uppercase mb-3">Letzter Spieltag</p>

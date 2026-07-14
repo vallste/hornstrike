@@ -86,8 +86,10 @@ function MatchDayEditForm() {
           <span className="text-2xl">📅</span>
           <input
             type="date"
+            lang="de"
             value={date}
             onChange={e => setDate(e.target.value)}
+            onClick={e => e.currentTarget.showPicker?.()}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
         </div>

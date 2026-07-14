@@ -13,6 +13,7 @@ type PrefRow = {
 type PartRow = { player_id: string; partner_player_id: string; weight: number }
 type MdRow = {
   id: string; date: string; opponent: string | null
+  start_time: string | null; location: string | null
   use_goalie: boolean; use_fifth_double: boolean; notes: string | null
   lineup: GameSlot[]
   matchday_players: { player_id: string; available_from: number; available_to: number }[] | null
@@ -175,13 +176,15 @@ async function fetchMatchDays(teamId: string): Promise<MatchDay[]> {
   const sb = getSupabase()
   const { data, error } = await sb
     .from('matchdays')
-    .select('id,date,opponent,use_goalie,use_fifth_double,notes,lineup,matchday_players(player_id,available_from,available_to)')
+    .select('id,date,start_time,location,opponent,use_goalie,use_fifth_double,notes,lineup,matchday_players(player_id,available_from,available_to)')
     .eq('team_id', teamId)
     .order('date', { ascending: true })
   if (error) throw error
   return ((data ?? []) as MdRow[]).map(m => ({
     id: m.id,
     date: m.date,
+    startTime: m.start_time ? m.start_time.slice(0, 5) : null,
+    location: m.location ?? null,
     opponent: m.opponent ?? undefined,
     useGoalie: m.use_goalie,
     useFifthDouble: m.use_fifth_double,
@@ -227,6 +230,7 @@ export function useMatchDays() {
       const sb = getSupabase()
       const ins = await sb.from('matchdays').insert({
         id: md.id, team_id: currentTeamId, date: md.date, opponent: md.opponent ?? null,
+        start_time: md.startTime || null, location: md.location || null,
         use_goalie: md.useGoalie, use_fifth_double: md.useFifthDouble,
         notes: md.notes ?? null, lineup: md.lineup,
       })
@@ -240,6 +244,7 @@ export function useMatchDays() {
       const sb = getSupabase()
       const upd = await sb.from('matchdays').update({
         date: md.date, opponent: md.opponent ?? null,
+        start_time: md.startTime || null, location: md.location || null,
         use_goalie: md.useGoalie, use_fifth_double: md.useFifthDouble,
         notes: md.notes ?? null, lineup: md.lineup,
       }).eq('id', md.id)
@@ -265,6 +270,7 @@ export function useMatchDays() {
       for (const md of list) {
         const ins = await sb.from('matchdays').insert({
           id: md.id, team_id: currentTeamId, date: md.date, opponent: md.opponent ?? null,
+          start_time: md.startTime || null, location: md.location || null,
           use_goalie: md.useGoalie, use_fifth_double: md.useFifthDouble,
           notes: md.notes ?? null, lineup: md.lineup,
         })
