@@ -18,6 +18,8 @@ export default function ManagePage() {
   const [newTeam, setNewTeam] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [renaming, setRenaming] = useState<string | null>(null)
+  const [renameVal, setRenameVal] = useState('')
 
   const { data: clubs = [], isLoading } = useQuery({
     queryKey: ['manage', 'clubs'],
@@ -60,6 +62,16 @@ export default function ManagePage() {
     qc.invalidateQueries({ queryKey: ['workspaces'] })
   }
 
+  const doRename = async (teamId: string) => {
+    const name = renameVal.trim()
+    if (!name) return
+    const { error } = await getSupabase().from('teams').update({ name }).eq('id', teamId)
+    if (error) { setError(error.message); return }
+    setRenaming(null)
+    qc.invalidateQueries({ queryKey: ['manage'] })
+    qc.invalidateQueries({ queryKey: ['workspaces'] })
+  }
+
   const switchTo = (teamId: string) => { setCurrentTeam(teamId); navigate('/home') }
 
   return (
@@ -75,12 +87,31 @@ export default function ManagePage() {
               <p className="text-white font-bold text-[16px]">{club.name}</p>
             </div>
             {(club.teams ?? []).map(t => (
-              <button key={t.id} onClick={() => switchTo(t.id)} className="w-full flex items-center justify-between px-4 py-3 active:bg-white/5 border-b border-white/5">
-                <span className="text-white text-[15px]">{t.name}</span>
-                {t.id === currentTeamId
-                  ? <span className="text-unicorn-cyan text-xs font-semibold">aktiv</span>
-                  : <span className="text-white/30 text-lg">›</span>}
-              </button>
+              <div key={t.id} className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
+                {renaming === t.id ? (
+                  <>
+                    <input
+                      value={renameVal} onChange={e => setRenameVal(e.target.value)} autoFocus
+                      onKeyDown={e => e.key === 'Enter' && doRename(t.id)}
+                      className="flex-1 bg-[#391060] rounded-lg px-2.5 py-1.5 text-white text-sm outline-none"
+                    />
+                    <button onClick={() => doRename(t.id)} className="text-unicorn-cyan text-sm font-semibold">Speichern</button>
+                    <button onClick={() => setRenaming(null)} className="text-white/40 text-lg px-1">✕</button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => switchTo(t.id)} className="flex-1 flex items-center justify-between text-left min-w-0">
+                      <span className="text-white text-[15px] truncate">{t.name}</span>
+                      {t.id === currentTeamId
+                        ? <span className="text-unicorn-cyan text-xs font-semibold flex-shrink-0">aktiv</span>
+                        : <span className="text-white/30 text-lg flex-shrink-0">›</span>}
+                    </button>
+                    {canManage(club.id) && (
+                      <button onClick={() => { setRenaming(t.id); setRenameVal(t.name) }} className="text-white/30 text-sm px-1 flex-shrink-0">✎</button>
+                    )}
+                  </>
+                )}
+              </div>
             ))}
             {(club.teams ?? []).length === 0 && (
               <p className="px-4 py-3 text-white/40 text-sm border-b border-white/5">Noch kein Team</p>
