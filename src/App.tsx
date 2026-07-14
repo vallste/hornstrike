@@ -7,6 +7,9 @@ import RequestClubPage from './pages/RequestClubPage'
 import AdminClubRequestsPage from './pages/AdminClubRequestsPage'
 import ManagePage from './pages/ManagePage'
 import MembersPage from './pages/MembersPage'
+import PollListPage from './pages/PollListPage'
+import PollEditorPage from './pages/PollEditorPage'
+import PollDetailPage from './pages/PollDetailPage'
 import HomePage from './pages/HomePage'
 import PlayersPage from './pages/PlayersPage'
 import PlayerEditorPage from './pages/PlayerEditorPage'
@@ -48,6 +51,9 @@ export default function App() {
           <Route path="/admin/club-requests" element={<AdminClubRequestsPage />} />
           <Route path="/manage" element={<ManagePage />} />
           <Route path="/members" element={<MembersPage />} />
+          <Route path="/terminfindung" element={<PollListPage />} />
+          <Route path="/terminfindung/new" element={<PollEditorPage />} />
+          <Route path="/terminfindung/:id" element={<PollDetailPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

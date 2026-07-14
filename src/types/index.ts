@@ -51,6 +51,8 @@ export interface GameSlot {
 export interface MatchDay {
   id: string
   date: string
+  startTime?: string | null   // 'HH:MM'
+  location?: string | null
   opponent?: string
   useGoalie: boolean
   useFifthDouble: boolean

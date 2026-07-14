@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import TimeField from '../components/TimeField'
 import { usePlayers, useMatchDays } from '../store'
 import type { MatchDayPlayer } from '../types'
 import { generateLineup } from '../utils/lineup'
@@ -10,14 +11,21 @@ import { uuid } from '../utils/uuid'
 
 export default function MatchDaySetupPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  // Vorbefüllung aus der Terminfindung (Datum + verfügbare Spieler)
+  const prefill = (location.state as { date?: string; playerIds?: string[]; time?: string; location?: string } | null) ?? {}
   const { players } = usePlayers()
   const { addMatchDay } = useMatchDays()
 
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(prefill.date ?? new Date().toISOString().split('T')[0])
+  const [startTime, setStartTime] = useState(prefill.time ?? '')
+  const [venue, setVenue] = useState(prefill.location ?? '')
   const [opponent, setOpponent] = useState('')
   const [useGoalie, setUseGoalie] = useState(false)
   const [useFifthDouble, setUseFifthDouble] = useState(false)
-  const [selected, setSelected] = useState<Record<string, boolean>>({})
+  const [selected, setSelected] = useState<Record<string, boolean>>(
+    () => Object.fromEntries((prefill.playerIds ?? []).map(id => [id, true])),
+  )
   const [availability, setAvailability] = useState<Record<string, { from: number; to: number }>>({})
   const [expanded, setExpanded] = useState<string | null>(null)
 
@@ -44,7 +52,7 @@ export default function MatchDaySetupPage() {
     }))
     const lineup = generateLineup(players, mdPlayers, useGoalie, useFifthDouble)
     const id = uuid()
-    addMatchDay({ id, date, opponent: opponent.trim() || undefined, useGoalie, useFifthDouble, players: mdPlayers, lineup })
+    addMatchDay({ id, date, startTime: startTime || null, location: venue.trim() || null, opponent: opponent.trim() || undefined, useGoalie, useFifthDouble, players: mdPlayers, lineup })
     navigate(`/lineup/${id}`)
   }
 
@@ -66,8 +74,10 @@ export default function MatchDaySetupPage() {
           <span className="text-2xl">📅</span>
           <input
             type="date"
+            lang="de"
             value={date}
             onChange={e => setDate(e.target.value)}
+            onClick={e => e.currentTarget.showPicker?.()}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
         </div>
@@ -82,6 +92,18 @@ export default function MatchDaySetupPage() {
             placeholder="z. B. Kickerfreunde Hamburg"
             className="w-full bg-transparent text-white placeholder-white/25 text-base outline-none"
           />
+        </div>
+
+        {/* Uhrzeit + Ort */}
+        <div className="flex gap-3">
+          <div className="flex-1 bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
+            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Uhrzeit</p>
+            <TimeField value={startTime} onChange={setStartTime} className="w-full" />
+          </div>
+          <div className="flex-[1.4] bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
+            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Ort</p>
+            <input type="text" value={venue} onChange={e => setVenue(e.target.value)} placeholder="Sporthalle…" className="w-full bg-transparent text-white placeholder-white/25 text-base outline-none" />
+          </div>
         </div>
 
         {/* Goalie toggle */}
