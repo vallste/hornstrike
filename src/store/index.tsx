@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Player, MatchDay, GameSlot, Position, GameTypePreference } from '../types'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 import { useSession } from '../context/SessionProvider'
+import { useScope } from '../context/ScopeProvider'
 
 // ─── DB-Zeilen-Typen (snake_case) ───────────────────────────────────────────
 type PlayerRow = { id: string; name: string; active: boolean; sort_order: number; user_id: string | null }
@@ -17,32 +18,12 @@ type MdRow = {
   matchday_players: { player_id: string; available_from: number; available_to: number }[] | null
 }
 
-const PLAYERS_KEY = ['players'] as const
-const MATCHDAYS_KEY = ['matchDays'] as const
-const TEAM_KEY = ['teamId'] as const
-
-// ─── Team-Id (für Inserts; Reads sind ohnehin per RLS auf das Team beschränkt) ─
-function useTeamId(enabled: boolean) {
-  const { data } = useQuery({
-    queryKey: TEAM_KEY,
-    enabled,
-    staleTime: 5 * 60_000,
-    queryFn: async () => {
-      const sb = getSupabase()
-      const { data, error } = await sb.from('teams').select('id').limit(1)
-      if (error) throw error
-      return (data?.[0]?.id as string | undefined) ?? null
-    },
-  })
-  return data ?? null
-}
-
 // ─── Players ─────────────────────────────────────────────────────────────────
 
-async function fetchPlayers(): Promise<Player[]> {
+async function fetchPlayers(teamId: string): Promise<Player[]> {
   const sb = getSupabase()
   const [pl, pref, part] = await Promise.all([
-    sb.from('players').select('id,name,active,sort_order,user_id').order('sort_order', { ascending: true }),
+    sb.from('players').select('id,name,active,sort_order,user_id').eq('team_id', teamId).order('sort_order', { ascending: true }),
     sb.from('player_preferences').select('*'),
     sb.from('partner_preferences').select('player_id,partner_player_id,weight'),
   ])
@@ -115,17 +96,18 @@ async function writePlayerPrefs(p: Player) {
 export function usePlayers() {
   const qc = useQueryClient()
   const { session } = useSession()
-  const enabled = isSupabaseConfigured && !!session
-  const teamId = useTeamId(enabled)
+  const { currentTeamId, isLoading: scopeLoading } = useScope()
+  const enabled = isSupabaseConfigured && !!session && !!currentTeamId
+  const playersKey = ['players', currentTeamId] as const
 
-  const query = useQuery({ queryKey: PLAYERS_KEY, enabled, queryFn: fetchPlayers })
+  const query = useQuery({ queryKey: playersKey, enabled, queryFn: () => fetchPlayers(currentTeamId as string) })
   const players = query.data ?? []
-  const invalidate = () => qc.invalidateQueries({ queryKey: PLAYERS_KEY })
+  const invalidate = () => qc.invalidateQueries({ queryKey: ['players'] })
 
   const addMut = useMutation({
     mutationFn: async (p: Player) => {
-      if (!teamId) throw new Error('Kein Team gefunden')
-      await insertPlayer(p, teamId, players.length)
+      if (!currentTeamId) throw new Error('Kein Team ausgewählt')
+      await insertPlayer(p, currentTeamId, players.length)
     },
     onSuccess: invalidate,
   })
@@ -153,32 +135,31 @@ export function usePlayers() {
         sb.from('players').update({ sort_order: i }).eq('id', p.id).then(({ error }) => { if (error) throw error }),
       ))
     },
-    // optimistisch: neue Reihenfolge sofort anzeigen (kein Zurückspringen/Ruckeln)
     onMutate: async (list: Player[]) => {
-      await qc.cancelQueries({ queryKey: PLAYERS_KEY })
-      const prev = qc.getQueryData<Player[]>(PLAYERS_KEY)
-      qc.setQueryData<Player[]>(PLAYERS_KEY, list)
+      await qc.cancelQueries({ queryKey: playersKey })
+      const prev = qc.getQueryData<Player[]>(playersKey)
+      qc.setQueryData<Player[]>(playersKey, list)
       return { prev }
     },
     onError: (_e, _v, ctx: { prev?: Player[] } | undefined) => {
-      if (ctx?.prev) qc.setQueryData(PLAYERS_KEY, ctx.prev)
+      if (ctx?.prev) qc.setQueryData(playersKey, ctx.prev)
     },
     onSettled: () => { void invalidate() },
   })
   const replaceMut = useMutation({
     mutationFn: async (list: Player[]) => {
-      if (!teamId) throw new Error('Kein Team gefunden')
+      if (!currentTeamId) throw new Error('Kein Team ausgewählt')
       const sb = getSupabase()
-      const del = await sb.from('players').delete().not('id', 'is', null)
+      const del = await sb.from('players').delete().eq('team_id', currentTeamId)
       if (del.error) throw del.error
-      for (let i = 0; i < list.length; i++) await insertPlayer(list[i], teamId, i)
+      for (let i = 0; i < list.length; i++) await insertPlayer(list[i], currentTeamId, i)
     },
     onSuccess: invalidate,
   })
 
   return {
     players,
-    isLoading: query.isLoading,
+    isLoading: scopeLoading || query.isLoading,
     error: query.error as Error | null,
     addPlayer: (p: Player) => addMut.mutate(p),
     updatePlayer: (p: Player) => updateMut.mutate(p),
@@ -190,11 +171,12 @@ export function usePlayers() {
 
 // ─── MatchDays ───────────────────────────────────────────────────────────────
 
-async function fetchMatchDays(): Promise<MatchDay[]> {
+async function fetchMatchDays(teamId: string): Promise<MatchDay[]> {
   const sb = getSupabase()
   const { data, error } = await sb
     .from('matchdays')
     .select('id,date,opponent,use_goalie,use_fifth_double,notes,lineup,matchday_players(player_id,available_from,available_to)')
+    .eq('team_id', teamId)
     .order('date', { ascending: true })
   if (error) throw error
   return ((data ?? []) as MdRow[]).map(m => ({
@@ -231,19 +213,20 @@ async function writeMatchDayAvailability(md: MatchDay) {
 export function useMatchDays() {
   const qc = useQueryClient()
   const { session } = useSession()
-  const enabled = isSupabaseConfigured && !!session
-  const teamId = useTeamId(enabled)
+  const { currentTeamId, isLoading: scopeLoading } = useScope()
+  const enabled = isSupabaseConfigured && !!session && !!currentTeamId
+  const mdKey = ['matchDays', currentTeamId] as const
 
-  const query = useQuery({ queryKey: MATCHDAYS_KEY, enabled, queryFn: fetchMatchDays })
+  const query = useQuery({ queryKey: mdKey, enabled, queryFn: () => fetchMatchDays(currentTeamId as string) })
   const matchDays = query.data ?? []
-  const invalidate = () => qc.invalidateQueries({ queryKey: MATCHDAYS_KEY })
+  const invalidate = () => qc.invalidateQueries({ queryKey: ['matchDays'] })
 
   const addMut = useMutation({
     mutationFn: async (md: MatchDay) => {
-      if (!teamId) throw new Error('Kein Team gefunden')
+      if (!currentTeamId) throw new Error('Kein Team ausgewählt')
       const sb = getSupabase()
       const ins = await sb.from('matchdays').insert({
-        id: md.id, team_id: teamId, date: md.date, opponent: md.opponent ?? null,
+        id: md.id, team_id: currentTeamId, date: md.date, opponent: md.opponent ?? null,
         use_goalie: md.useGoalie, use_fifth_double: md.useFifthDouble,
         notes: md.notes ?? null, lineup: md.lineup,
       })
@@ -275,13 +258,13 @@ export function useMatchDays() {
   })
   const replaceMut = useMutation({
     mutationFn: async (list: MatchDay[]) => {
-      if (!teamId) throw new Error('Kein Team gefunden')
+      if (!currentTeamId) throw new Error('Kein Team ausgewählt')
       const sb = getSupabase()
-      const del = await sb.from('matchdays').delete().not('id', 'is', null)
+      const del = await sb.from('matchdays').delete().eq('team_id', currentTeamId)
       if (del.error) throw del.error
       for (const md of list) {
         const ins = await sb.from('matchdays').insert({
-          id: md.id, team_id: teamId, date: md.date, opponent: md.opponent ?? null,
+          id: md.id, team_id: currentTeamId, date: md.date, opponent: md.opponent ?? null,
           use_goalie: md.useGoalie, use_fifth_double: md.useFifthDouble,
           notes: md.notes ?? null, lineup: md.lineup,
         })
@@ -294,7 +277,7 @@ export function useMatchDays() {
 
   return {
     matchDays,
-    isLoading: query.isLoading,
+    isLoading: scopeLoading || query.isLoading,
     error: query.error as Error | null,
     addMatchDay: (md: MatchDay) => addMut.mutate(md),
     updateMatchDay: (md: MatchDay) => updateMut.mutate(md),

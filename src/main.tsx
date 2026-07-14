@@ -6,6 +6,7 @@ import './index.css'
 import App from './App'
 import { SessionProvider } from './context/SessionProvider'
 import { PreviewRoleProvider } from './context/PreviewRoleProvider'
+import { ScopeProvider } from './context/ScopeProvider'
 import { queryClient } from './lib/queryClient'
 
 createRoot(document.getElementById('root')!).render(
@@ -14,7 +15,9 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <SessionProvider>
           <PreviewRoleProvider>
-            <App />
+            <ScopeProvider>
+              <App />
+            </ScopeProvider>
           </PreviewRoleProvider>
         </SessionProvider>
       </BrowserRouter>

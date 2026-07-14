@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import JoinPage from './pages/JoinPage'
 import RequestClubPage from './pages/RequestClubPage'
 import AdminClubRequestsPage from './pages/AdminClubRequestsPage'
+import ManagePage from './pages/ManagePage'
 import HomePage from './pages/HomePage'
 import PlayersPage from './pages/PlayersPage'
 import PlayerEditorPage from './pages/PlayerEditorPage'
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/lineup/:id" element={<LineupPage />} />
           <Route path="/request-club" element={<RequestClubPage />} />
           <Route path="/admin/club-requests" element={<AdminClubRequestsPage />} />
+          <Route path="/manage" element={<ManagePage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
