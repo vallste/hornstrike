@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSession } from '../context/SessionProvider'
 import { useRole, useRealRole, can, ROLE_LABEL } from '../lib/permissions'
 import { usePreviewRole } from '../context/PreviewRoleProvider'
+import { useScope } from '../context/ScopeProvider'
 import Can from '../components/Can'
 import { resetOnboarding } from '../components/OnboardingGuide'
 import { CHANGELOG } from '../data/changelog'
@@ -22,6 +23,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
   const role = useRole()
   const realRole = useRealRole()
   const { previewRole, previewPlayerId, setPreview } = usePreviewRole()
+  const { workspaces, currentTeamId, setCurrentTeam } = useScope()
 
   const handleLogout = async () => {
     await signOut()
@@ -136,6 +138,30 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           <div className="px-4 py-3 border-b border-white/5">
             <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Verein</p>
           </div>
+          {workspaces.length > 1 && (
+            <div className="px-4 py-3 border-b border-white/5">
+              <p className="text-white/45 text-xs mb-1.5">Aktueller Workspace</p>
+              <select
+                value={currentTeamId ?? ''}
+                onChange={e => setCurrentTeam(e.target.value)}
+                className="w-full rounded-xl bg-[#391060] text-white text-sm px-3 py-2.5 outline-none"
+              >
+                {workspaces.map(w => (
+                  <option key={w.teamId} value={w.teamId}>{w.clubName} · {w.teamName}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          <Can cap="club:manageTeams">
+            <button onClick={() => navigate('/manage')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors border-b border-white/5">
+              <span className="w-9 h-9 rounded-xl bg-unicorn-cyan/15 flex items-center justify-center text-xl">🏛</span>
+              <div className="flex-1 text-left">
+                <p className="text-white font-semibold text-[15px]">Vereine &amp; Teams verwalten</p>
+                <p className="text-white/40 text-xs mt-0.5">Teams anlegen, Workspace wechseln</p>
+              </div>
+              <span className="text-white/25 text-lg">›</span>
+            </button>
+          </Can>
           <button onClick={() => navigate('/request-club')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors">
             <span className="w-9 h-9 rounded-xl bg-unicorn-violet/40 flex items-center justify-center text-xl">➕</span>
             <div className="flex-1 text-left">
