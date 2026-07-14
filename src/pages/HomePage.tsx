@@ -1,13 +1,18 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import BottomNav from '../components/BottomNav'
 import { usePlayers } from '../store'
 import { useMatchDays } from '../store'
+import { useScope } from '../context/ScopeProvider'
 
 export default function HomePage() {
   const navigate = useNavigate()
   const { players } = usePlayers()
   const { matchDays } = useMatchDays()
+  const { workspaces, currentTeamId, setCurrentTeam } = useScope()
+  const current = workspaces.find(w => w.teamId === currentTeamId)
+  const [switchOpen, setSwitchOpen] = useState(false)
   const lastMatch = [...matchDays].sort((a, b) => b.date.localeCompare(a.date))[0]
 
   const formatDate = (iso: string) =>
@@ -20,6 +25,33 @@ export default function HomePage() {
 
       <div className="relative px-6 pt-12 pb-2">
         <h1 className="text-[26px] font-bold text-white">Hornstrike 🦄</h1>
+        {current && (
+          <div className="relative mt-1 inline-block">
+            <button
+              onClick={() => workspaces.length > 1 && setSwitchOpen(o => !o)}
+              className="text-white/55 text-sm flex items-center gap-1"
+            >
+              <span>{current.clubName} · {current.teamName}</span>
+              {workspaces.length > 1 && <span className="text-white/40">▾</span>}
+            </button>
+            {switchOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setSwitchOpen(false)} />
+                <div className="absolute left-0 top-7 z-50 bg-[#2b0b4c] border border-white/10 rounded-xl py-1 min-w-[220px] shadow-xl">
+                  {workspaces.map(w => (
+                    <button
+                      key={w.teamId}
+                      onClick={() => { setCurrentTeam(w.teamId); setSwitchOpen(false) }}
+                      className={`w-full text-left px-3 py-2 text-sm ${w.teamId === currentTeamId ? 'text-unicorn-cyan font-semibold' : 'text-white/80'}`}
+                    >
+                      {w.clubName} · {w.teamName}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="relative px-6 mt-4">

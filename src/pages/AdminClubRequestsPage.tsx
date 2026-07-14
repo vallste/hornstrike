@@ -31,6 +31,14 @@ export default function AdminClubRequestsPage() {
     qc.invalidateQueries()
   }
 
+  const reject = async (id: string) => {
+    setBusyId(id); setError(null)
+    const { error } = await getSupabase().rpc('reject_club_request', { p_request: id })
+    setBusyId(null)
+    if (error) { setError(error.message); return }
+    qc.invalidateQueries({ queryKey: ['clubRequests'] })
+  }
+
   const list = requests ?? []
 
   return (
@@ -52,12 +60,18 @@ export default function AdminClubRequestsPage() {
               <p className="text-white font-semibold text-[16px]">{r.club_name}</p>
               {r.note && <p className="text-white/55 text-sm mt-1">{r.note}</p>}
               <p className="text-white/30 text-xs mt-1">{new Date(r.created_at).toLocaleString('de-DE')}</p>
-              <button
-                onClick={() => approve(r.id)} disabled={busyId === r.id}
-                className="mt-3 w-full py-2.5 rounded-xl bg-unicorn-cyan text-[#1a0533] text-sm font-bold disabled:opacity-50"
-              >
-                {busyId === r.id ? 'Wird freigegeben…' : 'Freigeben → Verein anlegen'}
-              </button>
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={() => reject(r.id)} disabled={busyId === r.id}
+                  className="px-4 py-2.5 rounded-xl bg-[#391060] text-white/60 text-sm font-semibold disabled:opacity-50"
+                >Ablehnen</button>
+                <button
+                  onClick={() => approve(r.id)} disabled={busyId === r.id}
+                  className="flex-1 py-2.5 rounded-xl bg-unicorn-cyan text-[#1a0533] text-sm font-bold disabled:opacity-50"
+                >
+                  {busyId === r.id ? 'Moment…' : 'Freigeben → Verein anlegen'}
+                </button>
+              </div>
             </div>
           ))
         )}

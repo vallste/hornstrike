@@ -6,6 +6,7 @@ import JoinPage from './pages/JoinPage'
 import RequestClubPage from './pages/RequestClubPage'
 import AdminClubRequestsPage from './pages/AdminClubRequestsPage'
 import ManagePage from './pages/ManagePage'
+import MembersPage from './pages/MembersPage'
 import HomePage from './pages/HomePage'
 import PlayersPage from './pages/PlayersPage'
 import PlayerEditorPage from './pages/PlayerEditorPage'
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/request-club" element={<RequestClubPage />} />
           <Route path="/admin/club-requests" element={<AdminClubRequestsPage />} />
           <Route path="/manage" element={<ManagePage />} />
+          <Route path="/members" element={<MembersPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -152,6 +152,16 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
               </select>
             </div>
           )}
+          <Can cap="team:invite">
+            <button onClick={() => navigate('/members')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors border-b border-white/5">
+              <span className="w-9 h-9 rounded-xl bg-unicorn-pink/15 flex items-center justify-center text-xl">👥</span>
+              <div className="flex-1 text-left">
+                <p className="text-white font-semibold text-[15px]">Mitglieder &amp; Einladungen</p>
+                <p className="text-white/40 text-xs mt-0.5">Accounts, Rollen, Einladungslinks</p>
+              </div>
+              <span className="text-white/25 text-lg">›</span>
+            </button>
+          </Can>
           <Can cap="club:manageTeams">
             <button onClick={() => navigate('/manage')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-white/5 transition-colors border-b border-white/5">
               <span className="w-9 h-9 rounded-xl bg-unicorn-cyan/15 flex items-center justify-center text-xl">🏛</span>
