@@ -9,6 +9,7 @@ import { getSupabase } from '../lib/supabase'
 
 type PollRow = {
   id: string; title: string; status: 'open' | 'closed'; deadline: string | null
+  default_opponent: string | null
   created_at: string; poll_options: { id: string }[] | null
 }
 
@@ -23,7 +24,7 @@ export default function PollListPage() {
     queryFn: async (): Promise<PollRow[]> => {
       const { data, error } = await getSupabase()
         .from('polls')
-        .select('id,title,status,deadline,created_at,poll_options(id)')
+        .select('id,title,status,deadline,default_opponent,created_at,poll_options(id)')
         .eq('team_id', currentTeamId as string)
         .order('created_at', { ascending: false })
       if (error) throw error
@@ -76,7 +77,7 @@ export default function PollListPage() {
             className="w-full bg-[#2b0b4c] rounded-2xl p-4 text-left"
           >
             <div className="flex items-center justify-between gap-2">
-              <p className="text-white font-semibold text-[16px]">{p.title}</p>
+              <p className="text-white font-semibold text-[16px]">{p.title}{p.default_opponent ? ` – ${p.default_opponent}` : ''}</p>
               <span className={`text-xs font-semibold flex-shrink-0 ${p.status === 'open' ? 'text-unicorn-cyan' : 'text-white/40'}`}>
                 {p.status === 'open' ? 'offen' : 'geschlossen'}
               </span>

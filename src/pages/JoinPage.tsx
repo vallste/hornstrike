@@ -95,7 +95,7 @@ export default function JoinPage() {
               Code aus der Mail an <span className="text-white font-medium">{email}</span> eingeben:
             </p>
             <input
-              type="text" inputMode="numeric" autoComplete="one-time-code" placeholder="12345678" maxLength={8}
+              type="text" inputMode="numeric" autoComplete="one-time-code" placeholder="123456" maxLength={6}
               value={code} onChange={e => setCode(e.target.value.replace(/\D/g, ''))} onKeyDown={e => e.key === 'Enter' && submitCode()}
               className={`${inputCls} text-center text-2xl tracking-[0.3em] placeholder-white/25`}
             />

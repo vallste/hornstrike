@@ -1,0 +1,62 @@
+<!--
+  Hornstrike – Magic-Link / OTP E-Mail (Supabase Auth)
+  Einfügen unter: Supabase → Authentication → Email Templates → "Magic Link".
+  Betreff-Vorschlag: Dein Hornstrike Login-Code: {{ .Token }}
+  Variablen: {{ .Token }} (6-stelliger Code), {{ .ConfirmationURL }} (Magic-Link).
+  Voraussetzung: Custom SMTP (Resend) aktiv – sonst ist die Vorlage nicht editierbar.
+  E-Mail-sicher: Tabellen-Layout, Inline-Styles, websichere Fonts.
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#1a0533;margin:0;padding:24px 0;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="width:480px;max-width:100%;background-color:#2b0b4c;border-radius:20px;overflow:hidden;">
+        <!-- Header -->
+        <tr>
+          <td align="center" style="padding:32px 32px 8px 32px;">
+            <div style="font-size:26px;font-weight:bold;color:#e040fb;letter-spacing:0.5px;">🦄 Hornstrike</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-top:4px;">Fellow Unicorns · Hamburger Liga</div>
+          </td>
+        </tr>
+        <!-- Code -->
+        <tr>
+          <td align="center" style="padding:24px 32px 8px 32px;">
+            <div style="font-size:17px;font-weight:bold;color:#ffffff;">Dein Login-Code</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);margin-top:6px;">Gib diesen Code in der App ein:</div>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:8px 32px 4px 32px;">
+            <div style="display:inline-block;background-color:#391060;border-radius:14px;padding:16px 28px;font-size:34px;font-weight:bold;letter-spacing:10px;color:#ffd700;">{{ .Token }}</div>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:4px 32px 16px 32px;">
+            <div style="font-size:12px;color:rgba(255,255,255,0.4);">Der Code ist nur kurze Zeit gültig.</div>
+          </td>
+        </tr>
+        <!-- Divider -->
+        <tr>
+          <td align="center" style="padding:8px 32px;">
+            <div style="font-size:12px;color:rgba(255,255,255,0.35);">— oder —</div>
+          </td>
+        </tr>
+        <!-- Button -->
+        <tr>
+          <td align="center" style="padding:8px 32px 32px 32px;">
+            <a href="{{ .ConfirmationURL }}" style="display:inline-block;background-color:#e040fb;color:#ffffff;text-decoration:none;font-size:15px;font-weight:bold;padding:14px 28px;border-radius:14px;">Direkt anmelden</a>
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="padding:0 32px 28px 32px;border-top:1px solid rgba(255,255,255,0.08);">
+            <div style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.5;padding-top:16px;">
+              Du hast diese E-Mail erhalten, weil sich jemand mit dieser Adresse bei Hornstrike anmelden wollte.
+              Warst du das nicht, kannst du sie einfach ignorieren.
+            </div>
+          </td>
+        </tr>
+      </table>
+      <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:16px;">🦄 Hornstrike</div>
+    </td>
+  </tr>
+</table>

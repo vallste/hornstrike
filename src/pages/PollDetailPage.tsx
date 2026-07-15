@@ -7,7 +7,7 @@ import { usePlayers } from '../store'
 import { useCan, useMyPlayerId } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
 
-type Poll = { id: string; title: string; status: 'open' | 'closed'; deadline: string | null; default_time: string | null; default_location: string | null }
+type Poll = { id: string; title: string; status: 'open' | 'closed'; deadline: string | null; default_time: string | null; default_location: string | null; default_opponent: string | null }
 type Option = { id: string; proposed_date: string; label: string | null; sort_order: number; start_time: string | null; location: string | null }
 type Resp = { id: string; poll_option_id: string; player_id: string; status: 'available' | 'maybe' | 'no' }
 
@@ -26,12 +26,12 @@ export default function PollDetailPage() {
   const canManage = useCan('team:managePolls')
   const myPlayerId = useMyPlayerId()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['poll', id],
     enabled: !!id,
     queryFn: async () => {
       const sb = getSupabase()
-      const { data: poll, error: e1 } = await sb.from('polls').select('id,title,status,deadline,default_time,default_location').eq('id', id as string).single()
+      const { data: poll, error: e1 } = await sb.from('polls').select('id,title,status,deadline,default_time,default_location,default_opponent').eq('id', id as string).single()
       if (e1) throw e1
       const { data: options, error: e2 } = await sb.from('poll_options').select('id,proposed_date,label,sort_order,start_time,location').eq('poll_id', id as string).order('sort_order', { ascending: true })
       if (e2) throw e2
@@ -57,7 +57,18 @@ export default function PollDetailPage() {
     return () => { sb.removeChannel(ch) }
   }, [id, qc])
 
-  if (isLoading || !data) return <LoadingScreen />
+  if (isLoading) return <LoadingScreen />
+  if (error || !data) {
+    return (
+      <div className="min-h-screen bg-unicorn-purple flex items-center justify-center px-6">
+        <div className="text-center">
+          <p className="text-white text-lg font-semibold">Umfrage konnte nicht geladen werden</p>
+          {error && <p className="text-red-300/80 text-sm mt-2 break-words">{(error as Error).message}</p>}
+          <button onClick={() => navigate('/terminfindung')} className="text-unicorn-pink mt-4 block mx-auto">← Zurück</button>
+        </div>
+      </div>
+    )
+  }
   const { poll, options, responses } = data
   const open = poll.status === 'open'
   const myResp = (optId: string) => responses.find(r => r.poll_option_id === optId && r.player_id === myPlayerId)?.status
@@ -86,13 +97,13 @@ export default function PollDetailPage() {
     const availIds = responses.filter(r => r.poll_option_id === opt.id && r.status === 'available').map(r => r.player_id)
     const time = (opt.start_time ?? poll.default_time)?.slice(0, 5) || undefined
     const loc = opt.location ?? poll.default_location ?? undefined
-    navigate('/matchday/new', { state: { date: opt.proposed_date, playerIds: availIds, time, location: loc } })
+    navigate('/matchday/new', { state: { date: opt.proposed_date, playerIds: availIds, time, location: loc, opponent: poll.default_opponent ?? undefined } })
   }
 
   return (
     <div className="min-h-screen bg-unicorn-purple pb-24">
       <div className="absolute w-[360px] h-[360px] rounded-full bg-unicorn-violet/35 blur-[140px] -top-20 right-0 pointer-events-none" />
-      <Header title={poll.title} back />
+      <Header title={`${poll.title}${poll.default_opponent ? ` – ${poll.default_opponent}` : ''}`} back />
 
       <div className="relative px-6 mt-2 space-y-3">
         <p className="text-white/50 text-sm">

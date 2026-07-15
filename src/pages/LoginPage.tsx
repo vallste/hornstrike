@@ -86,8 +86,8 @@ export default function LoginPage() {
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
-              placeholder="12345678"
-              maxLength={8}
+              placeholder="123456"
+              maxLength={6}
               value={code}
               onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
               onKeyDown={e => e.key === 'Enter' && submitCode()}
