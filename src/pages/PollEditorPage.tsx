@@ -19,6 +19,7 @@ export default function PollEditorPage() {
   const [deadline, setDeadline] = useState('')
   const [defaultTime, setDefaultTime] = useState('19:00')
   const [defaultLocation, setDefaultLocation] = useState('')
+  const [defaultOpponent, setDefaultOpponent] = useState('')
   const [selected, setSelected] = useState<string[]>([])
   const [overrides, setOverrides] = useState<Record<string, { time: string; location: string }>>({})
   const [expanded, setExpanded] = useState<string | null>(null)
@@ -53,6 +54,7 @@ export default function PollEditorPage() {
       .insert({
         team_id: currentTeamId as string, title: title.trim(), deadline: deadline || null,
         default_time: defaultTime || null, default_location: defaultLocation.trim() || null,
+        default_opponent: defaultOpponent.trim() || null,
       })
       .select('id').single()
     if (e1 || !poll) { setBusy(false); setError(e1?.message ?? 'Fehler'); return }
@@ -89,6 +91,7 @@ export default function PollEditorPage() {
 
         <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
           <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Standard für alle Termine</p>
+          <input type="text" value={defaultOpponent} onChange={e => setDefaultOpponent(e.target.value)} placeholder="Gegner (optional)" className={`${fld} w-full mb-2`} />
           <div className="flex gap-2">
             <TimeField value={defaultTime} onChange={setDefaultTime} className={`${fld} flex-1`} />
             <input type="text" value={defaultLocation} onChange={e => setDefaultLocation(e.target.value)} placeholder="Spielort" className={`${fld} flex-[1.4]`} />

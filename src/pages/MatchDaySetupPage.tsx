@@ -13,14 +13,14 @@ export default function MatchDaySetupPage() {
   const navigate = useNavigate()
   const location = useLocation()
   // Vorbefüllung aus der Terminfindung (Datum + verfügbare Spieler)
-  const prefill = (location.state as { date?: string; playerIds?: string[]; time?: string; location?: string } | null) ?? {}
+  const prefill = (location.state as { date?: string; playerIds?: string[]; time?: string; location?: string; opponent?: string } | null) ?? {}
   const { players } = usePlayers()
   const { addMatchDay } = useMatchDays()
 
   const [date, setDate] = useState(prefill.date ?? new Date().toISOString().split('T')[0])
   const [startTime, setStartTime] = useState(prefill.time ?? '')
   const [venue, setVenue] = useState(prefill.location ?? '')
-  const [opponent, setOpponent] = useState('')
+  const [opponent, setOpponent] = useState(prefill.opponent ?? '')
   const [useGoalie, setUseGoalie] = useState(false)
   const [useFifthDouble, setUseFifthDouble] = useState(false)
   const [selected, setSelected] = useState<Record<string, boolean>>(
