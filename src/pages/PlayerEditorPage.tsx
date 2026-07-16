@@ -29,10 +29,10 @@ function PreferenceScale<T extends string>({
 }) {
   const current = options.find(o => o.value === value)
   return (
-    <div className="bg-[#2b0b4c] rounded-2xl px-4 py-4">
+    <div className="bg-surface rounded-2xl px-4 py-4">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">{label}</p>
-        <p className="text-unicorn-pink text-[12px] font-semibold">{current?.label}</p>
+        <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">{label}</p>
+        <p className="text-accent-pink text-[12px] font-semibold">{current?.label}</p>
       </div>
       <div className="flex items-center gap-1 mb-2">
         {options.map(opt => (
@@ -42,7 +42,7 @@ function PreferenceScale<T extends string>({
             className={`flex-1 py-2.5 rounded-xl text-[11px] font-semibold transition-all ${
               value === opt.value
                 ? 'bg-unicorn-pink text-white shadow-lg shadow-unicorn-pink/30'
-                : 'bg-[#391060] text-white/40'
+                : 'bg-surface2 text-fg/40'
             }`}
           >
             {opt.short}
@@ -50,8 +50,8 @@ function PreferenceScale<T extends string>({
         ))}
       </div>
       <div className="flex justify-between px-1">
-        <span className="text-white/25 text-[11px]">← {leftLabel}</span>
-        <span className="text-white/25 text-[11px]">{rightLabel} →</span>
+        <span className="text-fg/25 text-[11px]">← {leftLabel}</span>
+        <span className="text-fg/25 text-[11px]">{rightLabel} →</span>
       </div>
     </div>
   )
@@ -68,14 +68,14 @@ function ToggleSwitch({ label, description, value, onChange }: {
   return (
     <button
       onClick={() => onChange(!value)}
-      className="w-full bg-[#2b0b4c] rounded-2xl px-4 py-3.5 flex items-center justify-between"
+      className="w-full bg-surface rounded-2xl px-4 py-3.5 flex items-center justify-between"
     >
       <div className="text-left">
-        <p className="text-white font-semibold text-[15px]">{label}</p>
-        {description && <p className="text-white/40 text-xs mt-0.5">{description}</p>}
+        <p className="text-fg font-semibold text-[15px]">{label}</p>
+        {description && <p className="text-fg/40 text-xs mt-0.5">{description}</p>}
       </div>
-      <div className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${value ? 'bg-unicorn-cyan' : 'bg-[#391060]'}`}>
-        <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${value ? 'translate-x-6' : 'translate-x-0.5'}`} />
+      <div className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${value ? 'bg-unicorn-cyan' : 'bg-surface2'}`}>
+        <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-fg shadow transition-transform ${value ? 'translate-x-6' : 'translate-x-0.5'}`} />
       </div>
     </button>
   )
@@ -168,26 +168,26 @@ function PlayerEditorForm() {
   )
 
   return (
-    <div className="min-h-screen bg-unicorn-purple pb-32">
+    <div className="min-h-screen bg-app pb-32">
       <div className="absolute w-[360px] h-[360px] rounded-full bg-unicorn-violet/40 blur-[140px] top-0 right-0 pointer-events-none" />
 
       <Header title={isNew ? 'Neuer Spieler' : (existing?.name ?? 'Spieler')} back />
 
       <div className="relative px-6 mt-4">
         {!editable && (
-          <p className="text-white/50 text-xs bg-white/5 rounded-xl px-3 py-2 mb-3">👁 Nur Ansicht – du kannst nur dein eigenes Profil bearbeiten.</p>
+          <p className="text-fg/50 text-xs bg-fg/5 rounded-xl px-3 py-2 mb-3">👁 Nur Ansicht – du kannst nur dein eigenes Profil bearbeiten.</p>
         )}
         <fieldset disabled={!editable} className="space-y-3 block min-w-0 border-0 p-0 m-0 disabled:opacity-60">
 
         {/* Name */}
-        <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-          <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Name</p>
+        <div className="bg-surface rounded-2xl px-4 py-3.5">
+          <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Name</p>
           <input
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="Vollständiger Name"
-            className="w-full bg-transparent text-white placeholder-white/25 text-[17px] font-semibold outline-none"
+            className="w-full bg-transparent text-fg placeholder-fg/25 text-[17px] font-semibold outline-none"
             autoFocus={isNew}
           />
         </div>
@@ -221,38 +221,38 @@ function PlayerEditorForm() {
         />
 
         {/* Erstes / Letztes Spiel */}
-        <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
+        <div className="bg-surface rounded-2xl overflow-hidden">
           <div className="px-4 pt-4 pb-1">
-            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Spielposition im Ablauf</p>
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Spielposition im Ablauf</p>
           </div>
-          <div className="px-4 py-3 flex items-center justify-between border-t border-white/5">
+          <div className="px-4 py-3 flex items-center justify-between border-t border-fg/5">
             <div>
-              <p className="text-white font-semibold text-[15px]">🚀 Kein Starter</p>
-              <p className="text-white/40 text-xs mt-0.5">Spielt ungern E1 oder E2</p>
+              <p className="text-fg font-semibold text-[15px]">🚀 Kein Starter</p>
+              <p className="text-fg/40 text-xs mt-0.5">Spielt ungern E1 oder E2</p>
             </div>
             <button onClick={() => setPref('avoidsOpening', !prefs.avoidsOpening)}
-              className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${prefs.avoidsOpening ? 'bg-unicorn-pink' : 'bg-[#391060]'}`}>
-              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${prefs.avoidsOpening ? 'translate-x-6' : 'translate-x-0.5'}`} />
+              className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${prefs.avoidsOpening ? 'bg-unicorn-pink' : 'bg-surface2'}`}>
+              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-fg shadow transition-transform ${prefs.avoidsOpening ? 'translate-x-6' : 'translate-x-0.5'}`} />
             </button>
           </div>
-          <div className="px-4 py-3 flex items-center justify-between border-t border-white/5">
+          <div className="px-4 py-3 flex items-center justify-between border-t border-fg/5">
             <div>
-              <p className="text-white font-semibold text-[15px]">🏁 Kein Finisher</p>
-              <p className="text-white/40 text-xs mt-0.5">Spielt ungern die letzten Spiele</p>
+              <p className="text-fg font-semibold text-[15px]">🏁 Kein Finisher</p>
+              <p className="text-fg/40 text-xs mt-0.5">Spielt ungern die letzten Spiele</p>
             </div>
             <button onClick={() => setPref('avoidsClosing', !prefs.avoidsClosing)}
-              className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${prefs.avoidsClosing ? 'bg-unicorn-pink' : 'bg-[#391060]'}`}>
-              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${prefs.avoidsClosing ? 'translate-x-6' : 'translate-x-0.5'}`} />
+              className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${prefs.avoidsClosing ? 'bg-unicorn-pink' : 'bg-surface2'}`}>
+              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-fg shadow transition-transform ${prefs.avoidsClosing ? 'translate-x-6' : 'translate-x-0.5'}`} />
             </button>
           </div>
         </div>
 
         {/* Partner preferences */}
-        <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
+        <div className="bg-surface rounded-2xl overflow-hidden">
           <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Bevorzugte Partner</p>
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Bevorzugte Partner</p>
             {prefs.partnerPreferences.length > 0 && (
-              <p className="text-white/30 text-[12px]">{prefs.partnerPreferences.length} ausgewählt</p>
+              <p className="text-fg/30 text-[12px]">{prefs.partnerPreferences.length} ausgewählt</p>
             )}
           </div>
 
@@ -266,13 +266,13 @@ function PlayerEditorForm() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="flex items-center px-4 py-2.5 border-t border-white/5"
+                className="flex items-center px-4 py-2.5 border-t border-fg/5"
               >
                 <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold mr-3"
                   style={{ background: `${color}22`, color }}>
                   {partner?.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                 </div>
-                <span className="flex-1 text-white text-[14px] font-medium truncate">{partner?.name ?? '?'}</span>
+                <span className="flex-1 text-fg text-[14px] font-medium truncate">{partner?.name ?? '?'}</span>
                 <div className="flex items-center gap-1.5 ml-2">
                   {[1, 2, 3].map(w => (
                     <button
@@ -282,12 +282,12 @@ function PlayerEditorForm() {
                         updated[i] = { ...pp, weight: w as 1 | 2 | 3 }
                         setPref('partnerPreferences', updated)
                       }}
-                      className={`text-[18px] leading-none ${pp.weight >= w ? 'text-unicorn-gold' : 'text-white/15'}`}
+                      className={`text-[18px] leading-none ${pp.weight >= w ? 'text-accent-gold' : 'text-fg/15'}`}
                     >★</button>
                   ))}
                   <button
                     onClick={() => setPref('partnerPreferences', prefs.partnerPreferences.filter((_, j) => j !== i))}
-                    className="ml-1 text-white/20 text-sm w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10"
+                    className="ml-1 text-fg/20 text-sm w-6 h-6 flex items-center justify-center rounded-full hover:bg-fg/10"
                   >✕</button>
                 </div>
               </motion.div>
@@ -297,8 +297,8 @@ function PlayerEditorForm() {
           {/* Add partner – tappable player list */}
           <AnimatePresence>
             {otherPlayers.length > 0 && (
-              <div className="border-t border-white/5 px-4 py-3">
-                <p className="text-white/30 text-[12px] mb-2.5">Tippen zum Hinzufügen:</p>
+              <div className="border-t border-fg/5 px-4 py-3">
+                <p className="text-fg/30 text-[12px] mb-2.5">Tippen zum Hinzufügen:</p>
                 <div className="flex flex-wrap gap-2">
                   {otherPlayers.map(p => {
                     const color = AVATAR_COLORS[players.findIndex(pl => pl.id === p.id) % AVATAR_COLORS.length]
@@ -309,11 +309,11 @@ function PlayerEditorForm() {
                           ...prefs.partnerPreferences,
                           { playerId: p.id, weight: 2 },
                         ])}
-                        className="flex items-center gap-1.5 bg-[#391060] rounded-full px-3 py-1.5 text-[13px] font-medium"
+                        className="flex items-center gap-1.5 bg-surface2 rounded-full px-3 py-1.5 text-[13px] font-medium"
                         style={{ color }}
                       >
                         <span>{p.name.split(' ')[0]}</span>
-                        <span className="text-white/30 text-xs">+</span>
+                        <span className="text-fg/30 text-xs">+</span>
                       </button>
                     )
                   })}
@@ -323,7 +323,7 @@ function PlayerEditorForm() {
           </AnimatePresence>
 
           {otherPlayers.length === 0 && prefs.partnerPreferences.length === 0 && (
-            <p className="px-4 py-3 text-white/25 text-[13px] border-t border-white/5">
+            <p className="px-4 py-3 text-fg/25 text-[13px] border-t border-fg/5">
               {players.length <= 1 ? 'Erst weitere Spieler anlegen' : 'Alle Spieler bereits ausgewählt'}
             </p>
           )}
@@ -332,22 +332,22 @@ function PlayerEditorForm() {
         {/* Einladung (nur Captain+, bestehende Spieler) */}
         {!isNew && (
           <Can cap="team:invite">
-            <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-              <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Einladung</p>
+            <div className="bg-surface rounded-2xl px-4 py-3.5">
+              <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Einladung</p>
               {!inviteLink ? (
                 <button
                   onClick={generateInvite}
                   disabled={inviteBusy}
-                  className="w-full py-2.5 rounded-xl bg-unicorn-cyan/15 text-unicorn-cyan text-sm font-semibold disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl bg-unicorn-cyan/15 text-accent-cyan text-sm font-semibold disabled:opacity-50"
                 >{inviteBusy ? 'Erstelle…' : '🔗 Einladungslink erstellen'}</button>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-white/60 text-xs break-all bg-black/20 rounded-lg px-3 py-2">{inviteLink}</p>
+                  <p className="text-fg/60 text-xs break-all bg-black/20 rounded-lg px-3 py-2">{inviteLink}</p>
                   <div className="flex gap-2">
                     <button onClick={copyLink} className="flex-1 py-2.5 rounded-xl bg-unicorn-violet text-white text-sm font-semibold">{copied ? 'Kopiert ✓' : 'Kopieren'}</button>
                     <button onClick={shareLink} className="flex-1 py-2.5 rounded-xl bg-unicorn-pink text-white text-sm font-semibold">Teilen</button>
                   </div>
-                  <p className="text-white/35 text-xs">Link an den Spieler schicken (z. B. WhatsApp). 30 Tage gültig, einmalig.</p>
+                  <p className="text-fg/35 text-xs">Link an den Spieler schicken (z. B. WhatsApp). 30 Tage gültig, einmalig.</p>
                 </div>
               )}
               {inviteErr && <p className="text-red-400 text-xs mt-2">{inviteErr}</p>}
@@ -361,16 +361,16 @@ function PlayerEditorForm() {
           {/* Inaktiv-Toggle */}
           <button
             onClick={() => setActive(v => !v)}
-            className="w-full bg-[#2b0b4c] rounded-2xl px-4 py-3.5 flex items-center justify-between"
+            className="w-full bg-surface rounded-2xl px-4 py-3.5 flex items-center justify-between"
           >
             <div className="text-left">
-              <p className="text-white font-semibold text-[15px]">⏸ Inaktiv setzen</p>
-              <p className="text-white/40 text-xs mt-0.5">
+              <p className="text-fg font-semibold text-[15px]">⏸ Inaktiv setzen</p>
+              <p className="text-fg/40 text-xs mt-0.5">
                 {active ? 'Spieler erscheint aktuell bei der Spieltag-Planung' : 'Spieler ist inaktiv und wird nicht angezeigt'}
               </p>
             </div>
-            <div className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${!active ? 'bg-amber-500' : 'bg-[#391060]'}`}>
-              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${!active ? 'translate-x-6' : 'translate-x-0.5'}`} />
+            <div className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${!active ? 'bg-amber-500' : 'bg-surface2'}`}>
+              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-fg shadow transition-transform ${!active ? 'translate-x-6' : 'translate-x-0.5'}`} />
             </div>
           </button>
 
@@ -378,7 +378,7 @@ function PlayerEditorForm() {
           {!confirmDelete ? (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="w-full bg-[#2b0b4c] rounded-2xl px-4 py-3.5 flex items-center gap-3"
+              className="w-full bg-surface rounded-2xl px-4 py-3.5 flex items-center gap-3"
             >
               <span className="w-9 h-9 rounded-xl bg-red-500/15 flex items-center justify-center text-xl flex-shrink-0">🗑</span>
               <p className="text-red-400 font-semibold text-[15px]">Spieler löschen</p>
@@ -388,7 +388,7 @@ function PlayerEditorForm() {
               <p className="text-red-300 font-semibold text-[14px] mb-1">Wirklich löschen?</p>
               <p className="text-red-200/60 text-xs mb-3">Diese Aktion kann nicht rückgängig gemacht werden.</p>
               <div className="flex gap-2">
-                <button onClick={() => setConfirmDelete(false)} className="flex-1 py-2.5 rounded-xl bg-[#391060] text-white/60 text-sm font-semibold">Abbrechen</button>
+                <button onClick={() => setConfirmDelete(false)} className="flex-1 py-2.5 rounded-xl bg-surface2 text-fg/60 text-sm font-semibold">Abbrechen</button>
                 <button
                   onClick={() => { deletePlayer(existing!.id); navigate('/players') }}
                   className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-bold"
@@ -403,7 +403,7 @@ function PlayerEditorForm() {
 
       {/* Save CTA */}
       {editable && (
-        <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-4 bg-gradient-to-t from-unicorn-purple via-unicorn-purple/95 to-transparent">
+        <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-4 bg-gradient-to-t from-app via-app/95 to-transparent">
           <button
             onClick={save}
             disabled={!name.trim()}

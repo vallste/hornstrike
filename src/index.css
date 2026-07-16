@@ -3,30 +3,50 @@
 @tailwind utilities;
 
 @layer base {
+  /* Semantische Farb-Tokens (rgb-Komponenten, alpha-fähig via rgb(var(--x)/a)) */
+  :root, :root[data-theme='dark'] {
+    --app: 26 5 51;        /* #1a0533 */
+    --surface: 43 11 76;   /* #2b0b4c */
+    --surface2: 57 16 96;  /* #391060 */
+    --fg: 255 255 255;
+    --u-violet: 74 14 143;      /* #4a0e8f – Deko-Glows & Violett-Flächen */
+    --accent-pink: 224 64 251;  /* #e040fb – Neon wie bisher */
+    --accent-cyan: 0 229 255;   /* #00e5ff */
+    --accent-gold: 255 215 0;   /* #ffd700 */
+    color-scheme: dark;
+  }
+  :root[data-theme='light'] {
+    /* „Stufe 3“ – gedämpft helles Lavendel */
+    --app: 202 191 228;     /* #cabfe4 */
+    --surface: 234 228 246; /* #eae4f6 */
+    --surface2: 213 201 236;/* #d5c9ec */
+    --fg: 32 18 58;         /* #20123a – dunkles Violett-Ink */
+    --u-violet: 124 58 237; /* #7c3aed – hellere Glows/Flächen im Light */
+    --accent-pink: 168 27 143; /* #a81b8f – lesbares Magenta */
+    --accent-cyan: 12 106 131; /* #0c6a83 – Petrol */
+    --accent-gold: 143 97 6;   /* #8f6106 – Bernstein */
+    color-scheme: light;
+  }
+
   html {
     font-family: 'Outfit', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
-    /* Form-Controls (input, Autofill, date-picker …) im Dark-Mode rendern –
-       sonst weißer Default-Hintergrund → weißer Text unsichtbar. */
-    color-scheme: dark;
   }
 
   body {
-    @apply bg-unicorn-purple text-white min-h-screen;
+    @apply bg-app text-fg min-h-screen;
     overscroll-behavior: none;
   }
 
-  /* Browser-Autofill nicht weiß-auf-weiß rendern lassen: heller Text +
-     DECKENDER dunkler Inset-Shadow (muss opak sein, sonst scheint das weiße
-     Autofill-Feld durch). #2c1943 ≈ Optik von bg-white/8 auf #1a0533. */
+  /* Autofill an das Theme anpassen (Textfarbe + deckender Inset-Hintergrund). */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-text-fill-color: #ffffff !important;
-    caret-color: #ffffff;
-    -webkit-box-shadow: 0 0 0 1000px #2c1943 inset !important;
-    box-shadow: 0 0 0 1000px #2c1943 inset !important;
+    -webkit-text-fill-color: rgb(var(--fg)) !important;
+    caret-color: rgb(var(--fg));
+    -webkit-box-shadow: 0 0 0 1000px rgb(var(--surface2)) inset !important;
+    box-shadow: 0 0 0 1000px rgb(var(--surface2)) inset !important;
     transition: background-color 9999s ease-in-out 0s;
   }
 }

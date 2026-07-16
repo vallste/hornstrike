@@ -64,7 +64,7 @@ function StaticPill({ label, color }: { label: string; color: { bg: string; text
 function DroppableSlot({ id, children }: { id: string; children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id })
   return (
-    <div ref={setNodeRef} className={`flex-1 min-w-0 flex flex-wrap gap-1.5 items-center transition-colors rounded-lg p-0.5 ${isOver ? 'bg-white/10' : ''}`}>
+    <div ref={setNodeRef} className={`flex-1 min-w-0 flex flex-wrap gap-1.5 items-center transition-colors rounded-lg p-0.5 ${isOver ? 'bg-fg/10' : ''}`}>
       {children}
     </div>
   )
@@ -78,10 +78,10 @@ export default function LineupPage() {
   if (isLoading) return <LoadingScreen />
   if (!matchDay) {
     return (
-      <div className="min-h-screen bg-unicorn-purple flex items-center justify-center">
+      <div className="min-h-screen bg-app flex items-center justify-center">
         <div className="text-center">
-          <p className="text-white text-lg font-semibold">Spieltag nicht gefunden</p>
-          <button onClick={() => navigate('/matchday')} className="text-unicorn-pink mt-4 block">← Zurück</button>
+          <p className="text-fg text-lg font-semibold">Spieltag nicht gefunden</p>
+          <button onClick={() => navigate('/matchday')} className="text-accent-pink mt-4 block">← Zurück</button>
         </div>
       </div>
     )
@@ -286,7 +286,7 @@ function LineupView() {
   }
 
   return (
-    <div className="min-h-screen bg-unicorn-purple pb-24">
+    <div className="min-h-screen bg-app pb-24">
       <div className="absolute w-[350px] h-[350px] rounded-full bg-unicorn-pink/22 blur-[120px] top-0 right-0 pointer-events-none" />
 
       <Header
@@ -306,23 +306,23 @@ function LineupView() {
             <div className="relative">
               <button
                 onClick={() => setShareMenuOpen(v => !v)}
-                className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
+                className="flex items-center gap-1 bg-surface2 border border-fg/20 text-fg/60 text-sm font-semibold px-3 py-1.5 rounded-full"
               >
                 ↑
               </button>
               {shareMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShareMenuOpen(false)} />
-                  <div className="absolute right-0 top-9 z-50 bg-[#2b0b4c] border border-white/10 rounded-xl shadow-xl overflow-hidden min-w-[130px]">
+                  <div className="absolute right-0 top-9 z-50 bg-surface border border-fg/10 rounded-xl shadow-xl overflow-hidden min-w-[130px]">
                     <button
                       onClick={() => { setShareMenuOpen(false); share() }}
-                      className="flex items-center gap-2 w-full px-4 py-2.5 text-white/70 text-sm hover:bg-white/5 text-left"
+                      className="flex items-center gap-2 w-full px-4 py-2.5 text-fg/70 text-sm hover:bg-fg/5 text-left"
                     >
                       <span>↑</span> Als Text
                     </button>
                     <button
                       onClick={() => { setShareMenuOpen(false); shareAsImage() }}
-                      className="flex items-center gap-2 w-full px-4 py-2.5 text-white/70 text-sm hover:bg-white/5 text-left border-t border-white/5"
+                      className="flex items-center gap-2 w-full px-4 py-2.5 text-fg/70 text-sm hover:bg-fg/5 text-left border-t border-fg/5"
                     >
                       <span>🖼</span> Als Bild
                     </button>
@@ -335,13 +335,13 @@ function LineupView() {
               <>
                 <button
                   onClick={() => navigate(`/matchday/${matchDay.id}/edit`)}
-                  className="flex items-center gap-1 bg-[#391060] border border-white/20 text-white/60 text-sm font-semibold px-3 py-1.5 rounded-full"
+                  className="flex items-center gap-1 bg-surface2 border border-fg/20 text-fg/60 text-sm font-semibold px-3 py-1.5 rounded-full"
                 >
                   ✎
                 </button>
                 <button
                   onClick={regenerate}
-                  className="flex items-center gap-1.5 bg-[#391060] border border-unicorn-cyan/50 text-unicorn-cyan text-sm font-semibold px-3 py-1.5 rounded-full"
+                  className="flex items-center gap-1.5 bg-surface2 border border-accent-cyan/50 text-accent-cyan text-sm font-semibold px-3 py-1.5 rounded-full"
                 >
                   ⟳ Neu
                 </button>
@@ -353,28 +353,28 @@ function LineupView() {
 
       {/* Match info */}
       <div className="relative px-6 mb-4">
-        <div className="bg-[#2b0b4c] rounded-xl px-4 py-2.5 flex items-center justify-between">
+        <div className="bg-surface rounded-xl px-4 py-2.5 flex items-center justify-between">
           <div>
-            <span className="text-white/60 text-sm">{formatDate(matchDay.date)}</span>
+            <span className="text-fg/60 text-sm">{formatDate(matchDay.date)}</span>
             {matchDay.opponent && (
-              <span className="text-white/60 text-sm"> · vs. <span className="text-unicorn-cyan font-medium">{matchDay.opponent}</span></span>
+              <span className="text-fg/60 text-sm"> · vs. <span className="text-accent-cyan font-medium">{matchDay.opponent}</span></span>
             )}
           </div>
-          <span className="text-white/60 text-sm">{matchDay.players.length} Spieler</span>
+          <span className="text-fg/60 text-sm">{matchDay.players.length} Spieler</span>
         </div>
       </div>
 
       {/* Sets-Übersicht */}
       {setEntries.length > 0 && (
         <div className="relative px-6 mb-3">
-          <div className="bg-[#2b0b4c] rounded-xl px-4 py-3">
-            <p className="text-white/40 text-[11px] font-semibold tracking-wider uppercase mb-2">Sätze pro Spieler</p>
+          <div className="bg-surface rounded-xl px-4 py-3">
+            <p className="text-fg/40 text-[11px] font-semibold tracking-wider uppercase mb-2">Sätze pro Spieler</p>
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               {setEntries.map(([pid, sets]) => (
                 <div key={pid} className="flex items-center gap-1.5">
-                  <span className="text-white/70 text-[13px]">{playerName(pid)}</span>
+                  <span className="text-fg/70 text-[13px]">{playerName(pid)}</span>
                   <span className={`text-[12px] font-bold px-1.5 py-0.5 rounded ${
-                    sets > 6 ? 'bg-amber-500/20 text-amber-300' : 'bg-unicorn-cyan/15 text-unicorn-cyan'
+                    sets > 6 ? 'bg-amber-500/20 text-amber-300' : 'bg-unicorn-cyan/15 text-accent-cyan'
                   }`}>{sets}</span>
                 </div>
               ))}
@@ -400,27 +400,27 @@ function LineupView() {
                 transition={{ delay: idx * 0.03 }}
                 className={`w-full rounded-xl px-3 py-2 flex items-center gap-2 border-l-[3px] ${
                   slot?.forfeit
-                    ? 'bg-white/3 border-white/15 opacity-50'
+                    ? 'bg-fg/3 border-fg/15 opacity-50'
                     : violatingIndices.has(game.gameIndex)
                       ? 'bg-amber-900/25 border-amber-400/70'
                       : isDouble
-                        ? 'bg-[#2b0b4c] border-unicorn-pink'
-                        : 'bg-[#2b0b4c] border-unicorn-cyan'
+                        ? 'bg-surface border-accent-pink'
+                        : 'bg-surface border-accent-cyan'
                 }`}
               >
                 {/* Label badge */}
                 <span className={`text-[11px] font-bold w-8 text-center py-0.5 rounded-md flex-shrink-0 ${
-                  isDouble ? 'bg-unicorn-pink/15 text-unicorn-pink' : 'bg-unicorn-cyan/15 text-unicorn-cyan'
+                  isDouble ? 'bg-unicorn-pink/15 text-accent-pink' : 'bg-unicorn-cyan/15 text-accent-cyan'
                 }`}>
                   {label}
                 </span>
 
                 {/* Player pills */}
                 {slot?.forfeit ? (
-                  <span className="flex-1 text-white/30 text-sm italic">Kampflos</span>
+                  <span className="flex-1 text-fg/30 text-sm italic">Kampflos</span>
                 ) : isEmpty ? (
                   <DroppableSlot id={`g${game.gameIndex}-p0`}>
-                    <span className="text-white/25 text-[12px] italic">Nicht besetzt</span>
+                    <span className="text-fg/25 text-[12px] italic">Nicht besetzt</span>
                   </DroppableSlot>
                 ) : (
                   <div className="flex-1 flex flex-wrap gap-1 items-center">
@@ -430,7 +430,7 @@ function LineupView() {
                           ? <DraggablePill id={`g${game.gameIndex}-p${pi}`} label={playerName(pid)} color={playerColor(pid)} />
                           : <StaticPill label={playerName(pid)} color={playerColor(pid)} />}
                         {isDouble && slot.positions?.[pi] && (
-                          <span className="text-white/35 text-[10px] mr-1">
+                          <span className="text-fg/35 text-[10px] mr-1">
                             {slot.positions[pi] === 'attack' ? 'St' : 'To'}
                           </span>
                         )}
@@ -441,13 +441,13 @@ function LineupView() {
 
                 {/* Goalie badge */}
                 {slot && effectiveIsGoalie(slot) && (
-                  <span className="text-[10px] font-semibold bg-unicorn-gold/15 text-unicorn-gold px-1.5 py-0.5 rounded-md flex-shrink-0">
+                  <span className="text-[10px] font-semibold bg-unicorn-gold/15 text-accent-gold px-1.5 py-0.5 rounded-md flex-shrink-0">
                     🥅
                   </span>
                 )}
 
                 {canEdit && !slot?.forfeit && (
-                  <button onClick={() => setEditingSlot(game.gameIndex)} className="text-white/20 text-sm flex-shrink-0 pl-1">✎</button>
+                  <button onClick={() => setEditingSlot(game.gameIndex)} className="text-fg/20 text-sm flex-shrink-0 pl-1">✎</button>
                 )}
               </motion.div>
             )

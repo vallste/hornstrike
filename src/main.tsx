@@ -7,20 +7,23 @@ import App from './App'
 import { SessionProvider } from './context/SessionProvider'
 import { PreviewRoleProvider } from './context/PreviewRoleProvider'
 import { ScopeProvider } from './context/ScopeProvider'
+import { ThemeProvider } from './context/ThemeProvider'
 import { queryClient } from './lib/queryClient'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <SessionProvider>
-          <PreviewRoleProvider>
-            <ScopeProvider>
-              <App />
-            </ScopeProvider>
-          </PreviewRoleProvider>
-        </SessionProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <SessionProvider>
+            <PreviewRoleProvider>
+              <ScopeProvider>
+                <App />
+              </ScopeProvider>
+            </PreviewRoleProvider>
+          </SessionProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ThemeProvider>
   </StrictMode>
 )

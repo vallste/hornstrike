@@ -4,11 +4,11 @@ interface Props {
 }
 
 const colorMap = {
-  pink:   'bg-unicorn-pink/20 text-unicorn-pink',
-  cyan:   'bg-unicorn-cyan/20 text-unicorn-cyan',
-  gold:   'bg-unicorn-gold/20 text-unicorn-gold',
-  violet: 'bg-unicorn-violet/30 text-white/70',
-  default:'bg-white/10 text-white/60',
+  pink:   'bg-unicorn-pink/20 text-accent-pink',
+  cyan:   'bg-unicorn-cyan/20 text-accent-cyan',
+  gold:   'bg-unicorn-gold/20 text-accent-gold',
+  violet: 'bg-unicorn-violet/30 text-fg/70',
+  default:'bg-fg/10 text-fg/60',
 }
 
 export default function Badge({ label, color = 'default' }: Props) {

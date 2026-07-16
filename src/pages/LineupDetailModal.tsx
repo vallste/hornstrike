@@ -51,34 +51,34 @@ export default function LineupDetailModal({ gameIndex, gameLabel, slot, matchDay
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
       >
         {/* Handle */}
-        <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mt-3 mb-5" />
+        <div className="w-10 h-1 rounded-full bg-fg/20 mx-auto mt-3 mb-5" />
 
         <div className="px-6 pb-8 space-y-5">
           {/* Header */}
           <div className="flex items-center gap-3">
-            <h2 className="text-white font-bold text-xl flex-1">{gameLabel} — {isDouble ? 'Doppel' : 'Einzel'}</h2>
+            <h2 className="text-fg font-bold text-xl flex-1">{gameLabel} — {isDouble ? 'Doppel' : 'Einzel'}</h2>
             {isGoalie && (
-              <span className="text-[12px] font-semibold bg-unicorn-gold/18 text-unicorn-gold px-2.5 py-1 rounded-lg">
+              <span className="text-[12px] font-semibold bg-unicorn-gold/18 text-accent-gold px-2.5 py-1 rounded-lg">
                 🥅 Goalie
               </span>
             )}
           </div>
 
-          <div className="h-px bg-white/8" />
+          <div className="h-px bg-fg/8" />
 
           {/* Player 1 */}
           <div>
-            <label className="block text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">
+            <label className="block text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">
               {isDouble ? 'Spieler 1' : 'Spieler'}
             </label>
             <select
               value={player1}
               onChange={e => setPlayer1(e.target.value)}
-              className="w-full bg-[#391060] text-white rounded-xl px-4 py-3 outline-none text-[15px]"
+              className="w-full bg-surface2 text-fg rounded-xl px-4 py-3 outline-none text-[15px]"
             >
               <option value="">— nicht besetzt —</option>
               {activePlayers.map(p => (
-                <option key={p.id} value={p.id} className="bg-[#2b0b4c]">{p.name}</option>
+                <option key={p.id} value={p.id} className="bg-surface">{p.name}</option>
               ))}
             </select>
           </div>
@@ -86,7 +86,7 @@ export default function LineupDetailModal({ gameIndex, gameLabel, slot, matchDay
           {/* Position – nur beim Doppel relevant */}
           {isDouble && (
             <div>
-              <label className="block text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Position</label>
+              <label className="block text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Position</label>
               <ToggleGroup options={posOptions} value={pos1} onChange={setPos1} accent="pink" />
             </div>
           )}
@@ -94,35 +94,35 @@ export default function LineupDetailModal({ gameIndex, gameLabel, slot, matchDay
           {/* Player 2 (Doppel only) */}
           {isDouble && (
             <>
-              <div className="h-px bg-white/8" />
+              <div className="h-px bg-fg/8" />
               <div>
-                <label className="block text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Spieler 2</label>
+                <label className="block text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Spieler 2</label>
                 <select
                   value={player2}
                   onChange={e => setPlayer2(e.target.value)}
-                  className="w-full bg-[#391060] text-white rounded-xl px-4 py-3 outline-none text-[15px]"
+                  className="w-full bg-surface2 text-fg rounded-xl px-4 py-3 outline-none text-[15px]"
                 >
                   <option value="">— nicht besetzt —</option>
                   {activePlayers.filter(p => p.id !== player1).map(p => (
-                    <option key={p.id} value={p.id} className="bg-[#2b0b4c]">{p.name}</option>
+                    <option key={p.id} value={p.id} className="bg-surface">{p.name}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Position 2</label>
+                <label className="block text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Position 2</label>
                 <ToggleGroup options={posOptions} value={pos2} onChange={setPos2} accent="cyan" />
               </div>
             </>
           )}
 
           {/* Availability hint */}
-          <div className="bg-[#391060] rounded-xl px-4 py-2.5">
-            <p className="text-white/50 text-[13px]">⏱ Verfügbarkeit wird beim Neuberechnen berücksichtigt</p>
+          <div className="bg-surface2 rounded-xl px-4 py-2.5">
+            <p className="text-fg/50 text-[13px]">⏱ Verfügbarkeit wird beim Neuberechnen berücksichtigt</p>
           </div>
 
           {/* Buttons */}
           <div className="flex gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 py-3.5 rounded-2xl bg-[#391060] text-white/65 font-semibold text-[16px]">
+            <button onClick={onClose} className="flex-1 py-3.5 rounded-2xl bg-surface2 text-fg/65 font-semibold text-[16px]">
               Abbrechen
             </button>
             <button

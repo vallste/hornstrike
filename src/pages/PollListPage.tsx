@@ -47,7 +47,7 @@ export default function PollListPage() {
   const fmt = (iso: string) => new Date(iso).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })
 
   return (
-    <div className="min-h-screen bg-unicorn-purple pb-24">
+    <div className="min-h-screen bg-app pb-24">
       <div className="absolute w-[380px] h-[380px] rounded-full bg-unicorn-violet/35 blur-[130px] -top-20 right-0 pointer-events-none" />
       <Header
         title="Terminfindung"
@@ -62,27 +62,27 @@ export default function PollListPage() {
       />
 
       <div className="relative px-6 mt-2 space-y-3">
-        {isLoading && <p className="text-white/50 text-sm text-center py-8">Lädt…</p>}
+        {isLoading && <p className="text-fg/50 text-sm text-center py-8">Lädt…</p>}
         {!isLoading && polls.length === 0 && (
-          <div className="bg-[#2b0b4c] rounded-2xl p-6 text-center">
+          <div className="bg-surface rounded-2xl p-6 text-center">
             <p className="text-4xl mb-3">📅</p>
-            <p className="text-white font-semibold">Noch keine Umfrage</p>
-            <p className="text-white/45 text-sm mt-1">Frag ab, wer wann kann – tippe auf +.</p>
+            <p className="text-fg font-semibold">Noch keine Umfrage</p>
+            <p className="text-fg/45 text-sm mt-1">Frag ab, wer wann kann – tippe auf +.</p>
           </div>
         )}
         {polls.map(p => (
           <button
             key={p.id}
             onClick={() => navigate(`/terminfindung/${p.id}`)}
-            className="w-full bg-[#2b0b4c] rounded-2xl p-4 text-left"
+            className="w-full bg-surface rounded-2xl p-4 text-left"
           >
             <div className="flex items-center justify-between gap-2">
-              <p className="text-white font-semibold text-[16px]">{p.title}{p.default_opponent ? ` – ${p.default_opponent}` : ''}</p>
-              <span className={`text-xs font-semibold flex-shrink-0 ${p.status === 'open' ? 'text-unicorn-cyan' : 'text-white/40'}`}>
+              <p className="text-fg font-semibold text-[16px]">{p.title}{p.default_opponent ? ` – ${p.default_opponent}` : ''}</p>
+              <span className={`text-xs font-semibold flex-shrink-0 ${p.status === 'open' ? 'text-accent-cyan' : 'text-fg/40'}`}>
                 {p.status === 'open' ? 'offen' : 'geschlossen'}
               </span>
             </div>
-            <p className="text-white/50 text-sm mt-1">
+            <p className="text-fg/50 text-sm mt-1">
               {p.poll_options?.length ?? 0} Termine{p.deadline ? ` · bis ${fmt(p.deadline)}` : ''}
             </p>
           </button>

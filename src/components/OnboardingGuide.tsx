@@ -81,14 +81,14 @@ export default function OnboardingGuide({ onDone }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-unicorn-purple">
+    <div className="fixed inset-0 z-50 flex flex-col bg-app">
       {/* Ambient glow */}
       <div className="absolute w-[500px] h-[500px] rounded-full bg-unicorn-violet/50 blur-[160px] -top-20 -left-20 pointer-events-none" />
       <div className="absolute w-[400px] h-[400px] rounded-full bg-unicorn-pink/20 blur-[140px] bottom-0 right-0 pointer-events-none" />
 
       {/* Skip */}
       <div className="relative flex justify-end px-6 pt-14">
-        <button onClick={finish} className="text-white/35 text-sm font-medium">
+        <button onClick={finish} className="text-fg/35 text-sm font-medium">
           Überspringen
         </button>
       </div>
@@ -111,24 +111,24 @@ export default function OnboardingGuide({ onDone }: Props) {
             className="flex flex-col items-center text-center w-full"
           >
             {/* Icon */}
-            <div className="w-24 h-24 rounded-3xl bg-unicorn-violet/50 border border-white/10 flex items-center justify-center text-5xl mb-8 shadow-xl">
+            <div className="w-24 h-24 rounded-3xl bg-unicorn-violet/50 border border-fg/10 flex items-center justify-center text-5xl mb-8 shadow-xl">
               {slide.icon}
             </div>
 
             {/* Title */}
-            <h2 className="text-[26px] font-bold text-white leading-tight mb-4">
+            <h2 className="text-[26px] font-bold text-fg leading-tight mb-4">
               {slide.title}
             </h2>
 
             {/* Body */}
-            <p className="text-white/65 text-[16px] leading-relaxed max-w-sm">
+            <p className="text-fg/65 text-[16px] leading-relaxed max-w-sm">
               {slide.body}
             </p>
 
             {/* Hint pill */}
             {slide.hint && (
-              <div className="mt-6 bg-[#2b0b4c] border border-white/10 rounded-full px-5 py-2.5">
-                <p className="text-unicorn-cyan text-[13px] font-medium">{slide.hint}</p>
+              <div className="mt-6 bg-surface border border-fg/10 rounded-full px-5 py-2.5">
+                <p className="text-accent-cyan text-[13px] font-medium">{slide.hint}</p>
               </div>
             )}
           </motion.div>
@@ -144,7 +144,7 @@ export default function OnboardingGuide({ onDone }: Props) {
             className={`rounded-full transition-all ${
               i === index
                 ? 'w-5 h-2 bg-unicorn-pink'
-                : 'w-2 h-2 bg-white/20'
+                : 'w-2 h-2 bg-fg/20'
             }`}
           />
         ))}
@@ -155,7 +155,7 @@ export default function OnboardingGuide({ onDone }: Props) {
         {index > 0 && (
           <button
             onClick={() => go(index - 1)}
-            className="flex-1 py-4 rounded-3xl bg-[#2b0b4c] text-white/60 font-semibold text-[16px]"
+            className="flex-1 py-4 rounded-3xl bg-surface text-fg/60 font-semibold text-[16px]"
           >
             ← Zurück
           </button>

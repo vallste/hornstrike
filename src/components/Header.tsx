@@ -13,12 +13,12 @@ export default function Header({ title, back, right }: Props) {
       {back && (
         <button
           onClick={() => typeof back === 'string' ? navigate(back) : navigate(-1)}
-          className="text-white text-2xl font-bold w-8"
+          className="text-fg text-2xl font-bold w-8"
         >
           ←
         </button>
       )}
-      <h1 className="flex-1 text-[24px] font-bold text-white leading-tight">{title}</h1>
+      <h1 className="flex-1 text-[24px] font-bold text-fg leading-tight">{title}</h1>
       {right}
     </div>
   )

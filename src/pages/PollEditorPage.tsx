@@ -72,25 +72,25 @@ export default function PollEditorPage() {
     navigate(`/terminfindung/${pollId}`, { replace: true })
   }
 
-  const fld = 'bg-[#391060] rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/30 outline-none'
+  const fld = 'bg-surface2 rounded-xl px-3 py-2.5 text-fg text-sm placeholder-fg/30 outline-none'
 
   return (
-    <div className="min-h-screen bg-unicorn-purple pb-32">
+    <div className="min-h-screen bg-app pb-32">
       <div className="absolute w-[360px] h-[360px] rounded-full bg-unicorn-violet/40 blur-[140px] top-0 right-0 pointer-events-none" />
       <Header title="Neue Umfrage" back />
 
       <div className="relative px-6 mt-4 space-y-3">
-        <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-          <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Titel</p>
+        <div className="bg-surface rounded-2xl px-4 py-3.5">
+          <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Titel</p>
           <input
             type="text" value={title} onChange={e => setTitle(e.target.value)} autoFocus
             placeholder="z. B. Heimspieltage November"
-            className="w-full bg-transparent text-white placeholder-white/25 text-[17px] font-semibold outline-none"
+            className="w-full bg-transparent text-fg placeholder-fg/25 text-[17px] font-semibold outline-none"
           />
         </div>
 
-        <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-          <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Standard für alle Termine</p>
+        <div className="bg-surface rounded-2xl px-4 py-3.5">
+          <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Standard für alle Termine</p>
           <input type="text" value={defaultOpponent} onChange={e => setDefaultOpponent(e.target.value)} placeholder="Gegner (optional)" className={`${fld} w-full mb-2`} />
           <div className="flex gap-2">
             <TimeField value={defaultTime} onChange={setDefaultTime} className={`${fld} flex-1`} />
@@ -100,15 +100,15 @@ export default function PollEditorPage() {
 
         <div className="grid md:grid-cols-2 gap-3 items-start">
         {/* Kalender-Mehrfachauswahl */}
-        <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-          <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Termine wählen ({selected.length})</p>
+        <div className="bg-surface rounded-2xl px-4 py-3.5">
+          <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Termine wählen ({selected.length})</p>
           <div className="flex items-center justify-between mt-1 mb-2 max-w-[360px] mx-auto">
-            <button onClick={prevMonth} className="text-white/60 px-3 py-1 text-xl">‹</button>
-            <span className="text-white font-semibold text-sm capitalize">{monthName}</span>
-            <button onClick={nextMonth} className="text-white/60 px-3 py-1 text-xl">›</button>
+            <button onClick={prevMonth} className="text-fg/60 px-3 py-1 text-xl">‹</button>
+            <span className="text-fg font-semibold text-sm capitalize">{monthName}</span>
+            <button onClick={nextMonth} className="text-fg/60 px-3 py-1 text-xl">›</button>
           </div>
           <div className="grid grid-cols-7 gap-1 text-center max-w-[360px] mx-auto">
-            {WD.map(d => <div key={d} className="text-white/35 text-[11px] py-1">{d}</div>)}
+            {WD.map(d => <div key={d} className="text-fg/35 text-[11px] py-1">{d}</div>)}
             {cells.map((day, i) => {
               if (day === null) return <div key={i} />
               const ds = iso(view.y, view.m, day)
@@ -118,7 +118,7 @@ export default function PollEditorPage() {
                 <button
                   key={i} disabled={past} onClick={() => toggleDay(ds)}
                   className={`aspect-square rounded-lg text-sm flex items-center justify-center transition-colors ${
-                    sel ? 'bg-unicorn-pink text-white font-bold' : past ? 'text-white/15' : 'text-white/80 bg-white/5 active:bg-white/10'
+                    sel ? 'bg-unicorn-pink text-white font-bold' : past ? 'text-fg/15' : 'text-fg/80 bg-fg/5 active:bg-fg/10'
                   }`}
                 >{day}</button>
               )
@@ -128,8 +128,8 @@ export default function PollEditorPage() {
 
         {/* Gewählte Termine (Abweichungen / entfernen) */}
         {selected.length > 0 && (
-          <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Gewählte Termine</p>
+          <div className="bg-surface rounded-2xl px-4 py-3.5">
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Gewählte Termine</p>
             <div className="space-y-2">
               {selected.map(ds => {
                 const ov = overrides[ds]
@@ -137,9 +137,9 @@ export default function PollEditorPage() {
                 return (
                   <div key={ds} className="space-y-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-white text-sm flex-1">{fmtLong(ds)}</span>
-                      <button onClick={() => setExpanded(expanded === ds ? null : ds)} className={`text-xs px-2 py-1 rounded-lg flex-shrink-0 ${hasOv ? 'text-unicorn-gold' : 'text-white/40'}`}>abw.</button>
-                      <button onClick={() => toggleDay(ds)} className="text-white/40 text-lg px-1 flex-shrink-0">✕</button>
+                      <span className="text-fg text-sm flex-1">{fmtLong(ds)}</span>
+                      <button onClick={() => setExpanded(expanded === ds ? null : ds)} className={`text-xs px-2 py-1 rounded-lg flex-shrink-0 ${hasOv ? 'text-accent-gold' : 'text-fg/40'}`}>abw.</button>
+                      <button onClick={() => toggleDay(ds)} className="text-fg/40 text-lg px-1 flex-shrink-0">✕</button>
                     </div>
                     {expanded === ds && (
                       <div className="flex gap-2 pl-1">
@@ -155,14 +155,14 @@ export default function PollEditorPage() {
         )}
         </div>
 
-        <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-          <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Antwort-Deadline (optional)</p>
-          <div className="relative bg-[#391060] rounded-xl px-3 py-2.5 flex items-center justify-between">
-            <span className={deadline ? 'text-white text-sm' : 'text-white/40 text-sm'}>
+        <div className="bg-surface rounded-2xl px-4 py-3.5">
+          <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Antwort-Deadline (optional)</p>
+          <div className="relative bg-surface2 rounded-xl px-3 py-2.5 flex items-center justify-between">
+            <span className={deadline ? 'text-fg text-sm' : 'text-fg/40 text-sm'}>
               {deadline ? new Date(deadline + 'T12:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'keine'}
             </span>
             {deadline && (
-              <button onClick={() => setDeadline('')} className="relative z-10 text-white/40 text-sm px-1">✕</button>
+              <button onClick={() => setDeadline('')} className="relative z-10 text-fg/40 text-sm px-1">✕</button>
             )}
             <input type="date" lang="de" value={deadline} onChange={e => setDeadline(e.target.value)} onClick={e => e.currentTarget.showPicker?.()} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
           </div>
@@ -171,7 +171,7 @@ export default function PollEditorPage() {
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-4 bg-gradient-to-t from-unicorn-purple via-unicorn-purple/95 to-transparent">
+      <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-4 bg-gradient-to-t from-app via-app/95 to-transparent">
         <button
           onClick={create} disabled={!canSave}
           className="w-full py-4 rounded-3xl bg-unicorn-pink text-white font-bold text-[17px] disabled:opacity-40 shadow-xl shadow-unicorn-pink/40"

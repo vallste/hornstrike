@@ -23,9 +23,9 @@ export default function SplashScreen() {
   }, [animDone, loading, session, configured, navigate])
 
   return (
-    <div className="relative w-full h-dvh min-h-screen overflow-hidden bg-unicorn-purple flex flex-col items-center justify-center px-6">
-      {/* Ambient glows */}
-      <div className="absolute w-[560px] h-[560px] rounded-full bg-unicorn-violet/70 blur-[150px] -top-8 -left-20 pointer-events-none" />
+    <div className="relative w-full h-dvh min-h-screen overflow-hidden bg-[#1a0533] flex flex-col items-center justify-center px-6">
+      {/* Ambient glows – Splash bleibt immer im Dark-Design (Marken-Moment) */}
+      <div className="absolute w-[560px] h-[560px] rounded-full bg-[#4a0e8f]/70 blur-[150px] -top-8 -left-20 pointer-events-none" />
       <div className="absolute w-[370px] h-[370px] rounded-full bg-unicorn-pink/30 blur-[110px] top-64 left-5 pointer-events-none" />
       <div className="absolute w-[430px] h-[430px] rounded-full bg-unicorn-cyan/15 blur-[130px] bottom-0 -left-2 pointer-events-none" />
 
@@ -47,7 +47,7 @@ export default function SplashScreen() {
         >
           {/* Inner circle */}
           <div
-            className="rounded-full bg-unicorn-violet/80 flex items-center justify-center"
+            className="rounded-full bg-[#4a0e8f]/80 flex items-center justify-center"
             style={{ width: 'min(31vw, 140px)', height: 'min(31vw, 140px)' }}
           >
             {/* Horn */}

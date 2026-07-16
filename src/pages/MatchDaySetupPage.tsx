@@ -57,17 +57,17 @@ export default function MatchDaySetupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-unicorn-purple pb-52">
+    <div className="min-h-screen bg-app pb-52">
       <div className="absolute w-[400px] h-[400px] rounded-full bg-unicorn-violet/35 blur-[140px] bottom-40 -left-14 pointer-events-none" />
 
       <Header title="Spieltag planen" back="/matchday" />
 
       <div className="relative px-6 space-y-3 mt-4">
         {/* Date */}
-        <div className="relative bg-[#2b0b4c] rounded-2xl px-4 py-3.5 flex items-center justify-between">
+        <div className="relative bg-surface rounded-2xl px-4 py-3.5 flex items-center justify-between">
           <div>
-            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Datum</p>
-            <p className="text-white font-semibold text-lg mt-0.5">
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Datum</p>
+            <p className="text-fg font-semibold text-lg mt-0.5">
               {new Date(date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           </div>
@@ -83,63 +83,63 @@ export default function MatchDaySetupPage() {
         </div>
 
         {/* Opponent */}
-        <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-          <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Gegner (optional)</p>
+        <div className="bg-surface rounded-2xl px-4 py-3.5">
+          <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Gegner (optional)</p>
           <input
             type="text"
             value={opponent}
             onChange={e => setOpponent(e.target.value)}
             placeholder="z. B. Kickerfreunde Hamburg"
-            className="w-full bg-transparent text-white placeholder-white/25 text-base outline-none"
+            className="w-full bg-transparent text-fg placeholder-fg/25 text-base outline-none"
           />
         </div>
 
         {/* Uhrzeit + Ort */}
         <div className="flex gap-3">
-          <div className="flex-1 bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Uhrzeit</p>
+          <div className="flex-1 bg-surface rounded-2xl px-4 py-3.5">
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Uhrzeit</p>
             <TimeField value={startTime} onChange={setStartTime} className="w-full" />
           </div>
-          <div className="flex-[1.4] bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Ort</p>
-            <input type="text" value={venue} onChange={e => setVenue(e.target.value)} placeholder="Sporthalle…" className="w-full bg-transparent text-white placeholder-white/25 text-base outline-none" />
+          <div className="flex-[1.4] bg-surface rounded-2xl px-4 py-3.5">
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Ort</p>
+            <input type="text" value={venue} onChange={e => setVenue(e.target.value)} placeholder="Sporthalle…" className="w-full bg-transparent text-fg placeholder-fg/25 text-base outline-none" />
           </div>
         </div>
 
         {/* Goalie toggle */}
         <button
           onClick={() => setUseGoalie(v => !v)}
-          className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5 flex items-center justify-between w-full"
+          className="bg-surface rounded-2xl px-4 py-3.5 flex items-center justify-between w-full"
         >
           <div className="text-left">
-            <p className="text-white font-semibold text-[15px]">🥅 Goalie (E5/E6)</p>
-            <p className="text-white/40 text-xs mt-0.5">E5 und E6 als Goalie-Einzel spielen</p>
+            <p className="text-fg font-semibold text-[15px]">🥅 Goalie (E5/E6)</p>
+            <p className="text-fg/40 text-xs mt-0.5">E5 und E6 als Goalie-Einzel spielen</p>
           </div>
-          <div className={`w-12 h-6 rounded-full transition-colors relative ${useGoalie ? 'bg-unicorn-pink' : 'bg-[#391060]'}`}>
-            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${useGoalie ? 'translate-x-6' : 'translate-x-0.5'}`} />
+          <div className={`w-12 h-6 rounded-full transition-colors relative ${useGoalie ? 'bg-unicorn-pink' : 'bg-surface2'}`}>
+            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-fg shadow transition-transform ${useGoalie ? 'translate-x-6' : 'translate-x-0.5'}`} />
           </div>
         </button>
 
         {/* 5. Doppel toggle */}
         <button
           onClick={() => activePlayers.length >= 5 && setUseFifthDouble(v => !v)}
-          className={`bg-[#2b0b4c] rounded-2xl px-4 py-3.5 flex items-center justify-between w-full transition-opacity ${activePlayers.length < 5 ? 'opacity-40' : ''}`}
+          className={`bg-surface rounded-2xl px-4 py-3.5 flex items-center justify-between w-full transition-opacity ${activePlayers.length < 5 ? 'opacity-40' : ''}`}
         >
           <div className="text-left">
-            <p className="text-white font-semibold text-[15px]">🎯 5. Doppel (D5)</p>
-            <p className="text-white/40 text-xs mt-0.5">
+            <p className="text-fg font-semibold text-[15px]">🎯 5. Doppel (D5)</p>
+            <p className="text-fg/40 text-xs mt-0.5">
               {activePlayers.length < 5 ? 'Mindestens 5 Spieler erforderlich' : 'E3 + E4 werden durch D5 ersetzt'}
             </p>
           </div>
-          <div className={`w-12 h-6 rounded-full transition-colors relative ${useFifthDouble ? 'bg-unicorn-cyan' : 'bg-[#391060]'}`}>
-            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${useFifthDouble ? 'translate-x-6' : 'translate-x-0.5'}`} />
+          <div className={`w-12 h-6 rounded-full transition-colors relative ${useFifthDouble ? 'bg-unicorn-cyan' : 'bg-surface2'}`}>
+            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-fg shadow transition-transform ${useFifthDouble ? 'translate-x-6' : 'translate-x-0.5'}`} />
           </div>
         </button>
 
         {/* Players */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-white/45 text-[13px] font-semibold tracking-widest uppercase">
+            <p className="text-fg/45 text-[13px] font-semibold tracking-widest uppercase">
               Aktive Spieler ({activePlayers.length})
             </p>
             <button
@@ -149,16 +149,16 @@ export default function MatchDaySetupPage() {
                 rosterPlayers.forEach(p => { next[p.id] = !allSelected })
                 setSelected(next)
               }}
-              className="text-unicorn-cyan text-[13px] font-semibold"
+              className="text-accent-cyan text-[13px] font-semibold"
             >
               {rosterPlayers.every(p => selected[p.id]) ? 'Alle abwählen' : 'Alle auswählen'}
             </button>
           </div>
 
           {rosterPlayers.length === 0 && (
-            <p className="text-white/40 text-sm bg-[#2b0b4c] rounded-xl p-4">
+            <p className="text-fg/40 text-sm bg-surface rounded-xl p-4">
               Noch keine Spieler angelegt.{' '}
-              <button className="text-unicorn-cyan underline" onClick={() => navigate('/players')}>
+              <button className="text-accent-cyan underline" onClick={() => navigate('/players')}>
                 Jetzt hinzufügen →
               </button>
             </p>
@@ -170,29 +170,29 @@ export default function MatchDaySetupPage() {
               const avail = availability[player.id]
               const isExpanded = expanded === player.id && isChecked
               return (
-                <div key={player.id} className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
+                <div key={player.id} className="bg-surface rounded-2xl overflow-hidden">
                   <div className="flex items-center px-4 py-3.5 gap-3">
                     <button
                       onClick={() => togglePlayer(player.id)}
                       className={`w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${
-                        isChecked ? 'bg-unicorn-pink' : 'bg-[#391060] border border-white/20'
+                        isChecked ? 'bg-unicorn-pink' : 'bg-surface2 border border-fg/20'
                       }`}
                     >
-                      {isChecked && <span className="text-white text-xs font-bold">✓</span>}
+                      {isChecked && <span className="text-fg text-xs font-bold">✓</span>}
                     </button>
-                    <span className={`flex-1 text-[15px] font-semibold transition-opacity ${isChecked ? 'text-white' : 'text-white/35'}`}>
+                    <span className={`flex-1 text-[15px] font-semibold transition-opacity ${isChecked ? 'text-fg' : 'text-fg/35'}`}>
                       {player.name}
                     </span>
                     {isChecked && (
                       <>
                         {avail && (
-                          <span className="text-unicorn-cyan text-xs bg-unicorn-cyan/15 px-2 py-0.5 rounded-md">
+                          <span className="text-accent-cyan text-xs bg-unicorn-cyan/15 px-2 py-0.5 rounded-md">
                             {avail.from > 1 ? `ab E${avail.from - 1}` : ''}{avail.to < maxGame ? ` bis D${maxGame}` : ''}
                           </span>
                         )}
                         <button
                           onClick={() => setExpanded(isExpanded ? null : player.id)}
-                          className="text-white/30 text-sm ml-1 transition-transform"
+                          className="text-fg/30 text-sm ml-1 transition-transform"
                           style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
                         >▾</button>
                       </>
@@ -200,23 +200,23 @@ export default function MatchDaySetupPage() {
                   </div>
 
                   {isExpanded && (
-                    <div className="px-4 pb-4 pt-0 border-t border-white/5 space-y-3">
+                    <div className="px-4 pb-4 pt-0 border-t border-fg/5 space-y-3">
                       <div className="flex items-center gap-3">
-                        <span className="text-white/50 text-sm w-28">Ab Spiel Nr.</span>
+                        <span className="text-fg/50 text-sm w-28">Ab Spiel Nr.</span>
                         <input
                           type="number" min={1} max={maxGame}
                           value={avail?.from ?? 1}
                           onChange={e => setAvail(player.id, 'from', Math.max(1, Math.min(maxGame, +e.target.value)))}
-                          className="w-16 bg-[#391060] text-white text-center rounded-lg py-1 outline-none focus:ring-1 focus:ring-unicorn-cyan/50"
+                          className="w-16 bg-surface2 text-fg text-center rounded-lg py-1 outline-none focus:ring-1 focus:ring-unicorn-cyan/50"
                         />
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-white/50 text-sm w-28">Bis Spiel Nr.</span>
+                        <span className="text-fg/50 text-sm w-28">Bis Spiel Nr.</span>
                         <input
                           type="number" min={1} max={maxGame}
                           value={avail?.to ?? maxGame}
                           onChange={e => setAvail(player.id, 'to', Math.max(1, Math.min(maxGame, +e.target.value)))}
-                          className="w-16 bg-[#391060] text-white text-center rounded-lg py-1 outline-none focus:ring-1 focus:ring-unicorn-cyan/50"
+                          className="w-16 bg-surface2 text-fg text-center rounded-lg py-1 outline-none focus:ring-1 focus:ring-unicorn-cyan/50"
                         />
                       </div>
                     </div>
@@ -229,7 +229,7 @@ export default function MatchDaySetupPage() {
       </div>
 
       {/* CTA */}
-      <div className="fixed bottom-20 left-0 right-0 px-6 pb-4 pt-4 bg-gradient-to-t from-unicorn-purple via-unicorn-purple/95 to-transparent">
+      <div className="fixed bottom-20 left-0 right-0 px-6 pb-4 pt-4 bg-gradient-to-t from-app via-app/95 to-transparent">
         <button
           onClick={calculate}
           disabled={activePlayers.length < 2}
