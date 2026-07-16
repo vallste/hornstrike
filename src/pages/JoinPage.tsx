@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSession } from '../context/SessionProvider'
 import { getSupabase } from '../lib/supabase'
+import { track } from '../lib/analytics'
 
 export default function JoinPage() {
   const { token } = useParams()
@@ -42,6 +43,7 @@ export default function JoinPage() {
     const { error } = await getSupabase().rpc('redeem_invite', { p_raw_token: token })
     setBusy(false)
     if (error) { setError(error.message); return }
+    void track('invite_accepted')
     qc.invalidateQueries()
     navigate('/home', { replace: true })
   }

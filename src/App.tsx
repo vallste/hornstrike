@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import JoinPage from './pages/JoinPage'
 import RequestClubPage from './pages/RequestClubPage'
 import AdminClubRequestsPage from './pages/AdminClubRequestsPage'
+import AdminStatsPage from './pages/AdminStatsPage'
 import ManagePage from './pages/ManagePage'
 import MembersPage from './pages/MembersPage'
 import PollListPage from './pages/PollListPage'
@@ -23,6 +24,7 @@ import ScrollToTop from './components/ScrollToTop'
 import OnboardingGuide, { shouldShowOnboarding } from './components/OnboardingGuide'
 import ProtectedShell from './components/ProtectedShell'
 import PreviewRoleBanner from './components/PreviewRoleBanner'
+import AnalyticsMount from './components/AnalyticsMount'
 import LineupPage from './pages/LineupPage'
 
 export default function App() {
@@ -49,6 +51,7 @@ export default function App() {
           <Route path="/lineup/:id" element={<LineupPage />} />
           <Route path="/request-club" element={<RequestClubPage />} />
           <Route path="/admin/club-requests" element={<AdminClubRequestsPage />} />
+          <Route path="/admin/stats" element={<AdminStatsPage />} />
           <Route path="/manage" element={<ManagePage />} />
           <Route path="/members" element={<MembersPage />} />
           <Route path="/terminfindung" element={<PollListPage />} />
@@ -58,6 +61,7 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <AnalyticsMount />
       <ScrollToTop />
       <PreviewRoleBanner />
       <UpdateBanner />

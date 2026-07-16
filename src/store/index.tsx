@@ -3,6 +3,7 @@ import type { Player, MatchDay, GameSlot, Position, GameTypePreference } from '.
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 import { useSession } from '../context/SessionProvider'
 import { useScope } from '../context/ScopeProvider'
+import { track } from '../lib/analytics'
 
 // ─── DB-Zeilen-Typen (snake_case) ───────────────────────────────────────────
 type PlayerRow = { id: string; name: string; active: boolean; sort_order: number; user_id: string | null }
@@ -237,7 +238,10 @@ export function useMatchDays() {
       if (ins.error) throw ins.error
       await writeMatchDayAvailability(md)
     },
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate()
+      void track('matchday_created', {}, { teamId: currentTeamId })
+    },
   })
   const updateMut = useMutation({
     mutationFn: async (md: MatchDay) => {

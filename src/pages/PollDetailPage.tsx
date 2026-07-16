@@ -6,6 +6,7 @@ import LoadingScreen from '../components/LoadingScreen'
 import { usePlayers } from '../store'
 import { useCan, useMyPlayerId } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
+import { useTrack } from '../lib/analytics'
 
 type Poll = { id: string; title: string; status: 'open' | 'closed'; deadline: string | null; default_time: string | null; default_location: string | null; default_opponent: string | null }
 type Option = { id: string; proposed_date: string; label: string | null; sort_order: number; start_time: string | null; location: string | null }
@@ -25,6 +26,7 @@ export default function PollDetailPage() {
   const { players } = usePlayers()
   const canManage = useCan('team:managePolls')
   const myPlayerId = useMyPlayerId()
+  const track = useTrack()
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['poll', id],
@@ -86,6 +88,7 @@ export default function PollDetailPage() {
       { poll_option_id: optId, player_id: myPlayerId, status },
       { onConflict: 'poll_option_id,player_id' },
     )
+    track('poll_responded', { status })
     qc.invalidateQueries({ queryKey: ['poll', id] })
   }
   const toggleClosed = async () => {

@@ -187,18 +187,32 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
             </div>
             <span className="text-fg/25 text-lg">›</span>
           </button>
-          <Can cap="app:manageClubs">
-            <div className="h-px bg-fg/5" />
+        </div>
+
+        {/* Plattform-Admin */}
+        <Can cap="app:viewStats">
+          <div className="bg-surface rounded-2xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-fg/5">
+              <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Plattform-Admin</p>
+            </div>
+            <button onClick={() => navigate('/admin/stats')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-fg/5 transition-colors border-b border-fg/5">
+              <span className="w-9 h-9 rounded-xl bg-unicorn-cyan/15 flex items-center justify-center text-xl">📊</span>
+              <div className="flex-1 text-left">
+                <p className="text-fg font-semibold text-[15px]">Statistiken</p>
+                <p className="text-fg/40 text-xs mt-0.5">Plattform-Nutzung: Wachstum, Aktivität, Engagement</p>
+              </div>
+              <span className="text-fg/25 text-lg">›</span>
+            </button>
             <button onClick={() => navigate('/admin/club-requests')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-fg/5 transition-colors">
               <span className="w-9 h-9 rounded-xl bg-unicorn-gold/15 flex items-center justify-center text-xl">🗂</span>
               <div className="flex-1 text-left">
                 <p className="text-fg font-semibold text-[15px]">Vereins-Anträge</p>
-                <p className="text-fg/40 text-xs mt-0.5">Offene Anträge prüfen &amp; freigeben (Admin)</p>
+                <p className="text-fg/40 text-xs mt-0.5">Offene Anträge prüfen &amp; freigeben</p>
               </div>
               <span className="text-fg/25 text-lg">›</span>
             </button>
-          </Can>
-        </div>
+          </div>
+        </Can>
 
         {/* Current data overview */}
         <div className="bg-surface rounded-2xl px-4 py-3.5">
