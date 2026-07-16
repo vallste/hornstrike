@@ -7,7 +7,7 @@ import { getSupabase } from '../lib/supabase'
 import { errorMessage } from '../lib/errors'
 import { track } from '../lib/analytics'
 import ConsentCheckbox from '../components/ConsentCheckbox'
-import { hasConsent, acceptConsent, DS_VERSION } from '../lib/consent'
+import { DS_VERSION } from '../lib/consent'
 
 export default function JoinPage() {
   const { token } = useParams()
@@ -20,8 +20,8 @@ export default function JoinPage() {
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [accepted, setAccepted] = useState(hasConsent)
-  const onConsent = (v: boolean) => { setAccepted(v); if (v) acceptConsent() }
+  // GDPR: Häkchen startet immer ungesetzt und muss aktiv geklickt werden.
+  const [accepted, setAccepted] = useState(false)
 
   const sendCode = async () => {
     if (!email.trim() || busy || !accepted) return
@@ -93,7 +93,7 @@ export default function JoinPage() {
               value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendCode()}
               className={inputCls}
             />
-            <ConsentCheckbox checked={accepted} onChange={onConsent} />
+            <ConsentCheckbox checked={accepted} onChange={setAccepted} />
             <button onClick={sendCode} disabled={busy || !email.trim() || !accepted} className={ctaCls}>
               {busy ? 'Senden…' : 'Code anfordern'}
             </button>

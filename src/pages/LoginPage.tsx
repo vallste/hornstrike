@@ -3,7 +3,7 @@ import { Navigate, Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSession } from '../context/SessionProvider'
 import ConsentCheckbox from '../components/ConsentCheckbox'
-import { hasConsent, acceptConsent, DS_VERSION } from '../lib/consent'
+import { DS_VERSION } from '../lib/consent'
 import { track } from '../lib/analytics'
 
 export default function LoginPage() {
@@ -17,8 +17,8 @@ export default function LoginPage() {
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [accepted, setAccepted] = useState(hasConsent)
-  const onConsent = (v: boolean) => { setAccepted(v); if (v) acceptConsent() }
+  // GDPR: Häkchen startet immer ungesetzt und muss aktiv geklickt werden.
+  const [accepted, setAccepted] = useState(false)
 
   // Schon eingeloggt? → weiter in die App.
   if (session) return <Navigate to={from} replace />
@@ -74,13 +74,13 @@ export default function LoginPage() {
               onKeyDown={e => e.key === 'Enter' && sendLink()}
               className="w-full rounded-2xl bg-fg/8 border border-fg/12 px-4 py-3.5 text-fg placeholder-fg/30 outline-none focus:border-accent-pink/60"
             />
-            <ConsentCheckbox checked={accepted} onChange={onConsent} />
+            <ConsentCheckbox checked={accepted} onChange={setAccepted} />
             <button
               onClick={sendLink}
               disabled={!configured || busy || !email.trim() || !accepted}
               className="w-full rounded-2xl py-3.5 font-semibold text-white bg-gradient-to-r from-unicorn-violet to-unicorn-pink disabled:opacity-40 transition-opacity"
             >
-              {busy ? 'Senden…' : 'Magic-Link senden'}
+              {busy ? 'Senden…' : 'Anmelden'}
             </button>
           </div>
         ) : (
