@@ -2,7 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const BASE = '/hornstrike/'
+// Root-Deployment unter eigener Domain (hornstrike.de). Für den alten
+// Projekt-Pfad vallste.github.io/hornstrike/ wäre '/hornstrike/' nötig.
+const BASE = '/'
 
 export default defineConfig({
   base: BASE,
