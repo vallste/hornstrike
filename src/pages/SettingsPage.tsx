@@ -358,6 +358,27 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           </button>
         </div>
 
+        {/* Rechtliches */}
+        <div className="bg-surface rounded-2xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-fg/5">
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Rechtliches</p>
+          </div>
+          <button onClick={() => navigate('/impressum')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-fg/5 transition-colors border-b border-fg/5">
+            <span className="w-9 h-9 rounded-xl bg-unicorn-violet/40 flex items-center justify-center text-xl">📄</span>
+            <div className="flex-1 text-left">
+              <p className="text-fg font-semibold text-[15px]">Impressum</p>
+            </div>
+            <span className="text-fg/25 text-lg">›</span>
+          </button>
+          <button onClick={() => navigate('/datenschutz')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-fg/5 transition-colors">
+            <span className="w-9 h-9 rounded-xl bg-unicorn-cyan/15 flex items-center justify-center text-xl">🔒</span>
+            <div className="flex-1 text-left">
+              <p className="text-fg font-semibold text-[15px]">Datenschutzerklärung</p>
+            </div>
+            <span className="text-fg/25 text-lg">›</span>
+          </button>
+        </div>
+
         {/* Danger zone – nur Captain+ */}
         <Can cap="team:editRoster">
         <div className="bg-surface rounded-2xl overflow-hidden">

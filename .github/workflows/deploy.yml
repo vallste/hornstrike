@@ -35,6 +35,12 @@ jobs:
           # Im Repo unter Settings → Secrets and variables → Actions → Variables anlegen.
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          # Impressum/Datenschutz – ebenfalls als Repository Variables anlegen.
+          VITE_LEGAL_NAME: ${{ vars.VITE_LEGAL_NAME }}
+          VITE_LEGAL_STREET: ${{ vars.VITE_LEGAL_STREET }}
+          VITE_LEGAL_CITY: ${{ vars.VITE_LEGAL_CITY }}
+          VITE_LEGAL_EMAIL: ${{ vars.VITE_LEGAL_EMAIL }}
+          VITE_LEGAL_PHONE: ${{ vars.VITE_LEGAL_PHONE }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

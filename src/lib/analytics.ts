@@ -15,6 +15,7 @@ export type EventType =
   | 'invite_accepted'
   | 'club_requested'
   | 'pwa_installed'
+  | 'consent_accepted'
 
 /** Optionaler Scope – landet in eigenen Spalten, NICHT in meta (meta bleibt PII-frei). */
 export type TrackCtx = { teamId?: string | null; clubId?: string | null }
