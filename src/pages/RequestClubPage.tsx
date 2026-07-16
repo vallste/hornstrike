@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import { useSession } from '../context/SessionProvider'
 import { useTeamStatus } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
+import { errorMessage } from '../lib/errors'
 import { track } from '../lib/analytics'
 
 type RequestRow = { id: string; club_name: string; status: 'pending' | 'approved' | 'rejected'; created_at: string }
@@ -40,7 +41,7 @@ export default function RequestClubPage() {
       .from('club_requests')
       .insert({ requested_by: user.id, club_name: name.trim(), note: note.trim() || null })
     setBusy(false)
-    if (error) { setError(error.message); return }
+    if (error) { setError(errorMessage(error)); return }
     setName(''); setNote('')
     qc.invalidateQueries({ queryKey: ['clubRequests'] })
     void track('club_requested')

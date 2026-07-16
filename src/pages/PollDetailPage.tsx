@@ -6,6 +6,7 @@ import LoadingScreen from '../components/LoadingScreen'
 import { usePlayers } from '../store'
 import { useCan, useMyPlayerId } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
+import { errorMessage } from '../lib/errors'
 import { useTrack } from '../lib/analytics'
 
 type Poll = { id: string; title: string; status: 'open' | 'closed'; deadline: string | null; default_time: string | null; default_location: string | null; default_opponent: string | null }
@@ -65,7 +66,7 @@ export default function PollDetailPage() {
       <div className="min-h-screen bg-app flex items-center justify-center px-6">
         <div className="text-center">
           <p className="text-fg text-lg font-semibold">Umfrage konnte nicht geladen werden</p>
-          {error && <p className="text-red-300/80 text-sm mt-2 break-words">{(error as Error).message}</p>}
+          {error && <p className="text-red-300/80 text-sm mt-2 break-words">{errorMessage(error)}</p>}
           <button onClick={() => navigate('/terminfindung')} className="text-accent-pink mt-4 block mx-auto">← Zurück</button>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { usePlayers } from '../store'
 import { useScope } from '../context/ScopeProvider'
 import { useCan, ROLE_LABEL, type Role } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
+import { errorMessage } from '../lib/errors'
 import { useTrack } from '../lib/analytics'
 
 type MembershipRow = { user_id: string; role: Role }
@@ -50,7 +51,7 @@ export default function MembersPage() {
     setBusy(playerId); setError(null)
     const { data, error } = await getSupabase().rpc('create_invite', { p_player: playerId, p_role: 'player' })
     setBusy(null)
-    if (error) { setError(error.message); return }
+    if (error) { setError(errorMessage(error)); return }
     setLinkFor(s => ({ ...s, [playerId]: `${window.location.origin}${import.meta.env.BASE_URL}#/join/${data as string}` }))
     track('invite_created', { source: 'members' })
     qc.invalidateQueries({ queryKey: ['invites'] })
@@ -59,7 +60,7 @@ export default function MembersPage() {
     setBusy(id); setError(null)
     const { error } = await getSupabase().from('invites').update({ revoked_at: new Date().toISOString() }).eq('id', id)
     setBusy(null)
-    if (error) { setError(error.message); return }
+    if (error) { setError(errorMessage(error)); return }
     qc.invalidateQueries({ queryKey: ['invites'] })
   }
   const copy = (t: string) => { navigator.clipboard?.writeText(t).catch(() => {}) }

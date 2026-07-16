@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Header from '../components/Header'
 import { getSupabase } from '../lib/supabase'
+import { errorMessage } from '../lib/errors'
 
 type RequestRow = { id: string; club_name: string; note: string | null; created_at: string }
 
@@ -27,7 +28,7 @@ export default function AdminClubRequestsPage() {
     setBusyId(id); setError(null)
     const { error } = await getSupabase().rpc('approve_club_request', { p_request: id })
     setBusyId(null)
-    if (error) { setError(error.message); return }
+    if (error) { setError(errorMessage(error)); return }
     qc.invalidateQueries()
   }
 
@@ -35,7 +36,7 @@ export default function AdminClubRequestsPage() {
     setBusyId(id); setError(null)
     const { error } = await getSupabase().rpc('reject_club_request', { p_request: id })
     setBusyId(null)
-    if (error) { setError(error.message); return }
+    if (error) { setError(errorMessage(error)); return }
     qc.invalidateQueries({ queryKey: ['clubRequests'] })
   }
 

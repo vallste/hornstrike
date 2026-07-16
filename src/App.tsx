@@ -19,6 +19,8 @@ import MatchDaySetupPage from './pages/MatchDaySetupPage'
 import MatchDayEditPage from './pages/MatchDayEditPage'
 import SettingsPage from './pages/SettingsPage'
 import ChangelogPage from './pages/ChangelogPage'
+import ImpressumPage from './pages/ImpressumPage'
+import DatenschutzPage from './pages/DatenschutzPage'
 import UpdateBanner from './components/UpdateBanner'
 import ScrollToTop from './components/ScrollToTop'
 import OnboardingGuide, { shouldShowOnboarding } from './components/OnboardingGuide'
@@ -37,6 +39,9 @@ export default function App() {
         <Route path="/" element={<SplashScreen />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/join/:token" element={<JoinPage />} />
+        {/* Rechtliches – auch ohne Login erreichbar */}
+        <Route path="/impressum" element={<ImpressumPage />} />
+        <Route path="/datenschutz" element={<DatenschutzPage />} />
 
         {/* Eingeloggter Bereich */}
         <Route element={<ProtectedShell />}>

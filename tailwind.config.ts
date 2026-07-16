@@ -24,7 +24,7 @@ export default {
         'accent-gold': 'rgb(var(--accent-gold) / <alpha-value>)',
       },
       fontFamily: {
-        sans: ['Outfit', 'system-ui', 'sans-serif'],
+        sans: ['Outfit Variable', 'Outfit', 'system-ui', 'sans-serif'],
       }
     }
   },

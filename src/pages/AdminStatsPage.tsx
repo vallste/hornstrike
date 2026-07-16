@@ -10,6 +10,7 @@ import BarChart from '../components/BarChart'
 import Sparkline from '../components/Sparkline'
 import FunnelBar from '../components/FunnelBar'
 import { getSupabase } from '../lib/supabase'
+import { errorMessage } from '../lib/errors'
 
 // ── Typ des RPC-Ergebnisses (admin_usage_stats → jsonb) ──────────────────────
 type Bucket = { bucket: string; count: number }
@@ -98,7 +99,7 @@ export default function AdminStatsPage() {
       <div className="min-h-screen bg-app flex items-center justify-center px-6">
         <div className="text-center">
           <p className="text-fg text-lg font-semibold">Statistiken konnten nicht geladen werden</p>
-          {error && <p className="text-red-400/80 text-sm mt-2 break-words">{(error as Error).message}</p>}
+          {error && <p className="text-red-400/80 text-sm mt-2 break-words">{errorMessage(error)}</p>}
           <button onClick={() => navigate('/settings')} className="text-accent-pink mt-4 block mx-auto">← Zurück</button>
         </div>
       </div>

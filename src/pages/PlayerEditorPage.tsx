@@ -6,6 +6,7 @@ import LoadingScreen from '../components/LoadingScreen'
 import Can from '../components/Can'
 import { useCan, useMyPlayerId } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
+import { errorMessage } from '../lib/errors'
 import { useTrack } from '../lib/analytics'
 import { usePlayers } from '../store'
 import type { Player, Position, GameTypePreference } from '../types'
@@ -149,7 +150,7 @@ function PlayerEditorForm() {
     setInviteBusy(true); setInviteErr(null)
     const { data, error } = await getSupabase().rpc('create_invite', { p_player: existing.id, p_role: 'player' })
     setInviteBusy(false)
-    if (error) { setInviteErr(error.message); return }
+    if (error) { setInviteErr(errorMessage(error)); return }
     setInviteLink(`${window.location.origin}${import.meta.env.BASE_URL}#/join/${data as string}`)
     track('invite_created', { source: 'player_editor' })
   }

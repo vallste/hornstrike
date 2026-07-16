@@ -6,6 +6,7 @@ import BottomNav from '../components/BottomNav'
 import { useSession } from '../context/SessionProvider'
 import { useScope } from '../context/ScopeProvider'
 import { getSupabase } from '../lib/supabase'
+import { errorMessage } from '../lib/errors'
 
 type ClubRow = { id: string; name: string; teams: { id: string; name: string }[] | null }
 type MembershipRow = { club_id: string | null; role: string; user_id: string }
@@ -59,7 +60,7 @@ export default function ManagePage() {
     setBusy(clubId); setError(null)
     const { error } = await getSupabase().from('teams').insert({ club_id: clubId, name })
     setBusy(null)
-    if (error) { setError(error.message); return }
+    if (error) { setError(errorMessage(error)); return }
     setNewTeam(s => ({ ...s, [clubId]: '' }))
     qc.invalidateQueries({ queryKey: ['manage'] })
     qc.invalidateQueries({ queryKey: ['workspaces'] })
@@ -69,7 +70,7 @@ export default function ManagePage() {
     const name = renameVal.trim()
     if (!name) return
     const { error } = await getSupabase().from('teams').update({ name }).eq('id', teamId)
-    if (error) { setError(error.message); return }
+    if (error) { setError(errorMessage(error)); return }
     setRenaming(null)
     qc.invalidateQueries({ queryKey: ['manage'] })
     qc.invalidateQueries({ queryKey: ['workspaces'] })
@@ -79,7 +80,7 @@ export default function ManagePage() {
     const name = clubVal.trim()
     if (!name) return
     const { error } = await getSupabase().from('clubs').update({ name }).eq('id', clubId)
-    if (error) { setError(error.message); return }
+    if (error) { setError(errorMessage(error)); return }
     setRenamingClub(null)
     qc.invalidateQueries({ queryKey: ['manage'] })
     qc.invalidateQueries({ queryKey: ['workspaces'] })

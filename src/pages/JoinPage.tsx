@@ -4,7 +4,10 @@ import { motion } from 'framer-motion'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSession } from '../context/SessionProvider'
 import { getSupabase } from '../lib/supabase'
+import { errorMessage } from '../lib/errors'
 import { track } from '../lib/analytics'
+import ConsentCheckbox from '../components/ConsentCheckbox'
+import { hasConsent, acceptConsent, DS_VERSION } from '../lib/consent'
 
 export default function JoinPage() {
   const { token } = useParams()
@@ -17,9 +20,11 @@ export default function JoinPage() {
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [accepted, setAccepted] = useState(hasConsent)
+  const onConsent = (v: boolean) => { setAccepted(v); if (v) acceptConsent() }
 
   const sendCode = async () => {
-    if (!email.trim() || busy) return
+    if (!email.trim() || busy || !accepted) return
     setBusy(true); setError(null)
     const { error } = await signInWithOtp(email.trim())
     setBusy(false)
@@ -31,7 +36,8 @@ export default function JoinPage() {
     setBusy(true); setError(null)
     const { error } = await verifyOtp(email.trim(), code.trim())
     setBusy(false)
-    if (error) setError(error)
+    if (error) { setError(error); return }
+    void track('consent_accepted', { version: DS_VERSION })
     // Erfolg → session erscheint → unten der „Einladung annehmen"-Button
   }
 
@@ -42,7 +48,7 @@ export default function JoinPage() {
     setBusy(true); setError(null)
     const { error } = await getSupabase().rpc('redeem_invite', { p_raw_token: token })
     setBusy(false)
-    if (error) { setError(error.message); return }
+    if (error) { setError(errorMessage(error)); return }
     void track('invite_accepted')
     qc.invalidateQueries()
     navigate('/home', { replace: true })
@@ -87,7 +93,8 @@ export default function JoinPage() {
               value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendCode()}
               className={inputCls}
             />
-            <button onClick={sendCode} disabled={busy || !email.trim()} className={ctaCls}>
+            <ConsentCheckbox checked={accepted} onChange={onConsent} />
+            <button onClick={sendCode} disabled={busy || !email.trim() || !accepted} className={ctaCls}>
               {busy ? 'Senden…' : 'Code anfordern'}
             </button>
           </div>

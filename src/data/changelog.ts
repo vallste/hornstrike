@@ -14,6 +14,9 @@ export interface ChangelogEntry {
  */
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
+  { type: 'feat', text: 'Impressum & Datenschutzerklärung ergänzt; Anmeldung/Beitritt erst nach Zustimmung zur Datenschutzerklärung' },
+  { type: 'improve', text: 'Schriftart wird selbst ausgeliefert (kein Aufruf an Google Fonts) – datenschutzfreundlicher' },
+  { type: 'fix', text: 'Sicherheits- & Datenschutz-Härtung: Kontolöschung möglich, Einladungen an E-Mail gebunden, robustere Fehlermeldungen' },
   { type: 'feat', text: 'Plattform-Admin: Nutzungs-Statistiken (Wachstum, Aktivierung, Engagement, Aktivität) – inklusive anonymer First-Party-Nutzungsmetriken, kein Drittanbieter-Tracking' },
   { type: 'feat', text: 'Heller & dunkler Modus umschaltbar (Einstellungen → Darstellung: Hell / Auto / Dunkel); die Auswahl wird gespeichert' },
   { type: 'feat', text: 'Neues helles Design in sanftem Lavendel mit gut lesbaren Akzentfarben – der dunkle Modus bleibt unverändert' },

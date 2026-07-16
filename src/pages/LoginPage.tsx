@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSession } from '../context/SessionProvider'
+import ConsentCheckbox from '../components/ConsentCheckbox'
+import { hasConsent, acceptConsent, DS_VERSION } from '../lib/consent'
+import { track } from '../lib/analytics'
 
 export default function LoginPage() {
   const { session, configured, signInWithOtp, verifyOtp } = useSession()
@@ -14,12 +17,14 @@ export default function LoginPage() {
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [accepted, setAccepted] = useState(hasConsent)
+  const onConsent = (v: boolean) => { setAccepted(v); if (v) acceptConsent() }
 
   // Schon eingeloggt? → weiter in die App.
   if (session) return <Navigate to={from} replace />
 
   const sendLink = async () => {
-    if (!email.trim() || busy) return
+    if (!email.trim() || busy || !accepted) return
     setBusy(true); setError(null)
     const { error } = await signInWithOtp(email.trim())
     setBusy(false)
@@ -32,8 +37,9 @@ export default function LoginPage() {
     setBusy(true); setError(null)
     const { error } = await verifyOtp(email.trim(), code.trim())
     setBusy(false)
-    if (error) setError(error)
-    else navigate(from, { replace: true })
+    if (error) { setError(error); return }
+    void track('consent_accepted', { version: DS_VERSION })
+    navigate(from, { replace: true })
   }
 
   return (
@@ -68,9 +74,10 @@ export default function LoginPage() {
               onKeyDown={e => e.key === 'Enter' && sendLink()}
               className="w-full rounded-2xl bg-fg/8 border border-fg/12 px-4 py-3.5 text-fg placeholder-fg/30 outline-none focus:border-accent-pink/60"
             />
+            <ConsentCheckbox checked={accepted} onChange={onConsent} />
             <button
               onClick={sendLink}
-              disabled={!configured || busy || !email.trim()}
+              disabled={!configured || busy || !email.trim() || !accepted}
               className="w-full rounded-2xl py-3.5 font-semibold text-white bg-gradient-to-r from-unicorn-violet to-unicorn-pink disabled:opacity-40 transition-opacity"
             >
               {busy ? 'Senden…' : 'Magic-Link senden'}
@@ -111,6 +118,11 @@ export default function LoginPage() {
 
         {error && <p className="text-red-400 text-sm text-center mt-4">{error}</p>}
       </motion.div>
+
+      <div className="absolute bottom-6 inset-x-0 flex justify-center gap-4 text-xs text-fg/40">
+        <Link to="/impressum" className="hover:text-fg/70 transition-colors">Impressum</Link>
+        <Link to="/datenschutz" className="hover:text-fg/70 transition-colors">Datenschutz</Link>
+      </div>
     </div>
   )
 }
