@@ -16,12 +16,12 @@ export default function TimeField({ value, onChange, className, step = 15 }: {
     const cur = value ? toMins(value) : 19 * 60 - d
     onChange(fromMins(clamp(cur + d)))
   }
-  const btn = 'w-9 h-9 rounded-lg bg-[#391060] text-white text-xl flex items-center justify-center active:bg-white/10 flex-shrink-0 select-none'
+  const btn = 'w-9 h-9 rounded-lg bg-surface2 text-fg text-xl flex items-center justify-center active:bg-fg/10 flex-shrink-0 select-none'
   return (
     <div className={`flex items-center justify-between gap-2 ${className ?? ''}`}>
       <button type="button" onClick={() => shift(-step)} className={btn} aria-label="früher">−</button>
-      <span className="text-white text-base font-semibold tabular-nums">
-        {value || '—'} <span className="text-white/40 text-xs font-normal">Uhr</span>
+      <span className="text-fg text-base font-semibold tabular-nums">
+        {value || '—'} <span className="text-fg/40 text-xs font-normal">Uhr</span>
       </span>
       <button type="button" onClick={() => shift(step)} className={btn} aria-label="später">+</button>
     </div>

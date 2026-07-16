@@ -22,7 +22,7 @@ export default function ToggleGroup<T extends string>({ options, value, onChange
           key={opt.value}
           onClick={() => onChange(opt.value)}
           className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-            value === opt.value ? activeClass : 'bg-[#391060] text-white/55'
+            value === opt.value ? activeClass : 'bg-surface2 text-fg/55'
           }`}
         >
           {opt.label}

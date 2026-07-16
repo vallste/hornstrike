@@ -63,14 +63,14 @@ export default function MembersPage() {
   const playerName = (id: string | null) => players.find(p => p.id === id)?.name ?? '—'
 
   return (
-    <div className="min-h-screen bg-unicorn-purple pb-24">
+    <div className="min-h-screen bg-app pb-24">
       <div className="absolute w-[360px] h-[360px] rounded-full bg-unicorn-violet/35 blur-[140px] -top-20 right-0 pointer-events-none" />
       <Header title="Mitglieder" back />
 
       <div className="relative px-6 mt-4 space-y-3">
-        <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-white/5">
-            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Kader &amp; Accounts</p>
+        <div className="bg-surface rounded-2xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-fg/5">
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Kader &amp; Accounts</p>
           </div>
           {players.map(p => {
             const claimed = !!p.userId
@@ -78,26 +78,26 @@ export default function MembersPage() {
             const hasPending = pendingPlayerIds.has(p.id)
             const link = linkFor[p.id]
             return (
-              <div key={p.id} className="px-4 py-3 border-b border-white/5">
+              <div key={p.id} className="px-4 py-3 border-b border-fg/5">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-white text-[15px]">{p.name}</span>
+                  <span className="text-fg text-[15px]">{p.name}</span>
                   {claimed
-                    ? <span className="text-unicorn-cyan text-xs font-semibold">{role ? ROLE_LABEL[role] : 'Account ✓'}</span>
+                    ? <span className="text-accent-cyan text-xs font-semibold">{role ? ROLE_LABEL[role] : 'Account ✓'}</span>
                     : hasPending
-                      ? <span className="text-unicorn-gold text-xs font-semibold">Einladung offen</span>
-                      : <span className="text-white/35 text-xs">kein Account</span>}
+                      ? <span className="text-accent-gold text-xs font-semibold">Einladung offen</span>
+                      : <span className="text-fg/35 text-xs">kein Account</span>}
                 </div>
                 {canInvite && !claimed && (
                   <div className="mt-2">
                     {!link ? (
                       <button
                         onClick={() => invite(p.id)} disabled={busy === p.id}
-                        className="text-unicorn-cyan text-sm font-semibold disabled:opacity-50"
+                        className="text-accent-cyan text-sm font-semibold disabled:opacity-50"
                       >{busy === p.id ? 'Erstelle…' : (hasPending ? '↻ Neuen Link erstellen' : '🔗 Einladen')}</button>
                     ) : (
                       <div className="space-y-1.5">
-                        <p className="text-white/55 text-xs break-all bg-black/20 rounded-lg px-2.5 py-1.5">{link}</p>
-                        <button onClick={() => copy(link)} className="text-unicorn-pink text-sm font-semibold">Link kopieren</button>
+                        <p className="text-fg/55 text-xs break-all bg-black/20 rounded-lg px-2.5 py-1.5">{link}</p>
+                        <button onClick={() => copy(link)} className="text-accent-pink text-sm font-semibold">Link kopieren</button>
                       </div>
                     )}
                   </div>
@@ -108,15 +108,15 @@ export default function MembersPage() {
         </div>
 
         {canInvite && pending.length > 0 && (
-          <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-white/5">
-              <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Offene Einladungen</p>
+          <div className="bg-surface rounded-2xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-fg/5">
+              <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Offene Einladungen</p>
             </div>
             {pending.map(i => (
-              <div key={i.id} className="px-4 py-3 border-b border-white/5 flex items-center justify-between gap-2">
+              <div key={i.id} className="px-4 py-3 border-b border-fg/5 flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-white text-sm">{playerName(i.player_id)}</p>
-                  <p className="text-white/35 text-xs">gültig bis {new Date(i.expires_at).toLocaleDateString('de-DE')}</p>
+                  <p className="text-fg text-sm">{playerName(i.player_id)}</p>
+                  <p className="text-fg/35 text-xs">gültig bis {new Date(i.expires_at).toLocaleDateString('de-DE')}</p>
                 </div>
                 <button
                   onClick={() => revoke(i.id)} disabled={busy === i.id}

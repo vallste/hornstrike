@@ -60,14 +60,14 @@ function SortablePlayerCard({ player, idx, onEdit, canDrag }: {
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={`rounded-2xl px-4 py-3.5 flex items-center gap-3 transition-shadow ${
         isDragging ? 'shadow-2xl shadow-unicorn-pink/30 opacity-90 z-10 relative' : ''
-      } ${isActive ? 'bg-[#2b0b4c]' : 'bg-[#2b0b4c]/50'}`}
+      } ${isActive ? 'bg-surface' : 'bg-surface/50'}`}
     >
       {/* Drag handle */}
       {canDrag && (
         <button
           {...listeners}
           {...attributes}
-          className="text-white/20 text-lg flex-shrink-0 cursor-grab active:cursor-grabbing touch-none select-none px-1 -ml-1"
+          className="text-fg/20 text-lg flex-shrink-0 cursor-grab active:cursor-grabbing touch-none select-none px-1 -ml-1"
           tabIndex={-1}
           aria-label="Sortieren"
         >
@@ -85,9 +85,9 @@ function SortablePlayerCard({ player, idx, onEdit, canDrag }: {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className={`font-semibold text-[15px] truncate ${isActive ? 'text-white' : 'text-white/40'}`}>{player.name}</p>
+            <p className={`font-semibold text-[15px] truncate ${isActive ? 'text-fg' : 'text-fg/40'}`}>{player.name}</p>
             {!isActive && (
-              <span className="text-[10px] font-semibold bg-white/10 text-white/35 px-1.5 py-0.5 rounded-md flex-shrink-0">Inaktiv</span>
+              <span className="text-[10px] font-semibold bg-fg/10 text-fg/35 px-1.5 py-0.5 rounded-md flex-shrink-0">Inaktiv</span>
             )}
           </div>
           {isActive && (
@@ -101,7 +101,7 @@ function SortablePlayerCard({ player, idx, onEdit, canDrag }: {
       </button>
 
       {/* Chevron */}
-      <button onClick={onEdit} className="text-white/25 text-xl px-1 flex-shrink-0">›</button>
+      <button onClick={onEdit} className="text-fg/25 text-xl px-1 flex-shrink-0">›</button>
     </div>
   )
 }
@@ -128,7 +128,7 @@ export default function PlayersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-unicorn-purple pb-24">
+    <div className="min-h-screen bg-app pb-24">
       <div className="absolute w-[380px] h-[380px] rounded-full bg-unicorn-violet/35 blur-[130px] -top-20 right-0 pointer-events-none" />
 
       <Header
@@ -145,10 +145,10 @@ export default function PlayersPage() {
 
       <div className="relative px-6 mt-2">
         {players.length === 0 && (
-          <div className="bg-[#2b0b4c] rounded-2xl p-6 text-center">
+          <div className="bg-surface rounded-2xl p-6 text-center">
             <p className="text-4xl mb-3">👥</p>
-            <p className="text-white font-semibold">Noch keine Spieler</p>
-            <p className="text-white/45 text-sm mt-1">Tippe auf + um den ersten Spieler anzulegen.</p>
+            <p className="text-fg font-semibold">Noch keine Spieler</p>
+            <p className="text-fg/45 text-sm mt-1">Tippe auf + um den ersten Spieler anzulegen.</p>
           </div>
         )}
 

@@ -60,11 +60,11 @@ export default function PollDetailPage() {
   if (isLoading) return <LoadingScreen />
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-unicorn-purple flex items-center justify-center px-6">
+      <div className="min-h-screen bg-app flex items-center justify-center px-6">
         <div className="text-center">
-          <p className="text-white text-lg font-semibold">Umfrage konnte nicht geladen werden</p>
+          <p className="text-fg text-lg font-semibold">Umfrage konnte nicht geladen werden</p>
           {error && <p className="text-red-300/80 text-sm mt-2 break-words">{(error as Error).message}</p>}
-          <button onClick={() => navigate('/terminfindung')} className="text-unicorn-pink mt-4 block mx-auto">← Zurück</button>
+          <button onClick={() => navigate('/terminfindung')} className="text-accent-pink mt-4 block mx-auto">← Zurück</button>
         </div>
       </div>
     )
@@ -101,37 +101,37 @@ export default function PollDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-unicorn-purple pb-24">
+    <div className="min-h-screen bg-app pb-24">
       <div className="absolute w-[360px] h-[360px] rounded-full bg-unicorn-violet/35 blur-[140px] -top-20 right-0 pointer-events-none" />
       <Header title={`${poll.title}${poll.default_opponent ? ` – ${poll.default_opponent}` : ''}`} back />
 
       <div className="relative px-6 mt-2 space-y-3">
-        <p className="text-white/50 text-sm">
+        <p className="text-fg/50 text-sm">
           {open ? 'Offen' : 'Geschlossen'}
           {poll.deadline ? ` · Deadline ${new Date(poll.deadline).toLocaleDateString('de-DE')}` : ''}
         </p>
         {(poll.default_time || poll.default_location) && (
-          <p className="text-white/60 text-sm">
+          <p className="text-fg/60 text-sm">
             {[poll.default_time ? `🕐 ${poll.default_time.slice(0, 5)} Uhr` : '', poll.default_location ? `📍 ${poll.default_location}` : ''].filter(Boolean).join('  ·  ')}
           </p>
         )}
 
         {myPlayerId && (
-          <div className="bg-[#2b0b4c] rounded-2xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-white/5">
-              <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase">Deine Verfügbarkeit</p>
+          <div className="bg-surface rounded-2xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-fg/5">
+              <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Deine Verfügbarkeit</p>
             </div>
             {options.map(o => (
-              <div key={o.id} className="px-4 py-3 border-b border-white/5">
-                <p className="text-white text-sm">{fmt(o.proposed_date)}</p>
+              <div key={o.id} className="px-4 py-3 border-b border-fg/5">
+                <p className="text-fg text-sm">{fmt(o.proposed_date)}</p>
                 {(optTime(o) || optLoc(o)) && (
-                  <p className="text-white/45 text-xs">{[optTime(o) && `${optTime(o)} Uhr`, optLoc(o)].filter(Boolean).join(' · ')}</p>
+                  <p className="text-fg/45 text-xs">{[optTime(o) && `${optTime(o)} Uhr`, optLoc(o)].filter(Boolean).join(' · ')}</p>
                 )}
                 <div className="flex gap-2 mt-2">
                   {(['available', 'maybe', 'no'] as const).map(s => (
                     <button
                       key={s} disabled={!open} onClick={() => respond(o.id, s)}
-                      className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 ${myResp(o.id) === s ? STATUS_ACTIVE[s] : 'bg-[#391060] text-white/50'}`}
+                      className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 ${myResp(o.id) === s ? STATUS_ACTIVE[s] : 'bg-surface2 text-fg/50'}`}
                     >{STATUS_LABEL[s]}</button>
                   ))}
                 </div>
@@ -141,21 +141,21 @@ export default function PollDetailPage() {
         )}
 
         {canManage && (
-          <div className="bg-[#2b0b4c] rounded-2xl p-4">
-            <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-3">Ergebnisse</p>
+          <div className="bg-surface rounded-2xl p-4">
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-3">Ergebnisse</p>
 
             <div className="overflow-x-auto -mx-1">
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr>
-                    <th className="text-left px-1.5 py-1.5 font-medium text-white/40"> </th>
+                    <th className="text-left px-1.5 py-1.5 font-medium text-fg/40"> </th>
                     {options.map(o => {
                       const t = (o.start_time ?? poll.default_time)?.slice(0, 5)
                       return (
-                        <th key={o.id} className="px-1.5 py-1.5 font-medium text-white/70 text-center whitespace-nowrap align-bottom">
+                        <th key={o.id} className="px-1.5 py-1.5 font-medium text-fg/70 text-center whitespace-nowrap align-bottom">
                           <div>{fmtShort(o.proposed_date)}</div>
-                          {t && <div className="text-white/40 text-[11px] font-normal">{t}</div>}
-                          {o.location && <div className="text-unicorn-gold/80 text-[11px] font-normal max-w-[90px] truncate mx-auto" title={o.location}>📍{o.location}</div>}
+                          {t && <div className="text-fg/40 text-[11px] font-normal">{t}</div>}
+                          {o.location && <div className="text-accent-gold/80 text-[11px] font-normal max-w-[90px] truncate mx-auto" title={o.location}>📍{o.location}</div>}
                         </th>
                       )
                     })}
@@ -163,13 +163,13 @@ export default function PollDetailPage() {
                 </thead>
                 <tbody>
                   {players.filter(p => p.active !== false).map(p => (
-                    <tr key={p.id} className="border-t border-white/5">
-                      <td className="px-1.5 py-1.5 text-white/85 whitespace-nowrap">{p.name}</td>
+                    <tr key={p.id} className="border-t border-fg/5">
+                      <td className="px-1.5 py-1.5 text-fg/85 whitespace-nowrap">{p.name}</td>
                       {options.map(o => {
                         const st = responses.find(r => r.player_id === p.id && r.poll_option_id === o.id)?.status
                         return (
                           <td key={o.id} className="px-1.5 py-1.5 text-center">
-                            {st ? cell(st) : <span className="text-white/20">·</span>}
+                            {st ? cell(st) : <span className="text-fg/20">·</span>}
                           </td>
                         )
                       })}
@@ -177,19 +177,19 @@ export default function PollDetailPage() {
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t-2 border-white/15">
+                  <tr className="border-t-2 border-fg/15">
                     <td className="px-1.5 py-1.5 text-emerald-400 font-semibold whitespace-nowrap">Kann</td>
                     {options.map(o => <td key={o.id} className="px-1.5 py-1.5 text-center text-emerald-400 font-bold">{countAvail(o.id)}</td>)}
                   </tr>
                   <tr>
-                    <td className="px-1.5 py-1.5 text-unicorn-gold font-semibold whitespace-nowrap">+ Vielleicht</td>
-                    {options.map(o => <td key={o.id} className="px-1.5 py-1.5 text-center text-unicorn-gold font-bold">{countAvailMaybe(o.id)}</td>)}
+                    <td className="px-1.5 py-1.5 text-accent-gold font-semibold whitespace-nowrap">+ Vielleicht</td>
+                    {options.map(o => <td key={o.id} className="px-1.5 py-1.5 text-center text-accent-gold font-bold">{countAvailMaybe(o.id)}</td>)}
                   </tr>
                   <tr>
                     <td className="px-1.5 pt-2"> </td>
                     {options.map(o => (
                       <td key={o.id} className="px-1.5 pt-2 text-center">
-                        <button onClick={() => createLineup(o)} className="text-unicorn-pink text-xs font-semibold whitespace-nowrap">→ Aufstellung</button>
+                        <button onClick={() => createLineup(o)} className="text-accent-pink text-xs font-semibold whitespace-nowrap">→ Aufstellung</button>
                       </td>
                     ))}
                   </tr>
@@ -197,7 +197,7 @@ export default function PollDetailPage() {
               </table>
             </div>
 
-            <button onClick={toggleClosed} className="mt-3 text-white/55 text-sm">
+            <button onClick={toggleClosed} className="mt-3 text-fg/55 text-sm">
               {open ? 'Umfrage schließen' : 'Umfrage wieder öffnen'}
             </button>
           </div>

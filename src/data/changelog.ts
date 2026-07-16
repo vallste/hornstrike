@@ -14,6 +14,10 @@ export interface ChangelogEntry {
  */
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
+  { type: 'feat', text: 'Heller & dunkler Modus umschaltbar (Einstellungen → Darstellung: Hell / Auto / Dunkel); die Auswahl wird gespeichert' },
+  { type: 'feat', text: 'Neues helles Design in sanftem Lavendel mit gut lesbaren Akzentfarben – der dunkle Modus bleibt unverändert' },
+  { type: 'improve', text: 'Footer-Icons vereinheitlicht: ein einheitliches Linien-Icon-Set statt gemischter Emojis' },
+  { type: 'improve', text: 'Vereins- & Team-Verwaltung als eigener Footer-Tab für Admins (aus den Einstellungen ausgelagert)' },
   { type: 'fix', text: 'GitHub Actions: Node.js 24 Runtime für alle Actions erzwungen (Node 20 Deprecation)' },
   { type: 'feat', text: 'Aufstellung als Bild teilen oder herunterladen – Text- und Bild-Export im Teilen-Dropdown zusammengefasst' },
   { type: 'fix', text: 'Bild-Export: CORS-Fehler mit Google Fonts behoben (Font-Embedding übersprungen)' },

@@ -35,12 +35,12 @@ export default function UpdateBanner() {
         <motion.div
           initial={{ opacity: 0, y: 80 }}
           animate={{ opacity: 1, y: 0 }}
-          className="fixed bottom-24 left-4 right-4 z-50 bg-unicorn-violet border border-unicorn-cyan/40 rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-xl"
+          className="fixed bottom-24 left-4 right-4 z-50 bg-unicorn-violet border border-accent-cyan/40 rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-xl"
         >
           <span className="text-2xl flex-shrink-0 animate-spin">⟳</span>
           <div>
-            <p className="text-white font-semibold text-[14px]">App wird aktualisiert…</p>
-            <p className="text-white/50 text-[12px]">Einen Moment bitte.</p>
+            <p className="text-fg font-semibold text-[14px]">App wird aktualisiert…</p>
+            <p className="text-fg/50 text-[12px]">Einen Moment bitte.</p>
           </div>
         </motion.div>
       )}

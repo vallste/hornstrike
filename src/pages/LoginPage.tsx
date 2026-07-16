@@ -37,7 +37,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative w-full h-dvh min-h-screen overflow-hidden bg-unicorn-purple flex flex-col items-center justify-center px-6">
+    <div className="relative w-full h-dvh min-h-screen overflow-hidden bg-app flex flex-col items-center justify-center px-6">
       <div className="absolute w-[560px] h-[560px] rounded-full bg-unicorn-violet/60 blur-[150px] -top-8 -left-20 pointer-events-none" />
       <div className="absolute w-[370px] h-[370px] rounded-full bg-unicorn-pink/25 blur-[110px] bottom-10 -right-10 pointer-events-none" />
 
@@ -47,8 +47,8 @@ export default function LoginPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-white font-black text-3xl text-center">Hornstrike</h1>
-        <p className="text-unicorn-pink/80 text-center text-sm mt-1 mb-8 tracking-wide">Anmelden per E-Mail</p>
+        <h1 className="text-fg font-black text-3xl text-center">Hornstrike</h1>
+        <p className="text-accent-pink/80 text-center text-sm mt-1 mb-8 tracking-wide">Anmelden per E-Mail</p>
 
         {!configured && (
           <p className="text-amber-300/90 text-sm text-center mb-4">
@@ -66,7 +66,7 @@ export default function LoginPage() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && sendLink()}
-              className="w-full rounded-2xl bg-white/8 border border-white/12 px-4 py-3.5 text-white placeholder-white/30 outline-none focus:border-unicorn-pink/60"
+              className="w-full rounded-2xl bg-fg/8 border border-fg/12 px-4 py-3.5 text-fg placeholder-fg/30 outline-none focus:border-accent-pink/60"
             />
             <button
               onClick={sendLink}
@@ -78,8 +78,8 @@ export default function LoginPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-white/70 text-sm text-center">
-              Wir haben dir eine Mail an <span className="text-white font-medium">{email}</span> geschickt.
+            <p className="text-fg/70 text-sm text-center">
+              Wir haben dir eine Mail an <span className="text-fg font-medium">{email}</span> geschickt.
               Klicke den Link – oder gib den 6-stelligen Code ein:
             </p>
             <input
@@ -91,7 +91,7 @@ export default function LoginPage() {
               value={code}
               onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
               onKeyDown={e => e.key === 'Enter' && submitCode()}
-              className="w-full rounded-2xl bg-white/8 border border-white/12 px-4 py-3.5 text-white text-center text-2xl tracking-[0.3em] placeholder-white/25 outline-none focus:border-unicorn-pink/60"
+              className="w-full rounded-2xl bg-fg/8 border border-fg/12 px-4 py-3.5 text-fg text-center text-2xl tracking-[0.3em] placeholder-fg/25 outline-none focus:border-accent-pink/60"
             />
             <button
               onClick={submitCode}
@@ -102,7 +102,7 @@ export default function LoginPage() {
             </button>
             <button
               onClick={() => { setSent(false); setCode(''); setError(null) }}
-              className="w-full text-white/45 text-sm py-1"
+              className="w-full text-fg/45 text-sm py-1"
             >
               ← andere E-Mail
             </button>

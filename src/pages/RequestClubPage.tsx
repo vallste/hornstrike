@@ -45,35 +45,35 @@ export default function RequestClubPage() {
   }
 
   return (
-    <div className="min-h-screen bg-unicorn-purple pb-24">
+    <div className="min-h-screen bg-app pb-24">
       <div className="absolute w-[360px] h-[360px] rounded-full bg-unicorn-violet/35 blur-[140px] -top-20 right-0 pointer-events-none" />
       <Header title="Verein beantragen" back={teamStatus === 'has' ? true : undefined} />
 
       <div className="relative px-6 mt-4 space-y-3">
         {pending ? (
-          <div className="bg-[#2b0b4c] rounded-2xl px-4 py-5 text-center">
+          <div className="bg-surface rounded-2xl px-4 py-5 text-center">
             <p className="text-3xl mb-2">⏳</p>
-            <p className="text-white font-semibold text-[15px]">Antrag läuft</p>
-            <p className="text-white/55 text-sm mt-1">
+            <p className="text-fg font-semibold text-[15px]">Antrag läuft</p>
+            <p className="text-fg/55 text-sm mt-1">
               „{pending.club_name}" wartet auf Freigabe durch einen Plattform-Admin.
             </p>
           </div>
         ) : (
           <>
-            <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-              <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Vereinsname</p>
+            <div className="bg-surface rounded-2xl px-4 py-3.5">
+              <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Vereinsname</p>
               <input
                 type="text" value={name} onChange={e => setName(e.target.value)} autoFocus
                 placeholder="z. B. TSV Musterstadt"
-                className="w-full bg-transparent text-white placeholder-white/25 text-[17px] font-semibold outline-none"
+                className="w-full bg-transparent text-fg placeholder-fg/25 text-[17px] font-semibold outline-none"
               />
             </div>
-            <div className="bg-[#2b0b4c] rounded-2xl px-4 py-3.5">
-              <p className="text-white/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Notiz (optional)</p>
+            <div className="bg-surface rounded-2xl px-4 py-3.5">
+              <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Notiz (optional)</p>
               <textarea
                 value={note} onChange={e => setNote(e.target.value)} rows={3}
                 placeholder="Kurz zu dir / deinem Verein"
-                className="w-full bg-transparent text-white placeholder-white/25 text-[15px] outline-none resize-none"
+                className="w-full bg-transparent text-fg placeholder-fg/25 text-[15px] outline-none resize-none"
               />
             </div>
             <button
@@ -83,20 +83,20 @@ export default function RequestClubPage() {
               {busy ? 'Senden…' : 'Antrag stellen'}
             </button>
             {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-            <p className="text-white/40 text-xs text-center px-2">
+            <p className="text-fg/40 text-xs text-center px-2">
               Nach der Freigabe wirst du Vereins-Admin und kannst Teams anlegen und Spieler einladen.
             </p>
           </>
         )}
 
         {teamStatus !== 'has' && (
-          <div className="bg-[#2b0b4c]/60 rounded-2xl px-4 py-4 mt-2">
-            <p className="text-white/55 text-sm">
-              Du wurdest zu einem Team eingeladen? Öffne einfach den <span className="text-white">Einladungslink</span> deines Captains.
+          <div className="bg-surface/60 rounded-2xl px-4 py-4 mt-2">
+            <p className="text-fg/55 text-sm">
+              Du wurdest zu einem Team eingeladen? Öffne einfach den <span className="text-fg">Einladungslink</span> deines Captains.
             </p>
             <button
               onClick={async () => { await signOut(); navigate('/login', { replace: true }) }}
-              className="text-unicorn-pink text-sm font-semibold mt-3"
+              className="text-accent-pink text-sm font-semibold mt-3"
             >Abmelden</button>
           </div>
         )}
