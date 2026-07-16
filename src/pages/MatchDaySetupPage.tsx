@@ -8,6 +8,7 @@ import type { MatchDayPlayer } from '../types'
 import { generateLineup } from '../utils/lineup'
 import { GAME_SEQUENCE } from '../types'
 import { uuid } from '../utils/uuid'
+import { useTrack } from '../lib/analytics'
 
 export default function MatchDaySetupPage() {
   const navigate = useNavigate()
@@ -16,6 +17,7 @@ export default function MatchDaySetupPage() {
   const prefill = (location.state as { date?: string; playerIds?: string[]; time?: string; location?: string; opponent?: string } | null) ?? {}
   const { players } = usePlayers()
   const { addMatchDay } = useMatchDays()
+  const track = useTrack()
 
   const [date, setDate] = useState(prefill.date ?? new Date().toISOString().split('T')[0])
   const [startTime, setStartTime] = useState(prefill.time ?? '')
@@ -51,6 +53,7 @@ export default function MatchDaySetupPage() {
       availableTo: availability[p.id]?.to ?? maxGame,
     }))
     const lineup = generateLineup(players, mdPlayers, useGoalie, useFifthDouble)
+    track('lineup_generated', { playerCount: activePlayers.length, useGoalie, useFifthDouble })
     const id = uuid()
     addMatchDay({ id, date, startTime: startTime || null, location: venue.trim() || null, opponent: opponent.trim() || undefined, useGoalie, useFifthDouble, players: mdPlayers, lineup })
     navigate(`/lineup/${id}`)

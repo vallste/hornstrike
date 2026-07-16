@@ -14,6 +14,7 @@ export interface ChangelogEntry {
  */
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
+  { type: 'feat', text: 'Plattform-Admin: Nutzungs-Statistiken (Wachstum, Aktivierung, Engagement, Aktivität) – inklusive anonymer First-Party-Nutzungsmetriken, kein Drittanbieter-Tracking' },
   { type: 'feat', text: 'Heller & dunkler Modus umschaltbar (Einstellungen → Darstellung: Hell / Auto / Dunkel); die Auswahl wird gespeichert' },
   { type: 'feat', text: 'Neues helles Design in sanftem Lavendel mit gut lesbaren Akzentfarben – der dunkle Modus bleibt unverändert' },
   { type: 'improve', text: 'Footer-Icons vereinheitlicht: ein einheitliches Linien-Icon-Set statt gemischter Emojis' },

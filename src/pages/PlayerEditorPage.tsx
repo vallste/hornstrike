@@ -6,6 +6,7 @@ import LoadingScreen from '../components/LoadingScreen'
 import Can from '../components/Can'
 import { useCan, useMyPlayerId } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
+import { useTrack } from '../lib/analytics'
 import { usePlayers } from '../store'
 import type { Player, Position, GameTypePreference } from '../types'
 import { uuid } from '../utils/uuid'
@@ -130,6 +131,7 @@ function PlayerEditorForm() {
   const [inviteBusy, setInviteBusy] = useState(false)
   const [inviteErr, setInviteErr] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const track = useTrack()
 
   const save = () => {
     if (!name.trim()) return
@@ -149,6 +151,7 @@ function PlayerEditorForm() {
     setInviteBusy(false)
     if (error) { setInviteErr(error.message); return }
     setInviteLink(`${window.location.origin}${import.meta.env.BASE_URL}#/join/${data as string}`)
+    track('invite_created', { source: 'player_editor' })
   }
   const copyLink = async () => {
     if (!inviteLink) return

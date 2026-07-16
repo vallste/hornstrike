@@ -18,6 +18,7 @@ export type Capability =
   | 'club:manageTeams'
   | 'club:invite'
   | 'app:manageClubs'
+  | 'app:viewStats'
 
 const RANK: Record<Role, number> = { player: 0, team_admin: 1, club_admin: 2, admin: 3 }
 
@@ -32,6 +33,7 @@ const MIN_ROLE: Record<Capability, Role> = {
   'club:manageTeams': 'club_admin',
   'club:invite': 'club_admin',
   'app:manageClubs': 'admin',
+  'app:viewStats': 'admin',
 }
 
 export function can(role: Role | null, cap: Capability): boolean {

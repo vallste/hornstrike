@@ -5,6 +5,7 @@ import { usePlayers } from '../store'
 import { useScope } from '../context/ScopeProvider'
 import { useCan, ROLE_LABEL, type Role } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
+import { useTrack } from '../lib/analytics'
 
 type MembershipRow = { user_id: string; role: Role }
 type InviteRow = { id: string; player_id: string | null; email: string | null; expires_at: string; accepted_at: string | null; revoked_at: string | null }
@@ -14,6 +15,7 @@ export default function MembersPage() {
   const { currentTeamId } = useScope()
   const canInvite = useCan('team:invite')
   const qc = useQueryClient()
+  const track = useTrack()
 
   const [linkFor, setLinkFor] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState<string | null>(null)
@@ -50,6 +52,7 @@ export default function MembersPage() {
     setBusy(null)
     if (error) { setError(error.message); return }
     setLinkFor(s => ({ ...s, [playerId]: `${window.location.origin}${import.meta.env.BASE_URL}#/join/${data as string}` }))
+    track('invite_created', { source: 'members' })
     qc.invalidateQueries({ queryKey: ['invites'] })
   }
   const revoke = async (id: string) => {

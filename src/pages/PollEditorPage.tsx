@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import TimeField from '../components/TimeField'
 import { useScope } from '../context/ScopeProvider'
 import { getSupabase } from '../lib/supabase'
+import { useTrack } from '../lib/analytics'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const iso = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`
@@ -14,6 +15,7 @@ export default function PollEditorPage() {
   const navigate = useNavigate()
   const { currentTeamId } = useScope()
   const qc = useQueryClient()
+  const track = useTrack()
 
   const [title, setTitle] = useState('')
   const [deadline, setDeadline] = useState('')
@@ -69,6 +71,7 @@ export default function PollEditorPage() {
     setBusy(false)
     if (e2) { setError(e2.message); return }
     qc.invalidateQueries({ queryKey: ['polls'] })
+    track('poll_created', { optionCount: selected.length })
     navigate(`/terminfindung/${pollId}`, { replace: true })
   }
 
