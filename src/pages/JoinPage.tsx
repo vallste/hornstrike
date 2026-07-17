@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSession } from '../context/SessionProvider'
+import { useScope } from '../context/ScopeProvider'
 import { getSupabase } from '../lib/supabase'
 import { errorMessage } from '../lib/errors'
 import { track } from '../lib/analytics'
@@ -12,6 +13,7 @@ import { DS_VERSION } from '../lib/consent'
 export default function JoinPage() {
   const { token } = useParams()
   const { session, user, signInWithOtp, verifyOtp, signOut } = useSession()
+  const { setCurrentTeam } = useScope()
   const navigate = useNavigate()
   const qc = useQueryClient()
 
@@ -46,11 +48,16 @@ export default function JoinPage() {
   const acceptInvite = async () => {
     if (!token || busy) return
     setBusy(true); setError(null)
-    const { error } = await getSupabase().rpc('redeem_invite', { p_raw_token: token })
-    setBusy(false)
-    if (error) { setError(errorMessage(error)); return }
+    const { data, error } = await getSupabase().rpc('redeem_invite', { p_raw_token: token })
+    if (error) { setBusy(false); setError(errorMessage(error)); return }
     void track('invite_accepted')
+    // Beigetretenes Team direkt aktiv setzen …
+    if (typeof data === 'string') setCurrentTeam(data)
+    // … und die Workspace-Liste neu laden, BEVOR wir navigieren – sonst greift
+    // das „kein Team“-Gate (ProtectedShell) noch mit der veralteten, leeren Liste.
+    await qc.invalidateQueries({ queryKey: ['workspaces'] })
     qc.invalidateQueries()
+    setBusy(false)
     navigate('/home', { replace: true })
   }
 

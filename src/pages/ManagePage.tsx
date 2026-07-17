@@ -40,7 +40,7 @@ export default function ManagePage() {
     queryFn: async () => {
       const sb = getSupabase()
       const [prof, mems] = await Promise.all([
-        sb.from('profiles').select('is_platform_admin').maybeSingle(),
+        sb.from('profiles').select('is_platform_admin').eq('id', user?.id ?? '').maybeSingle(),
         sb.from('memberships').select('club_id,role,user_id'),
       ])
       const isPlatform = !!(prof.data as { is_platform_admin?: boolean } | null)?.is_platform_admin

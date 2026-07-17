@@ -15,6 +15,7 @@ export default function MembersPage() {
   const { players } = usePlayers()
   const { currentTeamId } = useScope()
   const canInvite = useCan('team:invite')
+  const canManageRoles = useCan('team:manageRoles')
   const qc = useQueryClient()
   const track = useTrack()
 
@@ -63,6 +64,15 @@ export default function MembersPage() {
     if (error) { setError(errorMessage(error)); return }
     qc.invalidateQueries({ queryKey: ['invites'] })
   }
+  const setRole = async (userId: string, role: Role) => {
+    if (!currentTeamId) return
+    setBusy(userId); setError(null)
+    const { error } = await getSupabase().rpc('set_member_role', { p_user: userId, p_team: currentTeamId, p_role: role })
+    setBusy(null)
+    if (error) { setError(errorMessage(error)); return }
+    qc.invalidateQueries({ queryKey: ['memberships'] })
+    qc.invalidateQueries({ queryKey: ['role'] }) // eigene Rolle könnte sich geändert haben
+  }
   const copy = (t: string) => { navigator.clipboard?.writeText(t).catch(() => {}) }
   const playerName = (id: string | null) => players.find(p => p.id === id)?.name ?? '—'
 
@@ -86,7 +96,18 @@ export default function MembersPage() {
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-fg text-[15px]">{p.name}</span>
                   {claimed
-                    ? <span className="text-accent-cyan text-xs font-semibold">{role ? ROLE_LABEL[role] : 'Account ✓'}</span>
+                    ? (canManageRoles && p.userId
+                        ? <select
+                            value={role ?? 'player'}
+                            onChange={e => setRole(p.userId as string, e.target.value as Role)}
+                            disabled={busy === p.userId}
+                            className="bg-surface2 text-accent-cyan text-xs font-semibold rounded-lg px-2 py-1 outline-none disabled:opacity-50"
+                          >
+                            <option value="team_admin">Captain</option>
+                            <option value="co_captain">Co-Captain</option>
+                            <option value="player">Spieler</option>
+                          </select>
+                        : <span className="text-accent-cyan text-xs font-semibold">{role ? ROLE_LABEL[role] : 'Account ✓'}</span>)
                     : hasPending
                       ? <span className="text-accent-gold text-xs font-semibold">Einladung offen</span>
                       : <span className="text-fg/35 text-xs">kein Account</span>}

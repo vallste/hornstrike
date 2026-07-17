@@ -14,6 +14,9 @@ export interface ChangelogEntry {
  */
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
+  { type: 'feat', text: 'Neue Rolle „Co-Captain": darf Kader, Spieltage, Umfragen & Aufstellungen verwalten, aber keine Mitglieder einladen oder Rollen vergeben' },
+  { type: 'feat', text: 'Rollen von Mitgliedern zuweisen (Captain/Co-Captain/Spieler) unter Mitglieder & Einladungen; der letzte Captain eines Teams bleibt geschützt' },
+  { type: 'fix', text: 'Einladung annehmen führt jetzt direkt ins Team; Vereins-Umbenennen als Plattform-Admin wieder möglich' },
   { type: 'feat', text: 'Impressum & Datenschutzerklärung ergänzt; Anmeldung/Beitritt erst nach Zustimmung zur Datenschutzerklärung' },
   { type: 'improve', text: 'Schriftart wird selbst ausgeliefert (kein Aufruf an Google Fonts) – datenschutzfreundlicher' },
   { type: 'fix', text: 'Sicherheits- & Datenschutz-Härtung: Kontolöschung möglich, Einladungen an E-Mail gebunden, robustere Fehlermeldungen' },

@@ -5,8 +5,10 @@ import { usePreviewRole } from '../context/PreviewRoleProvider'
 import { useScope } from '../context/ScopeProvider'
 import { usePlayers } from '../store'
 
-// Rollen sind hierarchisch: admin ⊇ club_admin ⊇ team_admin ⊇ player.
-export type Role = 'admin' | 'club_admin' | 'team_admin' | 'player'
+// Rollen. co_captain steht bewusst NICHT linear in der Hierarchie: darf Inhalte
+// wie ein Captain bearbeiten, aber weder einladen noch Rollen vergeben.
+// Deshalb explizite Capability-Matrix statt linearem Rang.
+export type Role = 'admin' | 'club_admin' | 'team_admin' | 'co_captain' | 'player'
 
 export type Capability =
   | 'player:editOwnPrefs'
@@ -15,36 +17,36 @@ export type Capability =
   | 'team:createMatchday'
   | 'team:managePolls'
   | 'team:invite'
+  | 'team:manageRoles'
   | 'club:manageTeams'
   | 'club:invite'
   | 'app:manageClubs'
   | 'app:viewStats'
 
-const RANK: Record<Role, number> = { player: 0, team_admin: 1, club_admin: 2, admin: 3 }
+// Inhaltsbearbeitung auf Team-Ebene (Kader, Spieltage, Umfragen, Aufstellungen).
+const TEAM_EDIT: Capability[] = [
+  'player:editOwnPrefs', 'team:editRoster', 'team:editLineup',
+  'team:createMatchday', 'team:managePolls',
+]
 
-// Mindest-Rolle je Capability (hierarchisch ausgewertet).
-const MIN_ROLE: Record<Capability, Role> = {
-  'player:editOwnPrefs': 'player',
-  'team:editRoster': 'team_admin',
-  'team:editLineup': 'team_admin',
-  'team:createMatchday': 'team_admin',
-  'team:managePolls': 'team_admin',
-  'team:invite': 'team_admin',
-  'club:manageTeams': 'club_admin',
-  'club:invite': 'club_admin',
-  'app:manageClubs': 'admin',
-  'app:viewStats': 'admin',
+// Explizite Rechte je Rolle.
+const CAPS: Record<Role, Capability[]> = {
+  player: ['player:editOwnPrefs'],
+  co_captain: [...TEAM_EDIT],
+  team_admin: [...TEAM_EDIT, 'team:invite', 'team:manageRoles'],
+  club_admin: [...TEAM_EDIT, 'team:invite', 'team:manageRoles', 'club:manageTeams', 'club:invite'],
+  admin: [...TEAM_EDIT, 'team:invite', 'team:manageRoles', 'club:manageTeams', 'club:invite', 'app:manageClubs', 'app:viewStats'],
 }
 
 export function can(role: Role | null, cap: Capability): boolean {
-  if (!role) return false
-  return RANK[role] >= RANK[MIN_ROLE[cap]]
+  return !!role && CAPS[role].includes(cap)
 }
 
 export const ROLE_LABEL: Record<Role, string> = {
   admin: 'Plattform-Admin',
   club_admin: 'Vereins-Admin',
   team_admin: 'Captain',
+  co_captain: 'Co-Captain',
   player: 'Spieler',
 }
 
@@ -74,6 +76,7 @@ export function useRealRole(): Role | null {
       const mine = ((mems.data ?? []) as MembershipRow[]).filter(m => m.user_id === uid)
       if (currentClubId && mine.some(m => m.role === 'club_admin' && m.club_id === currentClubId)) return 'club_admin'
       if (currentTeamId && mine.some(m => m.role === 'team_admin' && m.team_id === currentTeamId)) return 'team_admin'
+      if (currentTeamId && mine.some(m => m.role === 'co_captain' && m.team_id === currentTeamId)) return 'co_captain'
       if (currentTeamId && mine.some(m => m.role === 'player' && m.team_id === currentTeamId)) return 'player'
       return null
     },
