@@ -7,6 +7,13 @@ import { useCan, ROLE_LABEL, type Role } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
 import { errorMessage } from '../lib/errors'
 import { useTrack } from '../lib/analytics'
+import SelectMenu from '../components/SelectMenu'
+
+const ROLE_OPTIONS: { value: Role; label: string }[] = [
+  { value: 'team_admin', label: 'Captain' },
+  { value: 'co_captain', label: 'Co-Captain' },
+  { value: 'player', label: 'Spieler' },
+]
 
 type MembershipRow = { user_id: string; role: Role }
 type InviteRow = { id: string; player_id: string | null; email: string | null; expires_at: string; accepted_at: string | null; revoked_at: string | null }
@@ -82,7 +89,8 @@ export default function MembersPage() {
       <Header title="Mitglieder" back />
 
       <div className="relative px-6 mt-4 space-y-3">
-        <div className="bg-surface rounded-2xl overflow-hidden">
+        {/* Kein overflow-hidden: das Rollen-Dropdown (absolut positioniert) würde sonst geclippt. */}
+        <div className="bg-surface rounded-2xl">
           <div className="px-4 py-3 border-b border-fg/5">
             <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Kader &amp; Accounts</p>
           </div>
@@ -97,16 +105,13 @@ export default function MembersPage() {
                   <span className="text-fg text-[15px]">{p.name}</span>
                   {claimed
                     ? (canManageRoles && p.userId
-                        ? <select
+                        ? <SelectMenu<Role>
                             value={role ?? 'player'}
-                            onChange={e => setRole(p.userId as string, e.target.value as Role)}
+                            options={ROLE_OPTIONS}
+                            onChange={r => setRole(p.userId as string, r)}
                             disabled={busy === p.userId}
-                            className="bg-surface2 text-accent-cyan text-xs font-semibold rounded-lg px-2 py-1 outline-none disabled:opacity-50"
-                          >
-                            <option value="team_admin">Captain</option>
-                            <option value="co_captain">Co-Captain</option>
-                            <option value="player">Spieler</option>
-                          </select>
+                            ariaLabel={`Rolle von ${p.name}`}
+                          />
                         : <span className="text-accent-cyan text-xs font-semibold">{role ? ROLE_LABEL[role] : 'Account ✓'}</span>)
                     : hasPending
                       ? <span className="text-accent-gold text-xs font-semibold">Einladung offen</span>

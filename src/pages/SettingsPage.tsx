@@ -6,7 +6,7 @@ import { usePlayers, useMatchDays } from '../store'
 import { exportBackup, parseBackup, CURRENT_VERSION, type BackupFile } from '../utils/backup'
 import { useNavigate } from 'react-router-dom'
 import { useSession } from '../context/SessionProvider'
-import { useRole, useRealRole, can, ROLE_LABEL } from '../lib/permissions'
+import { useRole, useRealRole, ROLE_LABEL } from '../lib/permissions'
 import { usePreviewRole } from '../context/PreviewRoleProvider'
 import { useScope } from '../context/ScopeProvider'
 import { useTheme, type Theme } from '../context/ThemeProvider'
@@ -110,7 +110,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
             <p className="text-fg font-semibold text-[15px] break-all">{user?.email ?? '—'}</p>
             <p className="text-fg/45 text-xs mt-0.5">Rolle: {role ? ROLE_LABEL[role] : '—'}</p>
           </div>
-          {can(realRole, 'team:editRoster') && (
+          {realRole === 'admin' && (
             <div className="px-4 pb-3">
               <p className="text-fg/45 text-xs mb-1.5">Vorschau (nur Ansicht)</p>
               <select

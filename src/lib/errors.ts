@@ -10,6 +10,11 @@ const CUSTOM: Record<string, string> = {
   'invite invalid, expired, or already used': 'Diese Einladung ist ungültig, abgelaufen oder bereits eingelöst.',
   'invite email mismatch': 'Diese Einladung wurde an eine andere E-Mail-Adresse ausgestellt – bitte mit genau dieser Adresse anmelden.',
   'player already claimed': 'Dieser Spieler ist bereits mit einem Konto verknüpft.',
+  'cannot remove the last captain of the team': 'Der letzte Captain eines Teams kann nicht entfernt werden. Ernenne zuerst eine weitere Person zum Captain.',
+  'cannot remove the last admin of the club': 'Der letzte Vereins-Admin kann nicht entfernt werden. Ernenne zuerst eine weitere Person zum Vereins-Admin.',
+  'invalid role': 'Diese Rolle kann hier nicht vergeben werden.',
+  'team not found': 'Team nicht gefunden.',
+  'club not found': 'Verein nicht gefunden.',
 }
 
 // Postgres-SQLSTATE-Codes.

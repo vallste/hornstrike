@@ -1,6 +1,6 @@
 # Rollen & Rechte (Hornstrike)
 
-Stand: nach Migration `0010_role_management.sql`.
+Stand: nach Migration `0012_role_guard_locking.sql`.
 
 ## Rollen
 
@@ -28,6 +28,7 @@ Hierarchie ist **nicht** rein linear: Co-Captain hat Inhalts-Rechte wie ein Capt
 | Mitglieder einladen (Einladungslinks) | – | – | ✓ | ✓ | ✓ |
 | **Rollen zuweisen** (Captain/Co-Captain/Spieler) | – | – | ✓ (eigenes Team) | ✓ (Teams des Vereins) | ✓ (überall) |
 | Teams anlegen/umbenennen, Verein umbenennen, Workspace wechseln | – | – | – | ✓ | ✓ |
+| **Vereins-Admins** ernennen/entfernen | – | – | – | ✓ (eigener Verein) | ✓ (überall) |
 | „Verein"-Tab im Footer | – | – | – | ✓ | ✓ |
 | Statistiken + Vereins-Anträge (Plattform-Admin-Karte) | – | – | – | – | ✓ |
 | Neuen Verein beantragen | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -36,11 +37,20 @@ Hierarchie ist **nicht** rein linear: Co-Captain hat Inhalts-Rechte wie ein Capt
 
 ## Rollenvergabe
 
+### Team-Rollen (Captain / Co-Captain / Spieler)
 - **Wer darf vergeben:** Plattform-Admin (überall), Vereins-Admin (Teams seines Vereins), Captain (eigenes Team).
-- **Vergebbare Team-Rollen:** Captain, Co-Captain, Spieler. (Vereins-Admin wird **nicht** über diese Funktion vergeben – entsteht über die Vereins-Antrag-Freigabe bzw. Plattform-Admin.)
 - **Captain-Wechsel:** Ein Captain darf andere zu Captain machen oder herabstufen. **Mehrere Captains** gleichzeitig sind erlaubt.
 - **Letzter-Captain-Schutz:** Der **einzige** verbleibende Captain eines Teams kann nicht herabgestuft/entfernt werden (serverseitig erzwungen → Fehlermeldung „cannot remove the last captain of the team").
-- **UI:** Einstellungen → **Mitglieder & Einladungen** → bei jedem Mitglied mit Account öffnet die aktuelle Rolle ein Dropdown (nur sichtbar für Captain+).
+- **UI:** Einstellungen → **Mitglieder & Einladungen** → bei jedem Mitglied mit Account öffnet die aktuelle Rolle ein Dropdown (nur sichtbar für Captain+). Das Dropdown ist ein eigenes Button-Menü (kein natives `<select>`), damit es auf allen Mobilgeräten öffnet.
+
+### Vereins-Admin (`club_admin`)
+- **Entsteht** entweder über die **Vereins-Antrag-Freigabe** (der Antragsteller wird automatisch erster Vereins-Admin) **oder** wird über die **Vereine-&-Teams-Seite** vergeben.
+- **Wer darf vergeben:** Plattform-Admin (überall) und **bestehende Vereins-Admins** des Vereins → **Mehrere Vereins-Admins** und Übergabe möglich (analog zur Captain-Regel).
+- **Letzter-Vereins-Admin-Schutz:** Der **einzige** verbleibende Vereins-Admin kann nicht entfernt werden (serverseitig → „cannot remove the last admin of the club").
+- **UI:** Footer **Verein** → je Verein Abschnitt **„Vereins-Admins"** (aufklappbar). Mitglieder-Liste kommt aus der SECURITY-DEFINER-RPC `club_members` (nötig, weil `profiles`-RLS sonst nur das eigene Profil zeigt).
+
+### Onboarding ohne Team
+- Ein frisch freigegebener Vereins-Admin hat einen Verein, aber noch **kein Team**. Er wird auf die **Vereine-&-Teams-Seite** geleitet (nicht in die „Verein beantragen"-Sackgasse) und legt dort sein erstes Team an. Status intern: `useTeamStatus() === 'club-only'`.
 
 ## Wo wird das durchgesetzt?
 
@@ -70,7 +80,12 @@ Zwei Ebenen – die UI spiegelt nur, die **echte Absicherung ist die Datenbank (
 - **Lesen** (`_select`-Policies): `is_team_member`.
 - **Inhalte schreiben** (players, matchdays, polls, poll_options, sowie Präferenzen/Verfügbarkeiten/Umfrageantworten via `can_edit_player`): `is_team_editor` → Captain + Co-Captain.
 - **Einladungen** (`invites`): `is_team_admin` → nur Captain+.
-- **Rollen/Mitgliedschaften**: kein direkter Client-Schreibzugriff. Änderungen ausschließlich über `SECURITY DEFINER`-RPCs `public.set_member_role(user, team, role)` und `public.remove_member(user, team)` (mit Autorisierungs-Check + Letzter-Captain-Schutz) sowie `redeem_invite` / `approve_club_request`.
+- **Rollen/Mitgliedschaften**: kein direkter Client-Schreibzugriff. Änderungen ausschließlich über `SECURITY DEFINER`-RPCs:
+  - `public.set_member_role(user, team, role)` / `public.remove_member(user, team)` – Team-Rollen, mit Letzter-Captain-Schutz (`0010`).
+  - `public.set_club_admin(user, club, make)` – Vereins-Admin setzen/entfernen, mit Letzter-Vereins-Admin-Schutz (`0011`).
+  - `public.club_members(club)` – Leseliste der Vereinsmitglieder für die Rollen-UI (`0011`).
+  - `redeem_invite` / `approve_club_request` – Beitritt bzw. erster Vereins-Admin.
+  - Die „Letzter-Admin/Captain"-Prüfungen sind pro Verein/Team über einen transaktionsgebundenen Advisory-Lock serialisiert (`0012`), damit zwei parallele Entfernungen nicht beide am Schutz vorbeikommen.
 
 ## Vorschau-Modus (nur Ansicht)
 

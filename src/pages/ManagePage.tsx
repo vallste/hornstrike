@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import ClubAdminManager from '../components/ClubAdminManager'
 import { useSession } from '../context/SessionProvider'
 import { useScope } from '../context/ScopeProvider'
 import { getSupabase } from '../lib/supabase'
@@ -147,6 +148,7 @@ export default function ManagePage() {
             {(club.teams ?? []).length === 0 && (
               <p className="px-4 py-3 text-fg/40 text-sm border-b border-fg/5">Noch kein Team</p>
             )}
+            {canManage(club.id) && <ClubAdminManager clubId={club.id} />}
             {canManage(club.id) && (
               <div className="px-4 py-3 flex gap-2">
                 <input

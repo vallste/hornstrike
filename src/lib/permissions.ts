@@ -84,13 +84,22 @@ export function useRealRole(): Role | null {
   return data ?? null
 }
 
-/** Onboarding-Gate: hat der eingeloggte User Zugriff auf mindestens ein Team? */
-export function useTeamStatus(): 'loading' | 'has' | 'none' {
+/**
+ * Onboarding-Gate:
+ *  - 'has'       → Zugriff auf mindestens ein Team (Normalfall).
+ *  - 'club-only' → Vereins-Admin/Plattform-Admin, aber (noch) kein Team →
+ *                  darf verwalten (Team anlegen), aber team-abhängige Seiten
+ *                  ergeben noch keinen Sinn.
+ *  - 'none'      → gar kein Zugriff → Verein beantragen.
+ */
+export function useTeamStatus(): 'loading' | 'has' | 'club-only' | 'none' {
   const { session } = useSession()
-  const { workspaces, isLoading } = useScope()
+  const { workspaces, isLoading, adminClubIds, isPlatformAdmin } = useScope()
   if (!session) return 'none'
   if (isLoading) return 'loading'
-  return workspaces.length > 0 ? 'has' : 'none'
+  if (workspaces.length > 0) return 'has'
+  if (isPlatformAdmin || adminClubIds.length > 0) return 'club-only'
+  return 'none'
 }
 
 /** Effektive UI-Rolle inkl. Admin-Vorschaumodus (previewRole überschreibt die echte). */

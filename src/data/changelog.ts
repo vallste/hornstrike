@@ -14,6 +14,10 @@ export interface ChangelogEntry {
  */
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
+  { type: 'feat', text: 'Vereins-Admins ernennen: unter „Verein" pro Verein aufklappbar; Plattform-Admins und bestehende Vereins-Admins dürfen weitere ernennen/entfernen (Übergabe möglich), der letzte Vereins-Admin bleibt geschützt' },
+  { type: 'fix', text: 'Onboarding: frisch freigegebene Vereins-Admins ohne Team landen jetzt direkt in der Vereinsverwaltung (statt in der „Verein beantragen"-Sackgasse) und können ihr erstes Team anlegen' },
+  { type: 'fix', text: 'Rollen-Dropdown öffnet jetzt zuverlässig auf dem Smartphone (eigenes Menü statt nativem Auswahlfeld)' },
+  { type: 'fix', text: 'Letzter-Admin-/Captain-Schutz auch bei gleichzeitigen Änderungen sicher (serverseitig serialisiert)' },
   { type: 'feat', text: 'Neue Rolle „Co-Captain": darf Kader, Spieltage, Umfragen & Aufstellungen verwalten, aber keine Mitglieder einladen oder Rollen vergeben' },
   { type: 'feat', text: 'Rollen von Mitgliedern zuweisen (Captain/Co-Captain/Spieler) unter Mitglieder & Einladungen; der letzte Captain eines Teams bleibt geschützt' },
   { type: 'fix', text: 'Einladung annehmen führt jetzt direkt ins Team; Vereins-Umbenennen als Plattform-Admin wieder möglich' },

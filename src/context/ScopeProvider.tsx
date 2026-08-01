@@ -16,6 +16,9 @@ interface Ctx {
   currentClubId: string | null
   setCurrentTeam: (id: string) => void
   isLoading: boolean
+  /** Vereine, in denen der User Vereins-Admin ist (auch ohne Team). */
+  adminClubIds: string[]
+  isPlatformAdmin: boolean
 }
 
 const ScopeContext = createContext<Ctx | null>(null)
@@ -49,6 +52,29 @@ export function ScopeProvider({ children }: { children: ReactNode }) {
     },
   })
 
+  // Zugriff, der NICHT an ein Team hängt: Vereins-Admin (Verein ohne Team) und
+  // Plattform-Admin. Verhindert die Onboarding-Sackgasse „hat Verein, aber noch
+  // kein Team" → würde sonst dauerhaft auf /request-club gesperrt.
+  const { data: access, isLoading: accessLoading } = useQuery({
+    queryKey: ['scopeAccess', uid],
+    enabled: isSupabaseConfigured && !!uid,
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<{ adminClubIds: string[]; isPlatformAdmin: boolean }> => {
+      const sb = getSupabase()
+      const [prof, mems] = await Promise.all([
+        sb.from('profiles').select('is_platform_admin').eq('id', uid as string).maybeSingle(),
+        sb.from('memberships').select('club_id,role,user_id').eq('role', 'club_admin'),
+      ])
+      const isPlatformAdmin = !!(prof.data as { is_platform_admin?: boolean } | null)?.is_platform_admin
+      const adminClubIds = ((mems.data ?? []) as { club_id: string | null; user_id: string }[])
+        .filter(m => m.user_id === uid && m.club_id)
+        .map(m => m.club_id as string)
+      return { adminClubIds, isPlatformAdmin }
+    },
+  })
+  const adminClubIds = access?.adminClubIds ?? []
+  const isPlatformAdmin = access?.isPlatformAdmin ?? false
+
   const [selected, setSelected] = useState<string | null>(() => {
     try { return localStorage.getItem(LS_KEY) } catch { return null }
   })
@@ -73,7 +99,10 @@ export function ScopeProvider({ children }: { children: ReactNode }) {
   const currentClubId = workspaces.find(w => w.teamId === currentTeamId)?.clubId ?? null
 
   return (
-    <ScopeContext.Provider value={{ workspaces, currentTeamId, currentClubId, setCurrentTeam, isLoading }}>
+    <ScopeContext.Provider value={{
+      workspaces, currentTeamId, currentClubId, setCurrentTeam,
+      isLoading: isLoading || accessLoading, adminClubIds, isPlatformAdmin,
+    }}>
       {children}
     </ScopeContext.Provider>
   )
