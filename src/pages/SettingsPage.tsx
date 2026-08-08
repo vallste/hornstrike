@@ -96,7 +96,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           <div className="w-12 h-12 rounded-2xl bg-unicorn-violet/50 flex items-center justify-center text-2xl">🦄</div>
           <div>
             <p className="text-fg font-bold text-[16px]">Hornstrike</p>
-            <p className="text-fg/45 text-xs mt-0.5">Fellow Unicorns · Hamburger Liga</p>
+            <p className="text-fg/45 text-xs mt-0.5">Team-Manager · Hamburger Liga</p>
             <p className="text-fg/30 text-xs mt-0.5">v{APP_VERSION} · Datenformat v{CURRENT_VERSION}</p>
           </div>
         </div>

@@ -10,9 +10,10 @@ const PLAYER_COLORS = [
 interface Props {
   matchDay: MatchDay
   players: Player[]
+  teamName?: string
 }
 
-const LineupShareCard = forwardRef<HTMLDivElement, Props>(({ matchDay, players }, ref) => {
+const LineupShareCard = forwardRef<HTMLDivElement, Props>(({ matchDay, players, teamName }, ref) => {
   const gameSequence = getGameSequence(matchDay.useFifthDouble ?? false)
 
   const playerName = (pid: string) => players.find(p => p.id === pid)?.name ?? '?'
@@ -59,7 +60,7 @@ const LineupShareCard = forwardRef<HTMLDivElement, Props>(({ matchDay, players }
           🦄 Hornstrike
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginTop: 3 }}>
-          Fellow Unicorns · {formatDate(matchDay.date)}
+          {teamName ? `${teamName} · ` : ''}{formatDate(matchDay.date)}
           {matchDay.opponent ? ` · vs. ${matchDay.opponent}` : ''}
         </div>
       </div>

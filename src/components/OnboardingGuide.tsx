@@ -23,7 +23,7 @@ const SLIDES = [
   {
     icon: '🦄',
     title: 'Willkommen bei Hornstrike!',
-    body: 'Der Aufstellungsplaner der Fellow Unicorns für die Hamburger Liga. In wenigen Schritten zur optimalen Aufstellung.',
+    body: 'Dein Team-Manager für die Hamburger Liga: Kader, Spieltage, Terminfindung und die optimale Aufstellung – alles an einem Ort.',
     hint: null,
   },
   {

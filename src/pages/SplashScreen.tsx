@@ -105,7 +105,7 @@ export default function SplashScreen() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.75, duration: 0.5 }}
       >
-        FELLOW UNICORNS
+        TEAM-MANAGER
       </motion.p>
 
       <motion.p
@@ -114,7 +114,7 @@ export default function SplashScreen() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1, duration: 0.4 }}
       >
-        Aufstellungsplaner · Hamburger Liga
+        Tischfussball · Hamburger Liga
       </motion.p>
 
       {/* Loading dots – safe area aware */}

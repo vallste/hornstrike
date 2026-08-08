@@ -23,7 +23,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*.png'],
       manifest: {
-        name: 'Hornstrike – Fellow Unicorns',
+        name: 'Hornstrike – Team-Manager',
         short_name: 'Hornstrike',
         description: 'Tischfussball Aufstellungsplaner für die Hamburger Liga',
         theme_color: '#1a0533',

@@ -9,6 +9,7 @@ import { useDraggable, useDroppable } from '@dnd-kit/core'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { usePlayers, useMatchDays } from '../store'
+import { useScope } from '../context/ScopeProvider'
 import { generateLineup } from '../utils/lineup'
 import { validateLineup } from '../utils/validateLineup'
 import { getGameSequence, isGoalieGameIndex } from '../types'
@@ -94,6 +95,8 @@ function LineupView() {
   const navigate = useNavigate()
   const { players } = usePlayers()
   const { matchDays, updateMatchDay } = useMatchDays()
+  const { workspaces, currentTeamId } = useScope()
+  const teamName = workspaces.find(w => w.teamId === currentTeamId)?.teamName
   const matchDay = matchDays.find(m => m.id === id)!
   const canEdit = useCan('team:editLineup')
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
@@ -144,7 +147,7 @@ function LineupView() {
 
   const share = async () => {
     const lines: string[] = [
-      `🦄 Hornstrike – Fellow Unicorns`,
+      `🦄 ${teamName ?? 'Hornstrike'}`,
       `${formatDate(matchDay.date)}${matchDay.opponent ? ` vs. ${matchDay.opponent}` : ''}`,
       '',
     ]
@@ -510,7 +513,7 @@ function LineupView() {
 
       {/* Off-screen card for image export */}
       <div style={{ position: 'fixed', left: -9999, top: -9999, zIndex: -1, pointerEvents: 'none' }}>
-        <LineupShareCard ref={shareCardRef} matchDay={matchDay} players={players} />
+        <LineupShareCard ref={shareCardRef} matchDay={matchDay} players={players} teamName={teamName} />
       </div>
 
       <BottomNav />
