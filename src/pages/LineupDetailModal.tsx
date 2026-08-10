@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import ToggleGroup from '../components/ToggleGroup'
+import SelectMenu from '../components/SelectMenu'
 import type { Player, MatchDayPlayer, GameSlot } from '../types'
 import { getGameSequence, isGoalieGameIndex } from '../types'
 
@@ -22,18 +22,26 @@ export default function LineupDetailModal({ gameIndex, gameLabel, slot, matchDay
 
   const activePlayers = allPlayers.filter(p => matchDayPlayers.find(m => m.playerId === p.id))
 
+  // Beim Doppel ist die Reihenfolge die Position: Slot 1 = Sturm, Slot 2 = Tor.
+  // Bei bestehenden Slots steht Sturm (attack) durch die Normalisierung an Index 0.
   const [player1, setPlayer1] = useState(slot?.players[0] ?? '')
   const [player2, setPlayer2] = useState(slot?.players[1] ?? '')
-  const [pos1, setPos1] = useState<'attack' | 'defense'>(slot?.positions?.[0] ?? 'attack')
-  const [pos2, setPos2] = useState<'attack' | 'defense'>(slot?.positions?.[1] ?? 'defense')
 
   const save = () => {
-    const players = isDouble ? [player1, player2].filter(Boolean) : [player1].filter(Boolean)
-    const positions = isDouble ? [pos1, pos2] : [pos1]
-    onSave({ gameIndex, type: game.type, isGoalieSingles: isGoalie, players, positions })
+    if (isDouble) {
+      const picks: [string, 'attack' | 'defense'][] = []
+      if (player1) picks.push([player1, 'attack'])   // oben = Sturm
+      if (player2) picks.push([player2, 'defense'])  // unten = Tor
+      onSave({ gameIndex, type: game.type, isGoalieSingles: isGoalie, players: picks.map(p => p[0]), positions: picks.map(p => p[1]) })
+    } else {
+      onSave({ gameIndex, type: game.type, isGoalieSingles: isGoalie, players: player1 ? [player1] : [], positions: [] })
+    }
   }
 
-  const posOptions = [{ value: 'attack' as const, label: 'Sturm' }, { value: 'defense' as const, label: 'Torwart' }]
+  const playerOptions = (exclude?: string) => [
+    { value: '', label: '— nicht besetzt —' },
+    ...activePlayers.filter(p => p.id !== exclude).map(p => ({ value: p.id, label: p.name })),
+  ]
 
   return (
     <>
@@ -66,51 +74,33 @@ export default function LineupDetailModal({ gameIndex, gameLabel, slot, matchDay
 
           <div className="h-px bg-fg/8" />
 
-          {/* Player 1 */}
+          {/* Player 1 – beim Doppel = Sturm */}
           <div>
             <label className="block text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">
-              {isDouble ? 'Spieler 1' : 'Spieler'}
+              {isDouble ? '⚔ Sturm' : 'Spieler'}
             </label>
-            <select
+            <SelectMenu<string>
+              variant="block"
+              ariaLabel={isDouble ? 'Sturm' : 'Spieler'}
               value={player1}
-              onChange={e => setPlayer1(e.target.value)}
-              className="w-full bg-surface2 text-fg rounded-xl px-4 py-3 outline-none text-[15px]"
-            >
-              <option value="">— nicht besetzt —</option>
-              {activePlayers.map(p => (
-                <option key={p.id} value={p.id} className="bg-surface">{p.name}</option>
-              ))}
-            </select>
+              options={playerOptions(isDouble ? player2 : undefined)}
+              onChange={setPlayer1}
+            />
           </div>
 
-          {/* Position – nur beim Doppel relevant */}
-          {isDouble && (
-            <div>
-              <label className="block text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Position</label>
-              <ToggleGroup options={posOptions} value={pos1} onChange={setPos1} accent="pink" />
-            </div>
-          )}
-
-          {/* Player 2 (Doppel only) */}
+          {/* Player 2 – beim Doppel = Tor */}
           {isDouble && (
             <>
               <div className="h-px bg-fg/8" />
               <div>
-                <label className="block text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Spieler 2</label>
-                <select
+                <label className="block text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">🥅 Tor</label>
+                <SelectMenu<string>
+                  variant="block"
+                  ariaLabel="Tor"
                   value={player2}
-                  onChange={e => setPlayer2(e.target.value)}
-                  className="w-full bg-surface2 text-fg rounded-xl px-4 py-3 outline-none text-[15px]"
-                >
-                  <option value="">— nicht besetzt —</option>
-                  {activePlayers.filter(p => p.id !== player1).map(p => (
-                    <option key={p.id} value={p.id} className="bg-surface">{p.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">Position 2</label>
-                <ToggleGroup options={posOptions} value={pos2} onChange={setPos2} accent="cyan" />
+                  options={playerOptions(player1)}
+                  onChange={setPlayer2}
+                />
               </div>
             </>
           )}

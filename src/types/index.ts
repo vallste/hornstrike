@@ -97,6 +97,22 @@ export function getGameSequence(useFifthDouble: boolean) {
   return useFifthDouble ? GAME_SEQUENCE_D5 : GAME_SEQUENCE
 }
 
+/**
+ * Doppel einheitlich ordnen: Sturm (attack) immer zuerst/links, Tor (defense)
+ * dahinter/rechts. Lässt Einzel und unvollständige/abweichende Slots unberührt.
+ * Idempotent – auf Alt-Daten beim Laden anwendbar, ohne Drag&Drop-Indizes zu
+ * verfälschen (players und positions werden gemeinsam getauscht).
+ */
+export function normalizeDoublesOrder(lineup: GameSlot[]): GameSlot[] {
+  return lineup.map(s => {
+    if (s.type === 'doubles' && s.players.length === 2
+        && s.positions?.length === 2 && s.positions[0] !== 'attack' && s.positions[1] === 'attack') {
+      return { ...s, players: [s.players[1], s.players[0]], positions: [s.positions[1], s.positions[0]] }
+    }
+    return s
+  })
+}
+
 /** Torwarteinzel-Erkennung anhand des Labels (E5/E6) – funktioniert für beide
  * Spielfolgen, da sich der gameIndex im D5-Modus verschiebt. */
 export function isGoalieGameIndex(gameIndex: number, useFifthDouble: boolean): boolean {

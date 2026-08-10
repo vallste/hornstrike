@@ -11,6 +11,7 @@ import { usePreviewRole } from '../context/PreviewRoleProvider'
 import { useScope } from '../context/ScopeProvider'
 import { useTheme, type Theme } from '../context/ThemeProvider'
 import ToggleGroup from '../components/ToggleGroup'
+import SelectMenu from '../components/SelectMenu'
 import Can from '../components/Can'
 import { resetOnboarding } from '../components/OnboardingGuide'
 import { CHANGELOG } from '../data/changelog'
@@ -101,8 +102,8 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           </div>
         </div>
 
-        {/* Account */}
-        <div className="bg-surface rounded-2xl overflow-hidden">
+        {/* Account – kein overflow-hidden: das Vorschau-Dropdown (absolut) würde sonst geclippt */}
+        <div className="bg-surface rounded-2xl">
           <div className="px-4 py-3 border-b border-fg/5">
             <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Account</p>
           </div>
@@ -113,16 +114,16 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           {realRole === 'admin' && (
             <div className="px-4 pb-3">
               <p className="text-fg/45 text-xs mb-1.5">Vorschau (nur Ansicht)</p>
-              <select
+              <SelectMenu<string>
+                variant="block"
+                ariaLabel="Vorschau als Spieler"
                 value={previewRole === 'player' && previewPlayerId ? previewPlayerId : ''}
-                onChange={e => (e.target.value ? setPreview('player', e.target.value) : setPreview(null))}
-                className="w-full rounded-xl bg-surface2 text-fg text-sm px-3 py-2.5 outline-none"
-              >
-                <option value="">Normal (als du)</option>
-                {players.map(p => (
-                  <option key={p.id} value={p.id}>Als Spieler: {p.name}</option>
-                ))}
-              </select>
+                options={[
+                  { value: '', label: 'Normal (als du)' },
+                  ...players.map(p => ({ value: p.id, label: `Als Spieler: ${p.name}` })),
+                ]}
+                onChange={v => (v ? setPreview('player', v) : setPreview(null))}
+              />
             </div>
           )}
           <div className="h-px bg-fg/5" />
@@ -150,23 +151,21 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           />
         </div>
 
-        {/* Verein */}
-        <div className="bg-surface rounded-2xl overflow-hidden">
+        {/* Verein – kein overflow-hidden: das Workspace-Dropdown (absolut) würde sonst geclippt */}
+        <div className="bg-surface rounded-2xl">
           <div className="px-4 py-3 border-b border-fg/5">
             <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Verein</p>
           </div>
           {workspaces.length > 1 && (
             <div className="px-4 py-3 border-b border-fg/5">
               <p className="text-fg/45 text-xs mb-1.5">Aktueller Workspace</p>
-              <select
+              <SelectMenu<string>
+                variant="block"
+                ariaLabel="Workspace wechseln"
                 value={currentTeamId ?? ''}
-                onChange={e => setCurrentTeam(e.target.value)}
-                className="w-full rounded-xl bg-surface2 text-fg text-sm px-3 py-2.5 outline-none"
-              >
-                {workspaces.map(w => (
-                  <option key={w.teamId} value={w.teamId}>{w.clubName} · {w.teamName}</option>
-                ))}
-              </select>
+                options={workspaces.map(w => ({ value: w.teamId, label: `${w.clubName} · ${w.teamName}` }))}
+                onChange={setCurrentTeam}
+              />
             </div>
           )}
           <Can cap="team:invite">

@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Header from '../components/Header'
 import { usePlayers } from '../store'
 import { useScope } from '../context/ScopeProvider'
+import { useSession } from '../context/SessionProvider'
 import { useCan, ROLE_LABEL, type Role } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
 import { errorMessage } from '../lib/errors'
@@ -21,6 +22,7 @@ type InviteRow = { id: string; player_id: string | null; email: string | null; e
 export default function MembersPage() {
   const { players } = usePlayers()
   const { currentTeamId } = useScope()
+  const { user } = useSession()
   const canInvite = useCan('team:invite')
   const canManageRoles = useCan('team:manageRoles')
   const qc = useQueryClient()
@@ -99,10 +101,14 @@ export default function MembersPage() {
             const role = p.userId ? roleByUser.get(p.userId) : undefined
             const hasPending = pendingPlayerIds.has(p.id)
             const link = linkFor[p.id]
+            const isMe = !!p.userId && p.userId === user?.id
             return (
-              <div key={p.id} className="px-4 py-3 border-b border-fg/5">
+              <div key={p.id} className={`px-4 py-3 border-b border-fg/5 ${isMe ? 'bg-accent-pink/8' : ''}`}>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-fg text-[15px]">{p.name}</span>
+                  <span className="text-fg text-[15px] flex items-center gap-2 min-w-0">
+                    <span className="truncate">{p.name}</span>
+                    {isMe && <span className="flex-shrink-0 text-[10px] font-bold text-accent-pink bg-accent-pink/15 px-1.5 py-0.5 rounded-md uppercase tracking-wide">Du</span>}
+                  </span>
                   {claimed
                     ? (canManageRoles && p.userId
                         ? <SelectMenu<Role>

@@ -209,11 +209,18 @@ export function generateLineup(
       }
 
       if (bestPair) {
-        const [p1, p2, pos1, pos2] = bestPair
+        const [p1, p2, pos1] = bestPair
         context.doublePairs.add(pairKey(p1.id, p2.id))
         context.doublesCount[p1.id] = (context.doublesCount[p1.id] ?? 0) + 1
         context.doublesCount[p2.id] = (context.doublesCount[p2.id] ?? 0) + 1
-        context.slots.push({ gameIndex: game.gameIndex, type: 'doubles', players: [p1.id, p2.id], positions: [pos1, pos2] })
+        // Einheitlich: Sturm (attack) immer zuerst/links, Tor (defense) dahinter.
+        const atkFirst = pos1 === 'attack'
+        context.slots.push({
+          gameIndex: game.gameIndex,
+          type: 'doubles',
+          players: atkFirst ? [p1.id, p2.id] : [p2.id, p1.id],
+          positions: ['attack', 'defense'],
+        })
       } else {
         context.slots.push({ gameIndex: game.gameIndex, type: 'doubles', players: [], positions: [] })
       }

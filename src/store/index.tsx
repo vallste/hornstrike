@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Player, MatchDay, GameSlot, Position, GameTypePreference } from '../types'
+import { normalizeDoublesOrder } from '../types'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 import { useSession } from '../context/SessionProvider'
 import { useScope } from '../context/ScopeProvider'
@@ -195,7 +196,7 @@ async function fetchMatchDays(teamId: string): Promise<MatchDay[]> {
       availableFrom: mp.available_from,
       availableTo: mp.available_to,
     })),
-    lineup: m.lineup ?? [],
+    lineup: normalizeDoublesOrder(m.lineup ?? []),
   }))
 }
 
