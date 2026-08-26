@@ -13,31 +13,36 @@ export interface ChangelogEntry {
  * 3. CURRENT_CHANGES leeren für die nächste Version
  */
 
-const CURRENT_CHANGES: ChangelogEntry['changes'] = [
-  { type: 'feat', text: 'Vereins-Admins ernennen: unter „Verein" pro Verein aufklappbar; Plattform-Admins und bestehende Vereins-Admins dürfen weitere ernennen/entfernen (Übergabe möglich), der letzte Vereins-Admin bleibt geschützt' },
-  { type: 'fix', text: 'Onboarding: frisch freigegebene Vereins-Admins ohne Team landen jetzt direkt in der Vereinsverwaltung (statt in der „Verein beantragen"-Sackgasse) und können ihr erstes Team anlegen' },
-  { type: 'fix', text: 'Alle Auswahl-Menüs (Rollen, Aufstellungs-Slot, Vorschau, Workspace-Wechsel) öffnen jetzt zuverlässig auf dem Smartphone – einheitliches Menü statt nativem Auswahlfeld' },
-  { type: 'fix', text: 'Letzter-Admin-/Captain-Schutz auch bei gleichzeitigen Änderungen sicher (serverseitig serialisiert)' },
-  { type: 'improve', text: 'Allgemeinere Formulierungen – Hornstrike ist ein Team-Manager für die Hamburger Liga (nicht mehr auf ein einzelnes Team gemünzt); geteilte Aufstellungen zeigen jetzt euren eigenen Teamnamen' },
-  { type: 'improve', text: 'Doppel einheitlich: oben immer Sturm, unten Tor – gleiche Reihenfolge (Sturm links, Tor rechts) in Editor und Aufstellungsliste; ein Spieler kann nicht mehr doppelt oder zweimal dieselbe Position belegen' },
-  { type: 'improve', text: 'In „Mitglieder & Einladungen" ist der eigene Eintrag jetzt mit „Du" hervorgehoben' },
-  { type: 'feat', text: 'Neue Rolle „Co-Captain": darf Kader, Spieltage, Umfragen & Aufstellungen verwalten, aber keine Mitglieder einladen oder Rollen vergeben' },
-  { type: 'feat', text: 'Rollen von Mitgliedern zuweisen (Captain/Co-Captain/Spieler) unter Mitglieder & Einladungen; der letzte Captain eines Teams bleibt geschützt' },
-  { type: 'fix', text: 'Einladung annehmen führt jetzt direkt ins Team; Vereins-Umbenennen als Plattform-Admin wieder möglich' },
-  { type: 'feat', text: 'Impressum & Datenschutzerklärung ergänzt; Anmeldung/Beitritt erst nach Zustimmung zur Datenschutzerklärung' },
-  { type: 'improve', text: 'Schriftart wird selbst ausgeliefert (kein Aufruf an Google Fonts) – datenschutzfreundlicher' },
-  { type: 'fix', text: 'Sicherheits- & Datenschutz-Härtung: Kontolöschung möglich, Einladungen an E-Mail gebunden, robustere Fehlermeldungen' },
-  { type: 'feat', text: 'Plattform-Admin: Nutzungs-Statistiken (Wachstum, Aktivierung, Engagement, Aktivität) – inklusive anonymer First-Party-Nutzungsmetriken, kein Drittanbieter-Tracking' },
-  { type: 'feat', text: 'Heller & dunkler Modus umschaltbar (Einstellungen → Darstellung: Hell / Auto / Dunkel); die Auswahl wird gespeichert' },
-  { type: 'feat', text: 'Neues helles Design in sanftem Lavendel mit gut lesbaren Akzentfarben – der dunkle Modus bleibt unverändert' },
-  { type: 'improve', text: 'Footer-Icons vereinheitlicht: ein einheitliches Linien-Icon-Set statt gemischter Emojis' },
-  { type: 'improve', text: 'Vereins- & Team-Verwaltung als eigener Footer-Tab für Admins (aus den Einstellungen ausgelagert)' },
-  { type: 'fix', text: 'GitHub Actions: Node.js 24 Runtime für alle Actions erzwungen (Node 20 Deprecation)' },
-  { type: 'feat', text: 'Aufstellung als Bild teilen oder herunterladen – Text- und Bild-Export im Teilen-Dropdown zusammengefasst' },
-  { type: 'fix', text: 'Bild-Export: CORS-Fehler mit Google Fonts behoben (Font-Embedding übersprungen)' },
-]
+const CURRENT_CHANGES: ChangelogEntry['changes'] = []
 
 const HISTORY: ChangelogEntry[] = [
+  {
+    version: '26.3.2',
+    date: '2026-08-10',
+    changes: [
+      { type: 'feat', text: 'Vereins-Admins ernennen: unter „Verein" pro Verein aufklappbar; Plattform-Admins und bestehende Vereins-Admins dürfen weitere ernennen/entfernen (Übergabe möglich), der letzte Vereins-Admin bleibt geschützt' },
+      { type: 'fix', text: 'Onboarding: frisch freigegebene Vereins-Admins ohne Team landen jetzt direkt in der Vereinsverwaltung (statt in der „Verein beantragen"-Sackgasse) und können ihr erstes Team anlegen' },
+      { type: 'fix', text: 'Alle Auswahl-Menüs (Rollen, Aufstellungs-Slot, Vorschau, Workspace-Wechsel) öffnen jetzt zuverlässig auf dem Smartphone – einheitliches Menü statt nativem Auswahlfeld' },
+      { type: 'fix', text: 'Letzter-Admin-/Captain-Schutz auch bei gleichzeitigen Änderungen sicher (serverseitig serialisiert)' },
+      { type: 'improve', text: 'Allgemeinere Formulierungen – Hornstrike ist ein Team-Manager für die Hamburger Liga (nicht mehr auf ein einzelnes Team gemünzt); geteilte Aufstellungen zeigen jetzt euren eigenen Teamnamen' },
+      { type: 'improve', text: 'Doppel einheitlich: oben immer Sturm, unten Tor – gleiche Reihenfolge (Sturm links, Tor rechts) in Editor und Aufstellungsliste; ein Spieler kann nicht mehr doppelt oder zweimal dieselbe Position belegen' },
+      { type: 'improve', text: 'In „Mitglieder & Einladungen" ist der eigene Eintrag jetzt mit „Du" hervorgehoben' },
+      { type: 'feat', text: 'Neue Rolle „Co-Captain": darf Kader, Spieltage, Umfragen & Aufstellungen verwalten, aber keine Mitglieder einladen oder Rollen vergeben' },
+      { type: 'feat', text: 'Rollen von Mitgliedern zuweisen (Captain/Co-Captain/Spieler) unter Mitglieder & Einladungen; der letzte Captain eines Teams bleibt geschützt' },
+      { type: 'fix', text: 'Einladung annehmen führt jetzt direkt ins Team; Vereins-Umbenennen als Plattform-Admin wieder möglich' },
+      { type: 'feat', text: 'Impressum & Datenschutzerklärung ergänzt; Anmeldung/Beitritt erst nach Zustimmung zur Datenschutzerklärung' },
+      { type: 'improve', text: 'Schriftart wird selbst ausgeliefert (kein Aufruf an Google Fonts) – datenschutzfreundlicher' },
+      { type: 'fix', text: 'Sicherheits- & Datenschutz-Härtung: Kontolöschung möglich, Einladungen an E-Mail gebunden, robustere Fehlermeldungen' },
+      { type: 'feat', text: 'Plattform-Admin: Nutzungs-Statistiken (Wachstum, Aktivierung, Engagement, Aktivität) – inklusive anonymer First-Party-Nutzungsmetriken, kein Drittanbieter-Tracking' },
+      { type: 'feat', text: 'Heller & dunkler Modus umschaltbar (Einstellungen → Darstellung: Hell / Auto / Dunkel); die Auswahl wird gespeichert' },
+      { type: 'feat', text: 'Neues helles Design in sanftem Lavendel mit gut lesbaren Akzentfarben – der dunkle Modus bleibt unverändert' },
+      { type: 'improve', text: 'Footer-Icons vereinheitlicht: ein einheitliches Linien-Icon-Set statt gemischter Emojis' },
+      { type: 'improve', text: 'Vereins- & Team-Verwaltung als eigener Footer-Tab für Admins (aus den Einstellungen ausgelagert)' },
+      { type: 'fix', text: 'GitHub Actions: Node.js 24 Runtime für alle Actions erzwungen (Node 20 Deprecation)' },
+      { type: 'feat', text: 'Aufstellung als Bild teilen oder herunterladen – Text- und Bild-Export im Teilen-Dropdown zusammengefasst' },
+      { type: 'fix', text: 'Bild-Export: CORS-Fehler mit Google Fonts behoben (Font-Embedding übersprungen)' },
+    ],
+  },
   {
     version: '0.1.7',
     date: '2026-05-29',
@@ -127,7 +132,7 @@ const HISTORY: ChangelogEntry[] = [
 ]
 
 // Datum des aktuellen Releases – beim `npm version`-Bump auf das Datum setzen
-const CURRENT_DATE = '2026-05-29'
+const CURRENT_DATE = '2026-08-26'
 
 export const CHANGELOG: ChangelogEntry[] = [
   ...(CURRENT_CHANGES.length > 0 ? [{
