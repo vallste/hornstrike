@@ -18,6 +18,7 @@ export type Capability =
   | 'team:managePolls'
   | 'team:invite'
   | 'team:manageRoles'
+  | 'team:editLogo'
   | 'club:manageTeams'
   | 'club:invite'
   | 'app:manageClubs'
@@ -33,9 +34,9 @@ const TEAM_EDIT: Capability[] = [
 const CAPS: Record<Role, Capability[]> = {
   player: ['player:editOwnPrefs'],
   co_captain: [...TEAM_EDIT],
-  team_admin: [...TEAM_EDIT, 'team:invite', 'team:manageRoles'],
-  club_admin: [...TEAM_EDIT, 'team:invite', 'team:manageRoles', 'club:manageTeams', 'club:invite'],
-  admin: [...TEAM_EDIT, 'team:invite', 'team:manageRoles', 'club:manageTeams', 'club:invite', 'app:manageClubs', 'app:viewStats'],
+  team_admin: [...TEAM_EDIT, 'team:invite', 'team:manageRoles', 'team:editLogo'],
+  club_admin: [...TEAM_EDIT, 'team:invite', 'team:manageRoles', 'team:editLogo', 'club:manageTeams', 'club:invite'],
+  admin: [...TEAM_EDIT, 'team:invite', 'team:manageRoles', 'team:editLogo', 'club:manageTeams', 'club:invite', 'app:manageClubs', 'app:viewStats'],
 }
 
 export function can(role: Role | null, cap: Capability): boolean {

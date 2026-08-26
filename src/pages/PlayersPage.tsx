@@ -8,14 +8,14 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import Header from '../components/Header'
+import Avatar from '../components/Avatar'
 import Can from '../components/Can'
 import { useCan } from '../lib/permissions'
 import Badge from '../components/Badge'
 import BottomNav from '../components/BottomNav'
+import { useAvatarUrls } from '../lib/avatars'
 import { usePlayers } from '../store'
 import type { Player } from '../types'
-
-const AVATAR_COLORS = ['#00e5ff', '#e040fb', '#ffd700', '#00e5ff', '#7c3aed', '#e040fb', '#ffd700']
 
 function positionColor(pos: string): 'cyan' | 'pink' | 'gold' | 'default' {
   if (pos.includes('attack')) return 'cyan'
@@ -43,15 +43,14 @@ function gameTypeLabel(t: Player['preferences']['gameType']): string {
 
 // ── Sortierbare Karte ──────────────────────────────────────────────────────
 
-function SortablePlayerCard({ player, idx, onEdit, canDrag }: {
+function SortablePlayerCard({ player, idx, onEdit, canDrag, avatarUrl }: {
   player: Player
   idx: number
   onEdit: () => void
   canDrag: boolean
+  avatarUrl?: string | null
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: player.id, disabled: !canDrag })
-  const color = AVATAR_COLORS[idx % AVATAR_COLORS.length]
-  const initials = player.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
   const isActive = player.active !== false  // default true für alte Datensätze
 
   return (
@@ -77,12 +76,7 @@ function SortablePlayerCard({ player, idx, onEdit, canDrag }: {
 
       {/* Avatar */}
       <button onClick={onEdit} className="flex items-center gap-3 flex-1 min-w-0 text-left">
-        <div
-          className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-[13px] font-bold transition-opacity ${isActive ? '' : 'opacity-35'}`}
-          style={{ background: `${color}22`, color }}
-        >
-          {initials}
-        </div>
+        <Avatar name={player.name} url={avatarUrl} size={40} colorIndex={idx} dimmed={!isActive} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className={`font-semibold text-[15px] truncate ${isActive ? 'text-fg' : 'text-fg/40'}`}>{player.name}</p>
@@ -112,6 +106,8 @@ export default function PlayersPage() {
   const navigate = useNavigate()
   const { players, reorder } = usePlayers()
   const canReorder = useCan('team:editRoster')
+  // Ein Request für alle Bilder der Liste – ein Hook pro Karte wären N Requests.
+  const avatarUrls = useAvatarUrls(players.map(p => p.avatarPath))
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -161,6 +157,7 @@ export default function PlayersPage() {
                   player={player}
                   idx={idx}
                   canDrag={canReorder}
+                  avatarUrl={player.avatarPath ? avatarUrls[player.avatarPath] : null}
                   onEdit={() => navigate(`/players/${player.id}`)}
                 />
               ))}

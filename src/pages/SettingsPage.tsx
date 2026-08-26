@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Header from '../components/Header'
+import AvatarUpload from '../components/AvatarUpload'
 import BottomNav from '../components/BottomNav'
 import { usePlayers, useMatchDays } from '../store'
 import { exportBackup, parseBackup, CURRENT_VERSION, type BackupFile } from '../utils/backup'
@@ -27,6 +28,9 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
   const realRole = useRealRole()
   const { previewRole, previewPlayerId, setPreview } = usePreviewRole()
   const { workspaces, currentTeamId, setCurrentTeam } = useScope()
+  // Captains erreichen die Vereinsverwaltung nicht (Footer-Tab nur für Admins),
+  // deshalb liegt das Team-Logo hier – set_team_avatar erlaubt genau das.
+  const currentWorkspace = workspaces.find(w => w.teamId === currentTeamId) ?? null
   const { theme, setTheme } = useTheme()
 
   const handleLogout = async () => {
@@ -167,6 +171,22 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
                 onChange={setCurrentTeam}
               />
             </div>
+          )}
+          {currentWorkspace && (
+            <Can cap="team:editLogo">
+              <div className="px-4 py-3 border-b border-fg/5">
+                <AvatarUpload
+                  variant="inline"
+                  kind="teams"
+                  id={currentWorkspace.teamId}
+                  name={currentWorkspace.teamName}
+                  path={currentWorkspace.teamAvatarPath}
+                  shape="square"
+                  label="Team-Logo"
+                  hint="Sichtbar für alle im Team."
+                />
+              </div>
+            </Can>
           )}
           <Can cap="team:invite">
             <button onClick={() => navigate('/members')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-fg/5 transition-colors border-b border-fg/5">

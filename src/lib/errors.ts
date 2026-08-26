@@ -15,6 +15,12 @@ const CUSTOM: Record<string, string> = {
   'invalid role': 'Diese Rolle kann hier nicht vergeben werden.',
   'team not found': 'Team nicht gefunden.',
   'club not found': 'Verein nicht gefunden.',
+  // Client-seitige Bildaufbereitung (src/lib/avatars.ts).
+  'avatar: not an image': 'Bitte eine Bilddatei auswählen.',
+  'avatar: input too large': 'Diese Datei ist zu groß. Bitte ein Bild unter 25 MB wählen.',
+  'avatar: output too large': 'Das Bild ließ sich nicht klein genug rechnen. Bitte ein anderes wählen.',
+  'avatar: decode failed': 'Das Bild konnte nicht gelesen werden. Bitte ein anderes Format probieren.',
+  'avatar: encode failed': 'Das Bild konnte nicht verarbeitet werden. Bitte ein anderes wählen.',
 }
 
 // Postgres-SQLSTATE-Codes.
@@ -35,5 +41,10 @@ export function errorMessage(
   if (raw && CUSTOM[raw]) return CUSTOM[raw]
   if (code && BY_CODE[code]) return BY_CODE[code]
   if (/row-level security/i.test(raw)) return 'Dafür fehlt dir die Berechtigung.'
+  // Storage-Grenzen des avatars-Buckets (file_size_limit / allowed_mime_types).
+  if (/exceeded the maximum allowed size|payload too large/i.test(raw))
+    return 'Das Bild ist zu groß für den Upload. Bitte ein kleineres wählen.'
+  if (/mime type .* is not supported|invalid_mime_type/i.test(raw))
+    return 'Dieses Bildformat wird nicht unterstützt. Bitte JPG, PNG oder WebP wählen.'
   return fallback
 }

@@ -28,6 +28,7 @@ export interface Player {
   active: boolean   // false = langfristig nicht verfügbar (verletzt, pausiert etc.)
   preferences: PlayerPreferences
   userId?: string | null   // verknüpfter Account (auth.users.id); null = Ghost/nicht beansprucht
+  avatarPath?: string | null   // Storage-Pfad des Profilbilds ('players/<uuid>'), nie eine URL
 }
 
 /** Spieltag-spezifische Einstellungen für einen Spieler */

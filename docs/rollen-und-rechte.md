@@ -1,6 +1,6 @@
 # Rollen & Rechte (Hornstrike)
 
-Stand: nach Migration `0012_role_guard_locking.sql`.
+Stand: nach Migration `0013_avatars.sql`.
 
 ## Rollen
 
@@ -20,13 +20,17 @@ Hierarchie ist **nicht** rein linear: Co-Captain hat Inhalts-Rechte wie ein Capt
 |---|:--:|:--:|:--:|:--:|:--:|
 | Listen ansehen (Spieler/Spieltage/Umfragen) | 👁 | 👁 | 👁 | 👁 | 👁 |
 | Eigenes Profil/Präferenzen bearbeiten | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Eigenes Profilbild setzen/entfernen | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Eigene Verfügbarkeit in Umfrage angeben | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Kader bearbeiten (Spieler anlegen/ändern/sortieren) | – | ✓ | ✓ | ✓ | ✓ |
+| Profilbild **anderer** Spieler setzen/entfernen | – | ✓ | ✓ | ✓ | ✓ |
 | Spieltag anlegen + Aufstellung berechnen/bearbeiten | – | ✓ | ✓ | ✓ | ✓ |
 | Umfrage anlegen/verwalten + „Aufstellung erstellen" | – | ✓ | ✓ | ✓ | ✓ |
 | Verfügbarkeiten/Umfrageantworten **anderer** pflegen | – | ✓ | ✓ | ✓ | ✓ |
 | Mitglieder einladen (Einladungslinks) | – | – | ✓ | ✓ | ✓ |
 | **Rollen zuweisen** (Captain/Co-Captain/Spieler) | – | – | ✓ (eigenes Team) | ✓ (Teams des Vereins) | ✓ (überall) |
+| Team-Logo setzen/entfernen | – | – | ✓ | ✓ | ✓ |
+| Vereinslogo setzen/entfernen | – | – | – | ✓ | ✓ |
 | Teams anlegen/umbenennen, Verein umbenennen, Workspace wechseln | – | – | – | ✓ | ✓ |
 | **Vereins-Admins** ernennen/entfernen | – | – | – | ✓ (eigener Verein) | ✓ (überall) |
 | „Verein"-Tab im Footer | – | – | – | ✓ | ✓ |
@@ -62,7 +66,7 @@ Zwei Ebenen – die UI spiegelt nur, die **echte Absicherung ist die Datenbank (
 |---|---|
 | `player:editOwnPrefs` | Spieler |
 | `team:editRoster`, `team:editLineup`, `team:createMatchday`, `team:managePolls` | Co-Captain |
-| `team:invite`, `team:manageRoles` | Captain |
+| `team:invite`, `team:manageRoles`, `team:editLogo` | Captain |
 | `club:manageTeams`, `club:invite` | Vereins-Admin |
 | `app:manageClubs`, `app:viewStats` | Plattform-Admin |
 
@@ -76,6 +80,7 @@ Zwei Ebenen – die UI spiegelt nur, die **echte Absicherung ist die Datenbank (
 | `app.is_team_editor(team)` | Captain **oder** Co-Captain → **Inhaltsbearbeitung** |
 | `app.is_team_member(team)` | irgendeine Rolle im Team → **Lesen** |
 | `app.can_edit_player(player)` | `is_team_editor` des Spieler-Teams **oder** eigener Account |
+| `app.can_read_avatar(name)` / `app.can_write_avatar(name)` | Storage-RLS für Profilbilder, löst den Objektpfad auf die Entität auf (`0013`) |
 
 - **Lesen** (`_select`-Policies): `is_team_member`.
 - **Inhalte schreiben** (players, matchdays, polls, poll_options, sowie Präferenzen/Verfügbarkeiten/Umfrageantworten via `can_edit_player`): `is_team_editor` → Captain + Co-Captain.
@@ -90,3 +95,17 @@ Zwei Ebenen – die UI spiegelt nur, die **echte Absicherung ist die Datenbank (
 ## Vorschau-Modus (nur Ansicht)
 
 Captain+ können in den Einstellungen „als Spieler" in die Vorschau wechseln (rein clientseitig, `PreviewRoleProvider`). Das ändert **keine** echten Rechte – die Datenbank prüft immer die tatsächliche Rolle.
+
+## Profilbilder (Migration `0013`)
+
+Bilder liegen in einem **privaten** Storage-Bucket `avatars`, nicht öffentlich abrufbar. In der Datenbank steht ausschließlich der Pfad (`clubs.avatar_path`, `teams.avatar_path`, `players.avatar_path`), nie eine URL – die Anzeige läuft über kurzlebige signierte URLs (`src/lib/avatars.ts`).
+
+Objektname = `players/<uuid>` | `teams/<uuid>` | `clubs/<uuid>`, bewusst **ohne** Dateiendung: pro Entität genau eine Datei, ein neues Bild überschreibt das alte. Der Bucket lässt nur `image/jpeg`, `image/png`, `image/webp` und maximal 2 MB zu; der Client schneidet vorher quadratisch zu, skaliert auf 512 px und kodiert neu (auch damit HEIC von iPhones in ein erlaubtes Format übersetzt wird).
+
+| Objekt | Lesen | Schreiben |
+|---|---|---|
+| `players/<id>` | Mitglied des Teams | `can_edit_player` → man selbst, Captain, Co-Captain |
+| `teams/<id>` | Mitglied des Teams | `is_team_admin` → Captain+ |
+| `clubs/<id>` | Mitglied irgendeines Team des Vereins, oder Vereins-Admin | `is_club_admin` → Vereins-Admin+ |
+
+`teams.avatar_path` ist per Tabellen-Policy nur für Vereins-Admins schreibbar (`teams_update`). Damit ein Captain sein Team-Logo setzen kann, ohne gleich das Umbenennen-Recht zu bekommen, gibt es den RPC `public.set_team_avatar(team, path)` – er prüft `is_team_admin` und schreibt ausschließlich die Logo-Spalte. Im Client hängt die UI an der Capability `team:editLogo`; weil der Footer-Tab „Verein" nur Admins sehen, liegt das Team-Logo für Captains in den Einstellungen unter „Verein".

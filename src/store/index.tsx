@@ -7,7 +7,7 @@ import { useScope } from '../context/ScopeProvider'
 import { track } from '../lib/analytics'
 
 // ─── DB-Zeilen-Typen (snake_case) ───────────────────────────────────────────
-type PlayerRow = { id: string; name: string; active: boolean; sort_order: number; user_id: string | null }
+type PlayerRow = { id: string; name: string; active: boolean; sort_order: number; user_id: string | null; avatar_path: string | null }
 type PrefRow = {
   player_id: string; position: Position; game_type: GameTypePreference
   goalie_preference: boolean; avoids_opening: boolean; avoids_closing: boolean
@@ -26,7 +26,7 @@ type MdRow = {
 async function fetchPlayers(teamId: string): Promise<Player[]> {
   const sb = getSupabase()
   const [pl, pref, part] = await Promise.all([
-    sb.from('players').select('id,name,active,sort_order,user_id').eq('team_id', teamId).order('sort_order', { ascending: true }),
+    sb.from('players').select('id,name,active,sort_order,user_id,avatar_path').eq('team_id', teamId).order('sort_order', { ascending: true }),
     sb.from('player_preferences').select('*'),
     sb.from('partner_preferences').select('player_id,partner_player_id,weight'),
   ])
@@ -50,6 +50,7 @@ async function fetchPlayers(teamId: string): Promise<Player[]> {
       name: row.name,
       active: row.active,
       userId: row.user_id,
+      avatarPath: row.avatar_path,
       preferences: {
         position: p?.position ?? 'both',
         gameType: p?.game_type ?? 'both',
@@ -69,6 +70,9 @@ async function insertPlayer(p: Player, teamId: string, sortOrder: number) {
   const sb = getSupabase()
   const ins = await sb.from('players').insert({
     id: p.id, team_id: teamId, name: p.name, active: p.active, sort_order: sortOrder,
+    // Beim Wiederherstellen aus einem Backup bleibt die Bilddatei am selben
+    // Pfad liegen – ohne diese Zeile wäre die Referenz darauf verloren.
+    avatar_path: p.avatarPath ?? null,
   })
   if (ins.error) throw ins.error
   await writePlayerPrefs(p)

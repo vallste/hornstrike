@@ -8,12 +8,23 @@ export interface ChangelogEntry {
 
 /**
  * Beim Releasen:
- * 1. `npm version patch|minor|major` – bumpt package.json
- * 2. Den CURRENT_CHANGES-Block einfrieren (in HISTORY verschieben)
- * 3. CURRENT_CHANGES leeren für die nächste Version
+ * 1. Den CURRENT_CHANGES-Block einfrieren (mit der aktuellen package.json-Version
+ *    und dem Release-Datum nach HISTORY verschieben)
+ * 2. CURRENT_CHANGES leeren
+ * 3. `npm version patch|minor|major` – package.json trägt ab jetzt die NÄCHSTE
+ *    Version, unter der die neuen CURRENT_CHANGES-Einträge erscheinen
+ *
+ * Reihenfolge beachten: Wird erst gesammelt und dann gebumpt, zeigt der
+ * Changelog die laufende Version zweimal (einmal aus HISTORY, einmal aus
+ * CURRENT_CHANGES) – beide Karten hätten denselben Schlüssel.
+ * CURRENT_DATE ist das voraussichtliche Datum des laufenden Releases.
  */
 
-const CURRENT_CHANGES: ChangelogEntry['changes'] = []
+const CURRENT_CHANGES: ChangelogEntry['changes'] = [
+  { type: 'feat', text: 'Profilbilder: Spieler, Teams und Vereine können ein Bild bekommen. Spieler pflegen ihr eigenes, Captains und Co-Captains auch das der Mitspieler; das Team-Logo setzt der Captain (Einstellungen → Verein), das Vereinslogo der Vereins-Admin' },
+  { type: 'improve', text: 'Bilder werden direkt auf dem Gerät quadratisch zugeschnitten und verkleinert – auch iPhone-Fotos landen so klein und im richtigen Format im Speicher' },
+  { type: 'improve', text: 'Profilbilder bleiben privat: sie liegen in einem nicht öffentlichen Speicher und sind ausschließlich für das eigene Team bzw. den eigenen Verein sichtbar' },
+]
 
 const HISTORY: ChangelogEntry[] = [
   {

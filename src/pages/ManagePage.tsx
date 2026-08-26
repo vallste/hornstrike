@@ -2,14 +2,18 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Header from '../components/Header'
+import Avatar from '../components/Avatar'
+import AvatarUpload from '../components/AvatarUpload'
 import BottomNav from '../components/BottomNav'
 import ClubAdminManager from '../components/ClubAdminManager'
 import { useSession } from '../context/SessionProvider'
 import { useScope } from '../context/ScopeProvider'
 import { getSupabase } from '../lib/supabase'
 import { errorMessage } from '../lib/errors'
+import { useAvatarUrls } from '../lib/avatars'
 
-type ClubRow = { id: string; name: string; teams: { id: string; name: string }[] | null }
+type TeamRow = { id: string; name: string; avatar_path: string | null }
+type ClubRow = { id: string; name: string; avatar_path: string | null; teams: TeamRow[] | null }
 type MembershipRow = { club_id: string | null; role: string; user_id: string }
 
 export default function ManagePage() {
@@ -29,7 +33,7 @@ export default function ManagePage() {
   const { data: clubs = [], isLoading } = useQuery({
     queryKey: ['manage', 'clubs'],
     queryFn: async (): Promise<ClubRow[]> => {
-      const { data, error } = await getSupabase().from('clubs').select('id,name,teams(id,name)').order('name')
+      const { data, error } = await getSupabase().from('clubs').select('id,name,avatar_path,teams(id,name,avatar_path)').order('name')
       if (error) throw error
       return (data ?? []) as ClubRow[]
     },
@@ -54,6 +58,11 @@ export default function ManagePage() {
     },
   })
   const canManage = (clubId: string) => !!perms && (perms.isPlatform || perms.clubAdmin.has(clubId))
+
+  const avatarUrls = useAvatarUrls(
+    clubs.flatMap(c => [c.avatar_path, ...(c.teams ?? []).map(t => t.avatar_path)]),
+  )
+  const urlFor = (path: string | null) => (path ? avatarUrls[path] ?? null : null)
 
   const createTeam = async (clubId: string) => {
     const name = (newTeam[clubId] ?? '').trim()
@@ -96,52 +105,70 @@ export default function ManagePage() {
 
       <div className="relative px-6 mt-4 space-y-3">
         {isLoading && <p className="text-fg/50 text-sm text-center py-8">Lädt…</p>}
-        {clubs.map(club => (
+        {clubs.map((club, ci) => (
           <div key={club.id} className="bg-surface rounded-2xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-fg/5 flex items-center gap-2">
-              {renamingClub === club.id ? (
-                <>
-                  <input
-                    value={clubVal} onChange={e => setClubVal(e.target.value)} autoFocus
-                    onKeyDown={e => e.key === 'Enter' && doRenameClub(club.id)}
-                    className="flex-1 bg-surface2 rounded-lg px-2.5 py-1.5 text-fg text-sm outline-none"
-                  />
-                  <button onClick={() => doRenameClub(club.id)} className="text-accent-cyan text-sm font-semibold">Speichern</button>
-                  <button onClick={() => setRenamingClub(null)} className="text-fg/40 text-lg px-1">✕</button>
-                </>
-              ) : (
-                <>
-                  <p className="text-fg font-bold text-[16px] flex-1 truncate">{club.name}</p>
-                  {canManage(club.id) && (
-                    <button onClick={() => { setRenamingClub(club.id); setClubVal(club.name) }} className="text-fg/30 text-sm px-1 flex-shrink-0">✎</button>
-                  )}
-                </>
-              )}
-            </div>
-            {(club.teams ?? []).map(t => (
-              <div key={t.id} className="flex items-center gap-2 px-4 py-3 border-b border-fg/5">
-                {renaming === t.id ? (
+            <div className="px-4 py-3 border-b border-fg/5">
+              <div className="flex items-center gap-2">
+                {renamingClub === club.id ? (
                   <>
                     <input
-                      value={renameVal} onChange={e => setRenameVal(e.target.value)} autoFocus
-                      onKeyDown={e => e.key === 'Enter' && doRename(t.id)}
+                      value={clubVal} onChange={e => setClubVal(e.target.value)} autoFocus
+                      onKeyDown={e => e.key === 'Enter' && doRenameClub(club.id)}
                       className="flex-1 bg-surface2 rounded-lg px-2.5 py-1.5 text-fg text-sm outline-none"
                     />
-                    <button onClick={() => doRename(t.id)} className="text-accent-cyan text-sm font-semibold">Speichern</button>
-                    <button onClick={() => setRenaming(null)} className="text-fg/40 text-lg px-1">✕</button>
+                    <button onClick={() => doRenameClub(club.id)} className="text-accent-cyan text-sm font-semibold">Speichern</button>
+                    <button onClick={() => setRenamingClub(null)} className="text-fg/40 text-lg px-1">✕</button>
                   </>
                 ) : (
                   <>
-                    <button onClick={() => switchTo(t.id)} className="flex-1 flex items-center justify-between text-left min-w-0">
-                      <span className="text-fg text-[15px] truncate">{t.name}</span>
-                      {t.id === currentTeamId
-                        ? <span className="text-accent-cyan text-xs font-semibold flex-shrink-0">aktiv</span>
-                        : <span className="text-fg/30 text-lg flex-shrink-0">›</span>}
-                    </button>
+                    <Avatar name={club.name} url={urlFor(club.avatar_path)} size={28} shape="square" colorIndex={ci} />
+                    <p className="text-fg font-bold text-[16px] flex-1 truncate">{club.name}</p>
                     {canManage(club.id) && (
-                      <button onClick={() => { setRenaming(t.id); setRenameVal(t.name) }} className="text-fg/30 text-sm px-1 flex-shrink-0">✎</button>
+                      <button onClick={() => { setRenamingClub(club.id); setClubVal(club.name) }} className="text-fg/30 text-sm px-1 flex-shrink-0">✎</button>
                     )}
                   </>
+                )}
+              </div>
+              {renamingClub === club.id && (
+                <AvatarUpload
+                  variant="inline" kind="clubs" id={club.id} name={club.name}
+                  path={club.avatar_path} colorIndex={ci} shape="square" label="Vereinslogo"
+                />
+              )}
+            </div>
+            {(club.teams ?? []).map((t, ti) => (
+              <div key={t.id} className="px-4 py-3 border-b border-fg/5">
+                <div className="flex items-center gap-2">
+                  {renaming === t.id ? (
+                    <>
+                      <input
+                        value={renameVal} onChange={e => setRenameVal(e.target.value)} autoFocus
+                        onKeyDown={e => e.key === 'Enter' && doRename(t.id)}
+                        className="flex-1 bg-surface2 rounded-lg px-2.5 py-1.5 text-fg text-sm outline-none"
+                      />
+                      <button onClick={() => doRename(t.id)} className="text-accent-cyan text-sm font-semibold">Speichern</button>
+                      <button onClick={() => setRenaming(null)} className="text-fg/40 text-lg px-1">✕</button>
+                    </>
+                  ) : (
+                    <>
+                      <Avatar name={t.name} url={urlFor(t.avatar_path)} size={24} shape="square" colorIndex={ti + 1} />
+                      <button onClick={() => switchTo(t.id)} className="flex-1 flex items-center justify-between text-left min-w-0">
+                        <span className="text-fg text-[15px] truncate">{t.name}</span>
+                        {t.id === currentTeamId
+                          ? <span className="text-accent-cyan text-xs font-semibold flex-shrink-0">aktiv</span>
+                          : <span className="text-fg/30 text-lg flex-shrink-0">›</span>}
+                      </button>
+                      {canManage(club.id) && (
+                        <button onClick={() => { setRenaming(t.id); setRenameVal(t.name) }} className="text-fg/30 text-sm px-1 flex-shrink-0">✎</button>
+                      )}
+                    </>
+                  )}
+                </div>
+                {renaming === t.id && (
+                  <AvatarUpload
+                    variant="inline" kind="teams" id={t.id} name={t.name}
+                    path={t.avatar_path} colorIndex={ti + 1} shape="square" label="Team-Logo"
+                  />
                 )}
               </div>
             ))}

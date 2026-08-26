@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Header from '../components/Header'
+import Avatar, { avatarColor } from '../components/Avatar'
+import AvatarUpload from '../components/AvatarUpload'
 import LoadingScreen from '../components/LoadingScreen'
 import Can from '../components/Can'
 import { useCan, useMyPlayerId } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
+import { useAvatarUrls } from '../lib/avatars'
 import { errorMessage } from '../lib/errors'
 import { useTrack } from '../lib/analytics'
 import { usePlayers } from '../store'
@@ -101,7 +104,6 @@ const GAMETYPE_OPTIONS: { value: GameTypePreference; label: string; short: strin
   { value: 'doubles_only',      label: 'Immer Doppel',  short: 'D!' },
 ]
 
-const AVATAR_COLORS = ['#00e5ff', '#e040fb', '#ffd700', '#00e5ff', '#7c3aed', '#e040fb', '#ffd700']
 
 export default function PlayerEditorPage() {
   const { id } = useParams()
@@ -133,6 +135,7 @@ function PlayerEditorForm() {
   const [inviteErr, setInviteErr] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const track = useTrack()
+  const avatarUrls = useAvatarUrls(players.map(p => p.avatarPath))
 
   const save = () => {
     if (!name.trim()) return
@@ -195,6 +198,24 @@ function PlayerEditorForm() {
             autoFocus={isNew}
           />
         </div>
+
+        {/* Profilbild */}
+        {existing ? (
+          <AvatarUpload
+            kind="players"
+            id={existing.id}
+            name={name || existing.name}
+            path={existing.avatarPath}
+            colorIndex={players.findIndex(p => p.id === existing.id)}
+            label="Profilbild"
+            hint="Wird auf ein Quadrat zugeschnitten und verkleinert. Nur für das eigene Team sichtbar."
+            disabled={!editable}
+          />
+        ) : (
+          <p className="text-fg/35 text-xs bg-fg/5 rounded-xl px-3 py-2">
+            Ein Profilbild kannst du hinzufügen, sobald der Spieler gespeichert ist.
+          </p>
+        )}
 
         {/* Position */}
         <PreferenceScale
@@ -263,7 +284,7 @@ function PlayerEditorForm() {
           {/* Existing partner preferences */}
           {prefs.partnerPreferences.map((pp, i) => {
             const partner = players.find(p => p.id === pp.playerId)
-            const color = AVATAR_COLORS[players.findIndex(p => p.id === pp.playerId) % AVATAR_COLORS.length]
+            const partnerIdx = players.findIndex(p => p.id === pp.playerId)
             return (
               <motion.div
                 key={pp.playerId}
@@ -272,10 +293,13 @@ function PlayerEditorForm() {
                 exit={{ opacity: 0, height: 0 }}
                 className="flex items-center px-4 py-2.5 border-t border-fg/5"
               >
-                <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold mr-3"
-                  style={{ background: `${color}22`, color }}>
-                  {partner?.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                </div>
+                <Avatar
+                  name={partner?.name ?? '?'}
+                  url={partner?.avatarPath ? avatarUrls[partner.avatarPath] : null}
+                  size={28}
+                  colorIndex={partnerIdx}
+                  className="mr-3"
+                />
                 <span className="flex-1 text-fg text-[14px] font-medium truncate">{partner?.name ?? '?'}</span>
                 <div className="flex items-center gap-1.5 ml-2">
                   {[1, 2, 3].map(w => (
@@ -305,7 +329,7 @@ function PlayerEditorForm() {
                 <p className="text-fg/30 text-[12px] mb-2.5">Tippen zum Hinzufügen:</p>
                 <div className="flex flex-wrap gap-2">
                   {otherPlayers.map(p => {
-                    const color = AVATAR_COLORS[players.findIndex(pl => pl.id === p.id) % AVATAR_COLORS.length]
+                    const color = avatarColor(players.findIndex(pl => pl.id === p.id))
                     return (
                       <button
                         key={p.id}
