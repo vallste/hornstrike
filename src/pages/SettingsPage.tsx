@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Header from '../components/Header'
 import AvatarUpload from '../components/AvatarUpload'
+import TeamLigaIdField from '../components/TeamLigaIdField'
 import BottomNav from '../components/BottomNav'
 import { usePlayers, useMatchDays } from '../store'
 import { exportBackup, parseBackup, CURRENT_VERSION, type BackupFile } from '../utils/backup'
@@ -185,6 +186,13 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
                   label="Team-Logo"
                   hint="Sichtbar für alle im Team."
                 />
+              </div>
+            </Can>
+          )}
+          {currentWorkspace && (
+            <Can cap="team:editLigaId">
+              <div className="px-4 py-3 border-b border-fg/5">
+                <TeamLigaIdField teamId={currentWorkspace.teamId} ligaId={currentWorkspace.teamLigaId} />
               </div>
             </Can>
           )}

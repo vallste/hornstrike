@@ -7,6 +7,7 @@ export interface Workspace {
   teamId: string
   teamName: string
   teamAvatarPath: string | null
+  teamLigaId: number | null
   clubId: string
   clubName: string
   clubAvatarPath: string | null
@@ -27,7 +28,7 @@ const ScopeContext = createContext<Ctx | null>(null)
 const LS_KEY = 'hornstrike_current_team'
 
 type ClubRef = { name: string; avatar_path: string | null }
-type TeamRow = { id: string; name: string; club_id: string; avatar_path: string | null; clubs: ClubRef | ClubRef[] | null }
+type TeamRow = { id: string; name: string; club_id: string; avatar_path: string | null; liga_team_id: number | null; clubs: ClubRef | ClubRef[] | null }
 
 /**
  * Aktueller Arbeitskontext (Verein/Team). Listet alle Teams, auf die der User
@@ -45,13 +46,13 @@ export function ScopeProvider({ children }: { children: ReactNode }) {
     queryFn: async (): Promise<Workspace[]> => {
       const { data, error } = await getSupabase()
         .from('teams')
-        .select('id,name,club_id,avatar_path,clubs(name,avatar_path)')
+        .select('id,name,club_id,avatar_path,liga_team_id,clubs(name,avatar_path)')
         .order('name', { ascending: true })
       if (error) throw error
       return ((data ?? []) as TeamRow[]).map(t => {
         const club = Array.isArray(t.clubs) ? t.clubs[0] : t.clubs
         return {
-          teamId: t.id, teamName: t.name, teamAvatarPath: t.avatar_path,
+          teamId: t.id, teamName: t.name, teamAvatarPath: t.avatar_path, teamLigaId: t.liga_team_id,
           clubId: t.club_id, clubName: club?.name ?? '—', clubAvatarPath: club?.avatar_path ?? null,
         }
       })

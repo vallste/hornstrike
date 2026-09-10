@@ -1,6 +1,6 @@
 # Rollen & Rechte (Hornstrike)
 
-Stand: nach Migration `0014_lineup_lock.sql`.
+Stand: nach Migration `0015_liga_ids.sql`.
 
 ## Rollen
 
@@ -21,9 +21,11 @@ Hierarchie ist **nicht** rein linear: Co-Captain hat Inhalts-Rechte wie ein Capt
 | Listen ansehen (Spieler/Spieltage/Umfragen) | 👁 | 👁 | 👁 | 👁 | 👁 |
 | Eigenes Profil/Präferenzen bearbeiten | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Eigenes Profilbild setzen/entfernen | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Eigene Liga-ID hinterlegen | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Eigene Verfügbarkeit in Umfrage angeben | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Kader bearbeiten (Spieler anlegen/ändern/sortieren) | – | ✓ | ✓ | ✓ | ✓ |
 | Profilbild **anderer** Spieler setzen/entfernen | – | ✓ | ✓ | ✓ | ✓ |
+| Liga-ID **anderer** Spieler hinterlegen | – | ✓ | ✓ | ✓ | ✓ |
 | Spieltag anlegen + Aufstellung berechnen/bearbeiten | – | ✓ | ✓ | ✓ | ✓ |
 | Aufstellung sperren/entsperren | – | ✓ | ✓ | ✓ | ✓ |
 | Umfrage anlegen/verwalten + „Aufstellung erstellen" | – | ✓ | ✓ | ✓ | ✓ |
@@ -31,6 +33,7 @@ Hierarchie ist **nicht** rein linear: Co-Captain hat Inhalts-Rechte wie ein Capt
 | Mitglieder einladen (Einladungslinks) | – | – | ✓ | ✓ | ✓ |
 | **Rollen zuweisen** (Captain/Co-Captain/Spieler) | – | – | ✓ (eigenes Team) | ✓ (Teams des Vereins) | ✓ (überall) |
 | Team-Logo setzen/entfernen | – | – | ✓ | ✓ | ✓ |
+| Liga-ID des Teams hinterlegen | – | ✓ | ✓ | ✓ | ✓ |
 | Vereinslogo setzen/entfernen | – | – | – | ✓ | ✓ |
 | Teams anlegen/umbenennen, Verein umbenennen, Workspace wechseln | – | – | – | ✓ | ✓ |
 | **Vereins-Admins** ernennen/entfernen | – | – | – | ✓ (eigener Verein) | ✓ (überall) |
@@ -66,7 +69,7 @@ Zwei Ebenen – die UI spiegelt nur, die **echte Absicherung ist die Datenbank (
 | Capability | ab Rolle |
 |---|---|
 | `player:editOwnPrefs` | Spieler |
-| `team:editRoster`, `team:editLineup`, `team:createMatchday`, `team:managePolls` | Co-Captain |
+| `team:editRoster`, `team:editLineup`, `team:createMatchday`, `team:managePolls`, `team:editLigaId` | Co-Captain |
 | `team:invite`, `team:manageRoles`, `team:editLogo` | Captain |
 | `club:manageTeams`, `club:invite` | Vereins-Admin |
 | `app:manageClubs`, `app:viewStats` | Plattform-Admin |
@@ -120,3 +123,16 @@ Sperren und Entsperren hängt an keiner eigenen Policy: die bestehende `md_updat
 Der Schutz liegt zusätzlich in der Datenbank. Der Trigger `matchdays_guard_locked_lineup` weist jedes Update ab, das `lineup` verändert, während die Sperre steht (`raise exception 'lineup is locked'`, im Client übersetzt in `src/lib/errors.ts`). Maßgeblich ist der Zustand **vor** dem Update: entsperren und überschreiben in einem einzigen Update wird abgelehnt, es braucht zwei Schritte. Datum, Gegner, Ort, Notizen und Verfügbarkeiten bleiben auch bei gesperrter Aufstellung änderbar – verglichen wird ausschließlich die Spalte `lineup`.
 
 Bei gesperrter Aufstellung hält die App über die Screen Wake Lock API zusätzlich den Bildschirm wach (`src/lib/useWakeLock.ts`), solange die Seite im Vordergrund ist.
+
+## Liga-Verknüpfung (Migration `0015`)
+
+`players.liga_player_id` und `teams.liga_team_id` verweisen auf die öffentlichen Seiten des Tischfußballverbands Hamburg. Gespeichert wird **nur die Zahl**; die Adresse baut der Client aus einer festen Basis (`src/lib/liga.ts`). Über das Feld lässt sich also keine fremde Adresse in die App bringen, und ein Pfadwechsel beim Verband kostet eine Zeile im Frontend statt einer Datenwanderung. Die Eingabe akzeptiert die komplette URL und zieht die ID heraus.
+
+Die App **ruft dort nichts ab**. Ein Import der Ansetzungen scheiterte an zwei Punkten: die Seite beantwortet Nicht-Browser-Anfragen mit `410 Gone` (auch die `robots.txt`), und CORS-Header liefert sie ohnehin keine – ein Abruf aus dem Browser heraus wäre unmöglich, ein serverseitiger nur durch Umgehen der Sperre.
+
+| Feld | Schreibrecht | Weg |
+|---|---|---|
+| `players.liga_player_id` | man selbst, Captain, Co-Captain | direkt (`players_update` deckt das ab) |
+| `teams.liga_team_id` | Captain, Co-Captain | RPC `public.set_team_liga_id` (prüft `is_team_editor`) |
+
+Achtung, bewusste Asymmetrie: das **Team-Logo** verlangt serverseitig `is_team_admin` (Captain+, ohne Co-Captain), die **Liga-ID** dagegen `is_team_editor` (mit Co-Captain). Wer das angleichen will, ändert den Guard im jeweiligen RPC und die Capability-Zuordnung.

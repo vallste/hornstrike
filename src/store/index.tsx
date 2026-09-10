@@ -7,7 +7,7 @@ import { useScope } from '../context/ScopeProvider'
 import { track } from '../lib/analytics'
 
 // ─── DB-Zeilen-Typen (snake_case) ───────────────────────────────────────────
-type PlayerRow = { id: string; name: string; active: boolean; sort_order: number; user_id: string | null; avatar_path: string | null }
+type PlayerRow = { id: string; name: string; active: boolean; sort_order: number; user_id: string | null; avatar_path: string | null; liga_player_id: number | null }
 type PrefRow = {
   player_id: string; position: Position; game_type: GameTypePreference
   goalie_preference: boolean; avoids_opening: boolean; avoids_closing: boolean
@@ -26,7 +26,7 @@ type MdRow = {
 async function fetchPlayers(teamId: string): Promise<Player[]> {
   const sb = getSupabase()
   const [pl, pref, part] = await Promise.all([
-    sb.from('players').select('id,name,active,sort_order,user_id,avatar_path').eq('team_id', teamId).order('sort_order', { ascending: true }),
+    sb.from('players').select('id,name,active,sort_order,user_id,avatar_path,liga_player_id').eq('team_id', teamId).order('sort_order', { ascending: true }),
     sb.from('player_preferences').select('*'),
     sb.from('partner_preferences').select('player_id,partner_player_id,weight'),
   ])
@@ -51,6 +51,7 @@ async function fetchPlayers(teamId: string): Promise<Player[]> {
       active: row.active,
       userId: row.user_id,
       avatarPath: row.avatar_path,
+      ligaPlayerId: row.liga_player_id,
       preferences: {
         position: p?.position ?? 'both',
         gameType: p?.game_type ?? 'both',
@@ -73,6 +74,7 @@ async function insertPlayer(p: Player, teamId: string, sortOrder: number) {
     // Beim Wiederherstellen aus einem Backup bleibt die Bilddatei am selben
     // Pfad liegen – ohne diese Zeile wäre die Referenz darauf verloren.
     avatar_path: p.avatarPath ?? null,
+    liga_player_id: p.ligaPlayerId ?? null,
   })
   if (ins.error) throw ins.error
   await writePlayerPrefs(p)
@@ -121,7 +123,7 @@ export function usePlayers() {
   const updateMut = useMutation({
     mutationFn: async (p: Player) => {
       const sb = getSupabase()
-      const upd = await sb.from('players').update({ name: p.name, active: p.active }).eq('id', p.id)
+      const upd = await sb.from('players').update({ name: p.name, active: p.active, liga_player_id: p.ligaPlayerId ?? null }).eq('id', p.id)
       if (upd.error) throw upd.error
       await writePlayerPrefs(p)
     },

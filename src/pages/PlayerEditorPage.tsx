@@ -9,6 +9,7 @@ import Can from '../components/Can'
 import { useCan, useMyPlayerId } from '../lib/permissions'
 import { getSupabase } from '../lib/supabase'
 import { useAvatarUrls } from '../lib/avatars'
+import { ligaPlayerUrl, parseLigaId } from '../lib/liga'
 import { errorMessage } from '../lib/errors'
 import { useTrack } from '../lib/analytics'
 import { usePlayers } from '../store'
@@ -136,14 +137,17 @@ function PlayerEditorForm() {
   const [copied, setCopied] = useState(false)
   const track = useTrack()
   const avatarUrls = useAvatarUrls(players.map(p => p.avatarPath))
+  const [ligaId, setLigaId] = useState(existing?.ligaPlayerId ? String(existing.ligaPlayerId) : '')
+  const ligaParsed = parseLigaId(ligaId)
+  const ligaInvalid = ligaId.trim() !== '' && ligaParsed === null
 
   const save = () => {
-    if (!name.trim()) return
+    if (!name.trim() || ligaInvalid) return
     if (isNew) {
-      addPlayer({ id: uuid(), name: name.trim(), active: true, preferences: prefs })
+      addPlayer({ id: uuid(), name: name.trim(), active: true, preferences: prefs, ligaPlayerId: ligaParsed })
 
     } else if (existing) {
-      updatePlayer({ ...existing, name: name.trim(), active, preferences: prefs })
+      updatePlayer({ ...existing, name: name.trim(), active, preferences: prefs, ligaPlayerId: ligaParsed })
     }
     navigate('/players')
   }
@@ -216,6 +220,36 @@ function PlayerEditorForm() {
             Ein Profilbild kannst du hinzufügen, sobald der Spieler gespeichert ist.
           </p>
         )}
+
+        {/* Liga-Profil beim Verband */}
+        <div className="bg-surface rounded-2xl px-4 py-3.5">
+          <div className="flex items-center justify-between mb-1.5">
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Liga-Profil</p>
+            {existing?.ligaPlayerId && (
+              <a
+                href={ligaPlayerUrl(existing.ligaPlayerId)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-cyan text-[13px] font-semibold"
+              >
+                Statistiken ↗
+              </a>
+            )}
+          </div>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={ligaId}
+            onChange={e => setLigaId(e.target.value)}
+            placeholder="Profil-Link einfügen oder ID"
+            className="w-full bg-transparent text-fg placeholder-fg/25 text-[15px] outline-none"
+          />
+          <p className={`text-[11px] mt-1 leading-snug ${ligaInvalid ? 'text-red-400' : 'text-fg/35'}`}>
+            {ligaInvalid
+              ? 'Daraus lässt sich keine ID lesen – Link von kickern-hamburg.de einfügen oder die Zahl eintragen.'
+              : 'Link von kickern-hamburg.de einfügen, die ID wird herausgelesen. Die App ruft dort nichts ab, sie verlinkt nur.'}
+          </p>
+        </div>
 
         {/* Position */}
         <PreferenceScale

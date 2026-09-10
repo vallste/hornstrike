@@ -19,6 +19,7 @@ export type Capability =
   | 'team:invite'
   | 'team:manageRoles'
   | 'team:editLogo'
+  | 'team:editLigaId'
   | 'club:manageTeams'
   | 'club:invite'
   | 'app:manageClubs'
@@ -28,6 +29,9 @@ export type Capability =
 const TEAM_EDIT: Capability[] = [
   'player:editOwnPrefs', 'team:editRoster', 'team:editLineup',
   'team:createMatchday', 'team:managePolls',
+  // Liga-ID hängt an is_team_editor (RPC set_team_liga_id, 0015) – anders als
+  // das Team-Logo, das serverseitig is_team_admin verlangt.
+  'team:editLigaId',
 ]
 
 // Explizite Rechte je Rolle.

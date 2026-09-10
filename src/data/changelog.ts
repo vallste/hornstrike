@@ -21,6 +21,7 @@ export interface ChangelogEntry {
  */
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
+  { type: 'feat', text: 'Liga-Verknüpfung: Im Spielerprofil und beim Team lässt sich die Seite des Hamburger Verbands hinterlegen – einfach den Link von kickern-hamburg.de einfügen, die ID wird herausgelesen. Danach führt ein Tipp direkt zu den eigenen Statistiken bzw. zu Tabelle und Ansetzungen. Die App ruft dort keine Daten ab, sie verlinkt nur' },
   { type: 'feat', text: 'Aufstellung sperren: Ist die Aufstellung fertig, lässt sie sich mit einem Tipp sperren – dann verschiebt kein versehentlicher Fingertipp mehr einen Spieler und „Neu berechnen" ist aus. Sperren und Entsperren dürfen Captain und Co-Captain; die Sperre gilt auch auf dem Server, nicht nur in der Ansicht' },
   { type: 'improve', text: 'Bei gesperrter Aufstellung bleibt der Bildschirm an, solange sie geöffnet ist – praktisch am Tisch. Braucht iPhone mit iOS 18.4 oder neuer bzw. Android; auf älteren Geräten bleibt es beim gewohnten Verhalten' },
   { type: 'fix', text: '„Neu berechnen" liefert jetzt zuverlässig eine andere Aufstellung. Bisher kam bei unveränderten Eingaben immer exakt dasselbe Ergebnis heraus, der Knopf wirkte dadurch kaputt – jetzt wird gezielt eine Variante gewürfelt, ohne dass Gleichverteilung oder Präferenzen darunter leiden' },

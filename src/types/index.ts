@@ -29,6 +29,7 @@ export interface Player {
   preferences: PlayerPreferences
   userId?: string | null   // verknüpfter Account (auth.users.id); null = Ghost/nicht beansprucht
   avatarPath?: string | null   // Storage-Pfad des Profilbilds ('players/<uuid>'), nie eine URL
+  ligaPlayerId?: number | null // Spieler-ID beim Tischfußballverband Hamburg (nur Zahl, siehe lib/liga.ts)
 }
 
 /** Spieltag-spezifische Einstellungen für einen Spieler */
