@@ -20,17 +20,22 @@ export interface ChangelogEntry {
  * CURRENT_DATE ist das voraussichtliche Datum des laufenden Releases.
  */
 
-const CURRENT_CHANGES: ChangelogEntry['changes'] = [
-  { type: 'feat', text: 'Liga-Verknüpfung: Im Spielerprofil und beim Team lässt sich die Seite des Hamburger Verbands hinterlegen – einfach den Link von kickern-hamburg.de einfügen, die ID wird herausgelesen. Danach führt ein Tipp direkt zu den eigenen Statistiken bzw. zu Tabelle und Ansetzungen. Die App ruft dort keine Daten ab, sie verlinkt nur' },
-  { type: 'feat', text: 'Aufstellung sperren: Ist die Aufstellung fertig, lässt sie sich mit einem Tipp sperren – dann verschiebt kein versehentlicher Fingertipp mehr einen Spieler und „Neu berechnen" ist aus. Sperren und Entsperren dürfen Captain und Co-Captain; die Sperre gilt auch auf dem Server, nicht nur in der Ansicht' },
-  { type: 'improve', text: 'Bei gesperrter Aufstellung bleibt der Bildschirm an, solange sie geöffnet ist – praktisch am Tisch. Braucht iPhone mit iOS 18.4 oder neuer bzw. Android; auf älteren Geräten bleibt es beim gewohnten Verhalten' },
-  { type: 'fix', text: '„Neu berechnen" liefert jetzt zuverlässig eine andere Aufstellung. Bisher kam bei unveränderten Eingaben immer exakt dasselbe Ergebnis heraus, der Knopf wirkte dadurch kaputt – jetzt wird gezielt eine Variante gewürfelt, ohne dass Gleichverteilung oder Präferenzen darunter leiden' },
-  { type: 'feat', text: 'Profilbilder: Spieler, Teams und Vereine können ein Bild bekommen. Spieler pflegen ihr eigenes, Captains und Co-Captains auch das der Mitspieler; das Team-Logo setzt der Captain (Einstellungen → Verein), das Vereinslogo der Vereins-Admin' },
-  { type: 'improve', text: 'Bilder werden direkt auf dem Gerät quadratisch zugeschnitten und verkleinert – auch iPhone-Fotos landen so klein und im richtigen Format im Speicher' },
-  { type: 'improve', text: 'Profilbilder bleiben privat: sie liegen in einem nicht öffentlichen Speicher und sind ausschließlich für das eigene Team bzw. den eigenen Verein sichtbar' },
-]
+const CURRENT_CHANGES: ChangelogEntry['changes'] = []
 
 const HISTORY: ChangelogEntry[] = [
+  {
+    version: '26.3.3',
+    date: '2026-09-10',
+    changes: [
+      { type: 'feat', text: 'Liga-Verknüpfung: Im Spielerprofil und beim Team lässt sich die Seite des Hamburger Verbands hinterlegen – einfach den Link von kickern-hamburg.de einfügen, die ID wird herausgelesen. Danach führt ein Tipp direkt zu den eigenen Statistiken bzw. zu Tabelle und Ansetzungen. Die App ruft dort keine Daten ab, sie verlinkt nur' },
+      { type: 'feat', text: 'Aufstellung sperren: Ist die Aufstellung fertig, lässt sie sich mit einem Tipp sperren – dann verschiebt kein versehentlicher Fingertipp mehr einen Spieler und „Neu berechnen" ist aus. Sperren und Entsperren dürfen Captain und Co-Captain; die Sperre gilt auch auf dem Server, nicht nur in der Ansicht' },
+      { type: 'improve', text: 'Bei gesperrter Aufstellung bleibt der Bildschirm an, solange sie geöffnet ist – praktisch am Tisch. Braucht iPhone mit iOS 18.4 oder neuer bzw. Android; auf älteren Geräten bleibt es beim gewohnten Verhalten' },
+      { type: 'fix', text: '„Neu berechnen" liefert jetzt zuverlässig eine andere Aufstellung. Bisher kam bei unveränderten Eingaben immer exakt dasselbe Ergebnis heraus, der Knopf wirkte dadurch kaputt – jetzt wird gezielt eine Variante gewürfelt, ohne dass Gleichverteilung oder Präferenzen darunter leiden' },
+      { type: 'feat', text: 'Profilbilder: Spieler, Teams und Vereine können ein Bild bekommen. Spieler pflegen ihr eigenes, Captains und Co-Captains auch das der Mitspieler; das Team-Logo setzt der Captain (Einstellungen → Verein), das Vereinslogo der Vereins-Admin' },
+      { type: 'improve', text: 'Bilder werden direkt auf dem Gerät quadratisch zugeschnitten und verkleinert – auch iPhone-Fotos landen so klein und im richtigen Format im Speicher' },
+      { type: 'improve', text: 'Profilbilder bleiben privat: sie liegen in einem nicht öffentlichen Speicher und sind ausschließlich für das eigene Team bzw. den eigenen Verein sichtbar' },
+    ],
+  },
   {
     version: '26.3.2',
     date: '2026-08-10',
