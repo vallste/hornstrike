@@ -8,15 +8,23 @@ export interface ChangelogEntry {
 
 /**
  * Beim Releasen:
- * 1. Den CURRENT_CHANGES-Block einfrieren (mit der aktuellen package.json-Version
- *    und dem Release-Datum nach HISTORY verschieben)
+ * 1. CURRENT_CHANGES-Block einfrieren: mit der aktuellen package.json-Version
+ *    und dem Release-Datum nach HISTORY verschieben
  * 2. CURRENT_CHANGES leeren
- * 3. `npm version patch|minor|major` – package.json trägt ab jetzt die NÄCHSTE
- *    Version, unter der die neuen CURRENT_CHANGES-Einträge erscheinen
+ * 3. Commit mit der Version als Nachricht (`26.3.3`) + annotiertes Tag `v26.3.3`
  *
- * Reihenfolge beachten: Wird erst gesammelt und dann gebumpt, zeigt der
- * Changelog die laufende Version zweimal (einmal aus HISTORY, einmal aus
- * CURRENT_CHANGES) – beide Karten hätten denselben Schlüssel.
+ * Und dann die Stelle, an der man sich leicht vertut:
+ * 4. `npm version patch|minor|major` erst DANN, wenn der erste neue Eintrag in
+ *    CURRENT_CHANGES geschrieben wird – **vor** diesem Eintrag, nicht direkt
+ *    beim Release.
+ *
+ * Warum nicht sofort bumpen: Die App wird bei jedem Push ausgeliefert, die
+ * package.json-Version ist also immer die live laufende. Bumpt man direkt beim
+ * Release, zeigen die Einstellungen „v26.3.4 · 7 neue Einträge" für Einträge,
+ * die zu 26.3.3 gehören. Warum nicht später bumpen: Steht die neue Version noch
+ * nicht, wenn der erste Eintrag kommt, erscheint dieselbe Version zweimal im
+ * Changelog – einmal aus HISTORY, einmal aus CURRENT_CHANGES.
+ *
  * CURRENT_DATE ist das voraussichtliche Datum des laufenden Releases.
  */
 

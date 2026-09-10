@@ -5,8 +5,10 @@ import BottomNav from '../components/BottomNav'
 import { CHANGELOG, TYPE_LABEL, TYPE_COLOR } from '../data/changelog'
 
 export default function ChangelogPage() {
-  // Neueste Version standardmäßig geöffnet
-  const [open, setOpen] = useState<string | null>(CHANGELOG[0]?.version ?? null)
+  // Neueste Version standardmäßig geöffnet. Index statt Versionsnummer als
+  // Schlüssel: Wird beim Release der Bump vergessen, stünde dieselbe Version
+  // zweimal in der Liste – dann klappten sonst beide Karten gemeinsam auf.
+  const [open, setOpen] = useState<number | null>(CHANGELOG.length ? 0 : null)
 
   return (
     <div className="min-h-screen bg-app pb-24">
@@ -16,13 +18,13 @@ export default function ChangelogPage() {
 
       <div className="relative px-6 space-y-3 mt-4">
         {CHANGELOG.map((entry, idx) => {
-          const isOpen = open === entry.version
+          const isOpen = open === idx
           const isLatest = idx === 0
           return (
-            <div key={entry.version} className="bg-surface rounded-2xl overflow-hidden">
+            <div key={`${entry.version}-${idx}`} className="bg-surface rounded-2xl overflow-hidden">
               {/* Version header */}
               <button
-                onClick={() => setOpen(isOpen ? null : entry.version)}
+                onClick={() => setOpen(isOpen ? null : idx)}
                 className="w-full flex items-center px-4 py-4 gap-3 text-left"
               >
                 <div className="flex-1 flex items-center gap-2.5 flex-wrap">
