@@ -196,6 +196,14 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
               </div>
             </Can>
           )}
+          <button onClick={() => navigate('/auswertungen')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-fg/5 transition-colors border-b border-fg/5">
+            <span className="w-9 h-9 rounded-xl bg-unicorn-cyan/15 flex items-center justify-center text-xl">📊</span>
+            <div className="flex-1 text-left">
+              <p className="text-fg font-semibold text-[15px]">Auswertungen</p>
+              <p className="text-fg/40 text-xs mt-0.5">Doppel-Harmonie, Einzelbilanzen, Torschützen</p>
+            </div>
+            <span className="text-fg/25 text-lg">›</span>
+          </button>
           <Can cap="team:invite">
             <button onClick={() => navigate('/members')} className="w-full flex items-center gap-3 px-4 py-4 active:bg-fg/5 transition-colors border-b border-fg/5">
               <span className="w-9 h-9 rounded-xl bg-unicorn-pink/15 flex items-center justify-center text-xl">👥</span>

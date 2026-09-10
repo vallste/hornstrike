@@ -16,9 +16,10 @@ type PartRow = { player_id: string; partner_player_id: string; weight: number }
 type MdRow = {
   id: string; date: string; opponent: string | null
   start_time: string | null; location: string | null
-  use_goalie: boolean; use_fifth_double: boolean; notes: string | null; lineup_locked: boolean
+  use_goalie: boolean; use_fifth_double: boolean; notes: string | null; lineup_locked: boolean; status: string | null
   lineup: GameSlot[]
   matchday_players: { player_id: string; available_from: number; available_to: number }[] | null
+  matchday_sets: { game_index: number; set_no: number; goals_for: number; goals_against: number }[] | null
 }
 
 // ─── Players ─────────────────────────────────────────────────────────────────
@@ -184,7 +185,7 @@ async function fetchMatchDays(teamId: string): Promise<MatchDay[]> {
   const sb = getSupabase()
   const { data, error } = await sb
     .from('matchdays')
-    .select('id,date,start_time,location,opponent,use_goalie,use_fifth_double,notes,lineup,lineup_locked,matchday_players(player_id,available_from,available_to)')
+    .select('id,date,start_time,location,opponent,use_goalie,use_fifth_double,notes,lineup,lineup_locked,status,matchday_players(player_id,available_from,available_to),matchday_sets(game_index,set_no,goals_for,goals_against)')
     .eq('team_id', teamId)
     .order('date', { ascending: true })
   if (error) throw error
@@ -198,12 +199,17 @@ async function fetchMatchDays(teamId: string): Promise<MatchDay[]> {
     useFifthDouble: m.use_fifth_double,
     notes: m.notes ?? undefined,
     lineupLocked: m.lineup_locked ?? false,
+    status: (m.status ?? 'planned') as MatchDay['status'],
     players: (m.matchday_players ?? []).map(mp => ({
       playerId: mp.player_id,
       availableFrom: mp.available_from,
       availableTo: mp.available_to,
     })),
     lineup: normalizeDoublesOrder(m.lineup ?? []),
+    sets: (m.matchday_sets ?? []).map(r => ({
+      gameIndex: r.game_index, setNo: r.set_no as 1 | 2,
+      goalsFor: r.goals_for, goalsAgainst: r.goals_against,
+    })),
   }))
 }
 
@@ -241,7 +247,7 @@ export function useMatchDays() {
         id: md.id, team_id: currentTeamId, date: md.date, opponent: md.opponent ?? null,
         start_time: md.startTime || null, location: md.location || null,
         use_goalie: md.useGoalie, use_fifth_double: md.useFifthDouble,
-        notes: md.notes ?? null, lineup: md.lineup, lineup_locked: md.lineupLocked ?? false,
+        notes: md.notes ?? null, lineup: md.lineup, lineup_locked: md.lineupLocked ?? false, status: md.status ?? 'planned',
       })
       if (ins.error) throw ins.error
       await writeMatchDayAvailability(md)
@@ -258,7 +264,7 @@ export function useMatchDays() {
         date: md.date, opponent: md.opponent ?? null,
         start_time: md.startTime || null, location: md.location || null,
         use_goalie: md.useGoalie, use_fifth_double: md.useFifthDouble,
-        notes: md.notes ?? null, lineup: md.lineup, lineup_locked: md.lineupLocked ?? false,
+        notes: md.notes ?? null, lineup: md.lineup, lineup_locked: md.lineupLocked ?? false, status: md.status ?? 'planned',
       }).eq('id', md.id)
       if (upd.error) throw upd.error
       await writeMatchDayAvailability(md)
@@ -284,7 +290,7 @@ export function useMatchDays() {
           id: md.id, team_id: currentTeamId, date: md.date, opponent: md.opponent ?? null,
           start_time: md.startTime || null, location: md.location || null,
           use_goalie: md.useGoalie, use_fifth_double: md.useFifthDouble,
-          notes: md.notes ?? null, lineup: md.lineup, lineup_locked: md.lineupLocked ?? false,
+          notes: md.notes ?? null, lineup: md.lineup, lineup_locked: md.lineupLocked ?? false, status: md.status ?? 'planned',
         })
         if (ins.error) throw ins.error
         await writeMatchDayAvailability(md)

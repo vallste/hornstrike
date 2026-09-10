@@ -28,7 +28,13 @@ export interface ChangelogEntry {
  * CURRENT_DATE ist das voraussichtliche Datum des laufenden Releases.
  */
 
-const CURRENT_CHANGES: ChangelogEntry['changes'] = []
+const CURRENT_CHANGES: ChangelogEntry['changes'] = [
+  { type: 'feat', text: 'Ergebnisse erfassen: Jeder Spieltag hat jetzt eine Ergebnis-Ansicht mit allen 16 Sätzen. Du kannst nur den Endstand eines Satzes eintippen – oder im Live-Modus Tor für Tor mitschreiben, mit einem Tipp pro Tor. Wer aus welcher Position getroffen hat, weiß die App aus der Aufstellung' },
+  { type: 'feat', text: 'Im Live-Modus lassen sich außerdem Timeouts, Positionswechsel und Eigentore festhalten, dazu die gegnerischen Spieler je Partie (die stehen ja erst fest, wenn beide Spielpläne freigegeben sind – nachtragen geht jederzeit). Jeder Fehltipp lässt sich einzeln zurücknehmen' },
+  { type: 'feat', text: 'Neue Auswertungen (Spieltage → 📊): Welche Doppel harmonieren, wie die Einzelbilanzen aussehen, wer trifft – und ob nach einem Timeout oder Positionswechsel das nächste Tor an euch ging. Quoten mit zu dünner Datenlage werden ausgegraut statt schöngerechnet' },
+  { type: 'improve', text: 'Die Erfassung ist in jeder Feinheit freiwillig: nur Satzendstände reichen für Doppel- und Einzelbilanzen. Torschützen und Timeout-Wirkung entstehen erst dort, wo live mitgetippt wurde – beides lässt sich innerhalb einer Begegnung mischen' },
+  { type: 'improve', text: 'Spieltagsliste und Aufstellung zeigen das Ergebnis auf einen Blick, der Teilen-Text nimmt Satzpunkte und Tore mit. „Begegnung starten" sperrt die Aufstellung gleich mit' },
+]
 
 const HISTORY: ChangelogEntry[] = [
   {

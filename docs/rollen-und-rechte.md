@@ -1,6 +1,6 @@
 # Rollen & Rechte (Hornstrike)
 
-Stand: nach Migration `0015_liga_ids.sql`.
+Stand: nach Migration `0016_live_scoring.sql`.
 
 ## Rollen
 
@@ -28,6 +28,8 @@ Hierarchie ist **nicht** rein linear: Co-Captain hat Inhalts-Rechte wie ein Capt
 | Liga-ID **anderer** Spieler hinterlegen | – | ✓ | ✓ | ✓ | ✓ |
 | Spieltag anlegen + Aufstellung berechnen/bearbeiten | – | ✓ | ✓ | ✓ | ✓ |
 | Aufstellung sperren/entsperren | – | ✓ | ✓ | ✓ | ✓ |
+| Ergebnisse erfassen (Sätze, Tore, Timeouts, Gegner-Namen) | – | ✓ | ✓ | ✓ | ✓ |
+| Auswertungen ansehen | 👁 | 👁 | 👁 | 👁 | 👁 |
 | Umfrage anlegen/verwalten + „Aufstellung erstellen" | – | ✓ | ✓ | ✓ | ✓ |
 | Verfügbarkeiten/Umfrageantworten **anderer** pflegen | – | ✓ | ✓ | ✓ | ✓ |
 | Mitglieder einladen (Einladungslinks) | – | – | ✓ | ✓ | ✓ |
@@ -136,3 +138,23 @@ Die App **ruft dort nichts ab**. Ein Import der Ansetzungen scheiterte an zwei P
 | `teams.liga_team_id` | Captain, Co-Captain | RPC `public.set_team_liga_id` (prüft `is_team_editor`) |
 
 Achtung, bewusste Asymmetrie: das **Team-Logo** verlangt serverseitig `is_team_admin` (Captain+, ohne Co-Captain), die **Liga-ID** dagegen `is_team_editor` (mit Co-Captain). Wer das angleichen will, ändert den Guard im jeweiligen RPC und die Capability-Zuordnung.
+
+## Ergebnis-Erfassung (Migration `0016`)
+
+Regelgrundlage ist die Spielordnung des TFVHH (2.6.3): je Satz höchstens zehn Tore, Ende bei 6:4/4:6 oder 5:5. Einzel = 1 Satz, Doppel = 2 Sätze, macht **16 Sätze je Begegnung** – in beiden Spielfolgen. Satzpunkte: Sieg 2, Unentschieden je 1, in Summe 32.
+
+Zwei Ebenen, absichtlich unabhängig:
+
+| Tabelle | Inhalt | Pflicht? |
+|---|---|---|
+| `matchday_sets` | Satzstand je Partie und Satz. Grundlage aller Summen und Bilanzen. | nein, aber ohne sie gibt es keine Auswertung |
+| `matchday_events` | Protokoll: einzelne Tore mit Schütze und Rolle, Timeouts, Positionswechsel | rein optional |
+| `matchday_opponents` | gegnerische Spieler je Partie (freier Text) | rein optional |
+
+Wer nur Endstände tippt, erzeugt nie eine Protokollzeile. Beim Live-Tippen schreibt `public.record_match_event` Protokoll **und** Satzstand in einer Transaktion, serialisiert über einen Advisory-Lock auf den Spieltag – so können zwei Leute gleichzeitig erfassen, ohne dass der Stand vom Protokoll abweicht. `public.undo_match_event` nimmt das jeweils letzte Ereignis eines Satzes zurück und dreht seine Wirkung auf den Stand mit.
+
+`matchday_events` ist für Clients **nur lesbar**; geschrieben wird ausschließlich über die beiden RPCs. Sätze und Gegner-Namen sind direkt schreibbar (`app.can_edit_matchday` → Captain und Co-Captain). Lesen darf jedes Teammitglied (`app.is_matchday_member`).
+
+`matchdays.status` (`planned` / `live` / `done`) steuert nur die Darstellung; „Begegnung starten" setzt zusätzlich `lineup_locked`.
+
+Ein Eigentor wird als `side = 'them'` mit eigenem `player_id` und `role = 'own_goal'` erfasst: das Tor zählt für den Gegner, verursacht hat es die eigene Person. Die Rolle (Sturm/Tor) muss niemand auswählen – sie ergibt sich aus der Aufstellung plus den protokollierten Positionswechseln (`positionsAfterSwitches`).

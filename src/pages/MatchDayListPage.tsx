@@ -4,6 +4,7 @@ import Header from '../components/Header'
 import Can from '../components/Can'
 import BottomNav from '../components/BottomNav'
 import { useMatchDays, usePlayers } from '../store'
+import { matchTotals } from '../types'
 
 export default function MatchDayListPage() {
   const navigate = useNavigate()
@@ -27,12 +28,19 @@ export default function MatchDayListPage() {
       <Header
         title="Spieltage"
         right={
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/auswertungen')}
+              aria-label="Auswertungen"
+              className="w-9 h-9 rounded-full bg-surface2 border border-fg/15 flex items-center justify-center text-[15px]"
+            >📊</button>
           <Can cap="team:createMatchday">
             <button
               onClick={() => navigate('/matchday/new')}
               className="w-9 h-9 rounded-full bg-unicorn-pink flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-unicorn-pink/40"
             >+</button>
           </Can>
+          </div>
         }
       />
 
@@ -73,7 +81,29 @@ export default function MatchDayListPage() {
                       {activeNames.join(', ')}{more > 0 ? ` +${more}` : ''} · {md.players.length} Spieler
                     </p>
                   </div>
-                  <span className="text-fg/25 text-xl mt-0.5">›</span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {(() => {
+                      const t = matchTotals(md.sets ?? [], md.useFifthDouble ?? false)
+                      if (md.status === 'live') {
+                        return (
+                          <span className="text-accent-cyan text-[12px] font-semibold whitespace-nowrap">
+                            ● {t.pointsFor}:{t.pointsAgainst}
+                          </span>
+                        )
+                      }
+                      if (t.setsFinished === 0) return null
+                      const won = t.pointsFor > t.pointsAgainst
+                      const draw = t.pointsFor === t.pointsAgainst
+                      return (
+                        <span className={`text-[13px] font-bold whitespace-nowrap ${
+                          draw ? 'text-fg/50' : won ? 'text-accent-cyan' : 'text-fg/40'
+                        }`}>
+                          {t.pointsFor}:{t.pointsAgainst}
+                        </span>
+                      )
+                    })()}
+                    <span className="text-fg/25 text-xl mt-0.5">›</span>
+                  </div>
                 </div>
               </button>
 

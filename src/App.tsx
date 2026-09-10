@@ -28,6 +28,8 @@ import ProtectedShell from './components/ProtectedShell'
 import PreviewRoleBanner from './components/PreviewRoleBanner'
 import AnalyticsMount from './components/AnalyticsMount'
 import LineupPage from './pages/LineupPage'
+import MatchLivePage from './pages/MatchLivePage'
+import MatchStatsPage from './pages/MatchStatsPage'
 
 export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(shouldShowOnboarding)
@@ -54,6 +56,8 @@ export default function App() {
           <Route path="/settings" element={<SettingsPage onStartTour={() => setShowOnboarding(true)} />} />
           <Route path="/changelog" element={<ChangelogPage />} />
           <Route path="/lineup/:id" element={<LineupPage />} />
+          <Route path="/matchday/:id/live" element={<MatchLivePage />} />
+          <Route path="/auswertungen" element={<MatchStatsPage />} />
           <Route path="/request-club" element={<RequestClubPage />} />
           <Route path="/admin/club-requests" element={<AdminClubRequestsPage />} />
           <Route path="/admin/stats" element={<AdminStatsPage />} />

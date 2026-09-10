@@ -25,7 +25,7 @@ export type TrackCtx = { teamId?: string | null; clubId?: string | null }
 // Muster, sonst Fallback. Rohe IDs/Tokens verlassen den Client NIE.
 const STATIC_ROUTES = new Set<string>([
   '/', '/home', '/login', '/players', '/matchday', '/matchday/new',
-  '/settings', '/changelog', '/request-club', '/manage', '/members',
+  '/settings', '/changelog', '/request-club', '/manage', '/members', '/auswertungen',
   '/terminfindung', '/terminfindung/new',
   '/admin/club-requests', '/admin/stats',
 ])
@@ -33,6 +33,7 @@ const STATIC_ROUTES = new Set<string>([
 const DYNAMIC_PATTERNS: [RegExp, string][] = [
   [/^\/players\/[^/]+$/, '/players/:id'],
   [/^\/matchday\/[^/]+\/edit$/, '/matchday/:id/edit'],
+  [/^\/matchday\/[^/]+\/live$/, '/matchday/:id/live'],
   [/^\/lineup\/[^/]+$/, '/lineup/:id'],
   [/^\/terminfindung\/[^/]+$/, '/terminfindung/:id'],
   [/^\/join\/[^/]+$/, '/join/:token'],

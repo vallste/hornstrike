@@ -12,7 +12,7 @@ import { usePlayers, useMatchDays } from '../store'
 import { useScope } from '../context/ScopeProvider'
 import { generateLineupVariant } from '../utils/lineup'
 import { validateLineup } from '../utils/validateLineup'
-import { getGameSequence, isGoalieGameIndex } from '../types'
+import { getGameSequence, isGoalieGameIndex, matchTotals } from '../types'
 import type { GameSlot } from '../types'
 import LineupDetailModal from './LineupDetailModal'
 import LineupShareCard from '../components/LineupShareCard'
@@ -108,6 +108,7 @@ function LineupView() {
   // Gesperrt heißt in der Praxis „wir stehen am Tisch und schauen drauf" –
   // genau dann soll der Bildschirm nicht zumachen.
   const { held: screenAwake } = useWakeLock(locked)
+  const totals = matchTotals(matchDay.sets ?? [], matchDay.useFifthDouble ?? false)
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
   const [animKey, setAnimKey] = useState(0)
   const [dragLabel, setDragLabel] = useState<string | null>(null)
@@ -162,8 +163,11 @@ function LineupView() {
     const lines: string[] = [
       `🦄 ${teamName ?? 'Hornstrike'}`,
       `${formatDate(matchDay.date)}${matchDay.opponent ? ` vs. ${matchDay.opponent}` : ''}`,
-      '',
     ]
+    if (totals.setsFinished > 0) {
+      lines.push(`Satzpunkte ${totals.pointsFor}:${totals.pointsAgainst} · Tore ${totals.goalsFor}:${totals.goalsAgainst}`)
+    }
+    lines.push('')
     gameSequence.forEach((game) => {
       const slot = matchDay.lineup.find(s => s.gameIndex === game.gameIndex)
       const label = game.label
@@ -391,6 +395,29 @@ function LineupView() {
           </div>
           <span className="text-fg/60 text-sm">{matchDay.players.length} Spieler</span>
         </div>
+      </div>
+
+      {/* Ergebnis / Live-Erfassung */}
+      <div className="relative px-6 mb-3">
+        <button
+          onClick={() => navigate(`/matchday/${matchDay.id}/live`)}
+          className="w-full bg-surface rounded-xl px-4 py-3 flex items-center gap-3 text-left active:bg-surface2"
+        >
+          <span className="text-lg leading-none flex-shrink-0">{matchDay.status === 'live' ? '🔴' : '📊'}</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-fg font-semibold text-[14px]">
+              {totals.setsFinished > 0
+                ? <>Satzpunkte {totals.pointsFor}:{totals.pointsAgainst} <span className="text-fg/40 font-normal">· Tore {totals.goalsFor}:{totals.goalsAgainst}</span></>
+                : matchDay.status === 'live' ? 'Begegnung läuft' : 'Ergebnisse erfassen'}
+            </p>
+            <p className="text-fg/40 text-[11px] mt-0.5">
+              {totals.setsFinished > 0
+                ? `${totals.setsFinished} von ${totals.setsTotal} Sätzen`
+                : 'Endstände eintragen oder live Tor für Tor mittippen'}
+            </p>
+          </div>
+          <span className="text-fg/25 text-lg flex-shrink-0">›</span>
+        </button>
       </div>
 
       {/* Sperr-Status – für Spieler nur sichtbar, wenn tatsächlich gesperrt */}
