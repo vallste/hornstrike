@@ -60,6 +60,8 @@ export interface MatchDay {
   players: MatchDayPlayer[]
   lineup: GameSlot[]
   notes?: string
+  /** Gesperrt = Aufstellung steht fest; Änderungen weist auch die DB ab (0014). */
+  lineupLocked?: boolean
 }
 
 /** Standard-Spielfolge (12 Spiele) */

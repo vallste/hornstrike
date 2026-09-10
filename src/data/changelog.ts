@@ -21,6 +21,9 @@ export interface ChangelogEntry {
  */
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
+  { type: 'feat', text: 'Aufstellung sperren: Ist die Aufstellung fertig, lässt sie sich mit einem Tipp sperren – dann verschiebt kein versehentlicher Fingertipp mehr einen Spieler und „Neu berechnen" ist aus. Sperren und Entsperren dürfen Captain und Co-Captain; die Sperre gilt auch auf dem Server, nicht nur in der Ansicht' },
+  { type: 'improve', text: 'Bei gesperrter Aufstellung bleibt der Bildschirm an, solange sie geöffnet ist – praktisch am Tisch. Braucht iPhone mit iOS 18.4 oder neuer bzw. Android; auf älteren Geräten bleibt es beim gewohnten Verhalten' },
+  { type: 'fix', text: '„Neu berechnen" liefert jetzt zuverlässig eine andere Aufstellung. Bisher kam bei unveränderten Eingaben immer exakt dasselbe Ergebnis heraus, der Knopf wirkte dadurch kaputt – jetzt wird gezielt eine Variante gewürfelt, ohne dass Gleichverteilung oder Präferenzen darunter leiden' },
   { type: 'feat', text: 'Profilbilder: Spieler, Teams und Vereine können ein Bild bekommen. Spieler pflegen ihr eigenes, Captains und Co-Captains auch das der Mitspieler; das Team-Logo setzt der Captain (Einstellungen → Verein), das Vereinslogo der Vereins-Admin' },
   { type: 'improve', text: 'Bilder werden direkt auf dem Gerät quadratisch zugeschnitten und verkleinert – auch iPhone-Fotos landen so klein und im richtigen Format im Speicher' },
   { type: 'improve', text: 'Profilbilder bleiben privat: sie liegen in einem nicht öffentlichen Speicher und sind ausschließlich für das eigene Team bzw. den eigenen Verein sichtbar' },
@@ -143,7 +146,7 @@ const HISTORY: ChangelogEntry[] = [
 ]
 
 // Datum des aktuellen Releases – beim `npm version`-Bump auf das Datum setzen
-const CURRENT_DATE = '2026-08-26'
+const CURRENT_DATE = '2026-09-10'
 
 export const CHANGELOG: ChangelogEntry[] = [
   ...(CURRENT_CHANGES.length > 0 ? [{

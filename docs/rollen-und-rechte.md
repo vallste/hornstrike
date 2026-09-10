@@ -1,6 +1,6 @@
 # Rollen & Rechte (Hornstrike)
 
-Stand: nach Migration `0013_avatars.sql`.
+Stand: nach Migration `0014_lineup_lock.sql`.
 
 ## Rollen
 
@@ -25,6 +25,7 @@ Hierarchie ist **nicht** rein linear: Co-Captain hat Inhalts-Rechte wie ein Capt
 | Kader bearbeiten (Spieler anlegen/ändern/sortieren) | – | ✓ | ✓ | ✓ | ✓ |
 | Profilbild **anderer** Spieler setzen/entfernen | – | ✓ | ✓ | ✓ | ✓ |
 | Spieltag anlegen + Aufstellung berechnen/bearbeiten | – | ✓ | ✓ | ✓ | ✓ |
+| Aufstellung sperren/entsperren | – | ✓ | ✓ | ✓ | ✓ |
 | Umfrage anlegen/verwalten + „Aufstellung erstellen" | – | ✓ | ✓ | ✓ | ✓ |
 | Verfügbarkeiten/Umfrageantworten **anderer** pflegen | – | ✓ | ✓ | ✓ | ✓ |
 | Mitglieder einladen (Einladungslinks) | – | – | ✓ | ✓ | ✓ |
@@ -109,3 +110,13 @@ Objektname = `players/<uuid>` | `teams/<uuid>` | `clubs/<uuid>`, bewusst **ohne*
 | `clubs/<id>` | Mitglied irgendeines Team des Vereins, oder Vereins-Admin | `is_club_admin` → Vereins-Admin+ |
 
 `teams.avatar_path` ist per Tabellen-Policy nur für Vereins-Admins schreibbar (`teams_update`). Damit ein Captain sein Team-Logo setzen kann, ohne gleich das Umbenennen-Recht zu bekommen, gibt es den RPC `public.set_team_avatar(team, path)` – er prüft `is_team_admin` und schreibt ausschließlich die Logo-Spalte. Im Client hängt die UI an der Capability `team:editLogo`; weil der Footer-Tab „Verein" nur Admins sehen, liegt das Team-Logo für Captains in den Einstellungen unter „Verein".
+
+## Aufstellung sperren (Migration `0014`)
+
+`matchdays.lineup_locked` markiert eine Aufstellung als final. In der UI schaltet das Drag&Drop, die Slot-Bearbeitung, „Neu berechnen" und den Sprung in den Spieltag-Editor ab; sichtbar bleibt alles, Teilen funktioniert weiter.
+
+Sperren und Entsperren hängt an keiner eigenen Policy: die bestehende `md_update`-Policy verlangt `app.is_team_editor`, also **Captain und Co-Captain**. In der UI hängt der Knopf an der Capability `team:editLineup` – dieselbe Rollenmenge.
+
+Der Schutz liegt zusätzlich in der Datenbank. Der Trigger `matchdays_guard_locked_lineup` weist jedes Update ab, das `lineup` verändert, während die Sperre steht (`raise exception 'lineup is locked'`, im Client übersetzt in `src/lib/errors.ts`). Maßgeblich ist der Zustand **vor** dem Update: entsperren und überschreiben in einem einzigen Update wird abgelehnt, es braucht zwei Schritte. Datum, Gegner, Ort, Notizen und Verfügbarkeiten bleiben auch bei gesperrter Aufstellung änderbar – verglichen wird ausschließlich die Spalte `lineup`.
+
+Bei gesperrter Aufstellung hält die App über die Screen Wake Lock API zusätzlich den Bildschirm wach (`src/lib/useWakeLock.ts`), solange die Seite im Vordergrund ist.

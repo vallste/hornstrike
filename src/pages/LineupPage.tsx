@@ -10,7 +10,7 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { usePlayers, useMatchDays } from '../store'
 import { useScope } from '../context/ScopeProvider'
-import { generateLineup } from '../utils/lineup'
+import { generateLineupVariant } from '../utils/lineup'
 import { validateLineup } from '../utils/validateLineup'
 import { getGameSequence, isGoalieGameIndex } from '../types'
 import type { GameSlot } from '../types'
@@ -18,6 +18,8 @@ import LineupDetailModal from './LineupDetailModal'
 import LineupShareCard from '../components/LineupShareCard'
 import LoadingScreen from '../components/LoadingScreen'
 import { useCan } from '../lib/permissions'
+import { useWakeLock } from '../lib/useWakeLock'
+import { errorMessage } from '../lib/errors'
 
 
 // Farbpalette für Spieler-Pills – bewusst ohne Cyan (#00e5ff) und Pink (#e040fb),
@@ -94,11 +96,18 @@ function LineupView() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { players } = usePlayers()
-  const { matchDays, updateMatchDay } = useMatchDays()
+  const { matchDays, updateMatchDay, writeError } = useMatchDays()
   const { workspaces, currentTeamId } = useScope()
   const teamName = workspaces.find(w => w.teamId === currentTeamId)?.teamName
   const matchDay = matchDays.find(m => m.id === id)!
+  // Sperren/Entsperren darf, wer die Aufstellung bearbeiten darf (Co-Captain+);
+  // die Durchsetzung liegt zusätzlich in der DB (Trigger aus 0014).
   const canEdit = useCan('team:editLineup')
+  const locked = matchDay.lineupLocked === true
+  const editable = canEdit && !locked
+  // Gesperrt heißt in der Praxis „wir stehen am Tisch und schauen drauf" –
+  // genau dann soll der Bildschirm nicht zumachen.
+  const { held: screenAwake } = useWakeLock(locked)
   const [editingSlot, setEditingSlot] = useState<number | null>(null)
   const [animKey, setAnimKey] = useState(0)
   const [dragLabel, setDragLabel] = useState<string | null>(null)
@@ -107,6 +116,7 @@ function LineupView() {
   const [shareMenuOpen, setShareMenuOpen] = useState(false)
   const shareCardRef = useRef<HTMLDivElement>(null)
   const [violationsDismissed, setViolationsDismissed] = useState(false)
+  const [writeErrorDismissed, setWriteErrorDismissed] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -132,6 +142,9 @@ function LineupView() {
   // Banner wieder einblenden wenn sich Verstöße geändert haben
   const violationsKey = violations.map(v => v.message).join('|')
   useEffect(() => { setViolationsDismissed(false) }, [violationsKey])
+
+  const writeErrorText = writeError ? errorMessage(writeError) : null
+  useEffect(() => { setWriteErrorDismissed(false) }, [writeErrorText])
 
   // Sätze pro Spieler: Einzel = 1, Doppel = 2 – useMemo stellt sicher dass DnD-Swaps sofort reflektiert werden
   const setEntries = useMemo(() => {
@@ -220,16 +233,28 @@ function LineupView() {
     }
   }
 
+  // Bewusst die Varianten-Funktion: die deterministische Berechnung liefert bei
+  // unveränderten Eingaben immer dasselbe Ergebnis – „Neu" hätte sonst sichtbar
+  // keine Wirkung. Die Erstberechnung im Spieltag-Setup bleibt deterministisch.
   const regenerate = () => {
-    const lineup = generateLineup(players, matchDay.players, matchDay.useGoalie ?? true, matchDay.useFifthDouble ?? false)
+    if (!editable) return
+    const lineup = generateLineupVariant(
+      players, matchDay.players, matchDay.useGoalie ?? true, matchDay.useFifthDouble ?? false, matchDay.lineup,
+    )
     updateMatchDay({ ...matchDay, lineup })
     setAnimKey(k => k + 1)
   }
 
   const updateSlot = (slot: GameSlot) => {
+    if (!editable) return
     const lineup = matchDay.lineup.map(s => s.gameIndex === slot.gameIndex ? slot : s)
     updateMatchDay({ ...matchDay, lineup })
     setEditingSlot(null)
+  }
+
+  const toggleLock = () => {
+    if (!canEdit) return
+    updateMatchDay({ ...matchDay, lineupLocked: !locked })
   }
 
   const gameSequence = getGameSequence(matchDay.useFifthDouble ?? false)
@@ -263,6 +288,7 @@ function LineupView() {
   const handleDragEnd = (e: DragEndEvent) => {
     setDragLabel(null)
     setDragPlayerId(null)
+    if (!editable) return
     const from = parseDragId(String(e.active.id))
     const to = parseDragId(String(e.over?.id ?? ''))
     if (!from || !to || (from.gameIndex === to.gameIndex && from.playerIndex === to.playerIndex)) return
@@ -334,7 +360,7 @@ function LineupView() {
               )}
             </div>
 
-            {canEdit && (
+            {editable && (
               <>
                 <button
                   onClick={() => navigate(`/matchday/${matchDay.id}/edit`)}
@@ -367,6 +393,37 @@ function LineupView() {
         </div>
       </div>
 
+      {/* Sperr-Status – für Spieler nur sichtbar, wenn tatsächlich gesperrt */}
+      {(locked || canEdit) && (
+        <div className="relative px-6 mb-3">
+          <div className={`rounded-xl px-4 py-2.5 flex items-center gap-3 ${
+            locked ? 'bg-unicorn-cyan/10 border border-accent-cyan/30' : 'bg-surface'
+          }`}>
+            <span className="text-lg leading-none flex-shrink-0">{locked ? '🔒' : '🔓'}</span>
+            <div className="flex-1 min-w-0">
+              <p className={`text-[13px] font-semibold ${locked ? 'text-accent-cyan' : 'text-fg/60'}`}>
+                {locked ? 'Aufstellung gesperrt' : 'Aufstellung offen'}
+              </p>
+              <p className="text-fg/40 text-[11px] mt-0.5 leading-snug">
+                {locked
+                  ? (screenAwake ? 'Keine Änderungen möglich · Bildschirm bleibt an' : 'Keine Änderungen möglich')
+                  : 'Ziehen, Bearbeiten und Neu-Berechnen möglich'}
+              </p>
+            </div>
+            {canEdit && (
+              <button
+                onClick={toggleLock}
+                className={`text-[13px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 border ${
+                  locked ? 'border-accent-cyan/50 text-accent-cyan' : 'border-fg/20 text-fg/60'
+                }`}
+              >
+                {locked ? 'Entsperren' : 'Sperren'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Sets-Übersicht */}
       {setEntries.length > 0 && (
         <div className="relative px-6 mb-3">
@@ -387,7 +444,7 @@ function LineupView() {
       )}
 
       {/* Game rows with DnD */}
-      <DndContext sensors={canEdit ? sensors : []} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext sensors={editable ? sensors : []} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div key={animKey} className="relative px-6 space-y-1.5">
           {visibleGames.map((game, idx) => {
             const slot = matchDay.lineup.find(s => s.gameIndex === game.gameIndex)
@@ -429,7 +486,7 @@ function LineupView() {
                   <div className="flex-1 flex flex-wrap gap-1 items-center">
                     {slot.players.map((pid, pi) => (
                       <DroppableSlot key={pi} id={`g${game.gameIndex}-p${pi}`}>
-                        {canEdit
+                        {editable
                           ? <DraggablePill id={`g${game.gameIndex}-p${pi}`} label={playerName(pid)} color={playerColor(pid)} />
                           : <StaticPill label={playerName(pid)} color={playerColor(pid)} />}
                         {isDouble && slot.positions?.[pi] && (
@@ -449,7 +506,7 @@ function LineupView() {
                   </span>
                 )}
 
-                {canEdit && !slot?.forfeit && (
+                {editable && !slot?.forfeit && (
                   <button onClick={() => setEditingSlot(game.gameIndex)} className="text-fg/20 text-sm flex-shrink-0 pl-1">✎</button>
                 )}
               </motion.div>
@@ -506,6 +563,23 @@ function LineupView() {
                 ))}
               </div>
               <button onClick={() => setViolationsDismissed(true)} className="text-amber-300/60 text-lg leading-none flex-shrink-0 mt-0.5">×</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Schreibfehler – etwa wenn die DB eine gesperrte Aufstellung ablehnt */}
+      <AnimatePresence>
+        {writeErrorText && !writeErrorDismissed && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            className="fixed bottom-20 left-4 right-4 z-30 bg-red-900/80 backdrop-blur-sm border border-red-500/40 rounded-2xl px-4 py-3"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-red-200/90 text-[13px] leading-snug">{writeErrorText}</p>
+              <button onClick={() => setWriteErrorDismissed(true)} className="text-red-300/60 text-lg leading-none flex-shrink-0">×</button>
             </div>
           </motion.div>
         )}

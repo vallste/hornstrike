@@ -16,7 +16,7 @@ type PartRow = { player_id: string; partner_player_id: string; weight: number }
 type MdRow = {
   id: string; date: string; opponent: string | null
   start_time: string | null; location: string | null
-  use_goalie: boolean; use_fifth_double: boolean; notes: string | null
+  use_goalie: boolean; use_fifth_double: boolean; notes: string | null; lineup_locked: boolean
   lineup: GameSlot[]
   matchday_players: { player_id: string; available_from: number; available_to: number }[] | null
 }
@@ -182,7 +182,7 @@ async function fetchMatchDays(teamId: string): Promise<MatchDay[]> {
   const sb = getSupabase()
   const { data, error } = await sb
     .from('matchdays')
-    .select('id,date,start_time,location,opponent,use_goalie,use_fifth_double,notes,lineup,matchday_players(player_id,available_from,available_to)')
+    .select('id,date,start_time,location,opponent,use_goalie,use_fifth_double,notes,lineup,lineup_locked,matchday_players(player_id,available_from,available_to)')
     .eq('team_id', teamId)
     .order('date', { ascending: true })
   if (error) throw error
@@ -195,6 +195,7 @@ async function fetchMatchDays(teamId: string): Promise<MatchDay[]> {
     useGoalie: m.use_goalie,
     useFifthDouble: m.use_fifth_double,
     notes: m.notes ?? undefined,
+    lineupLocked: m.lineup_locked ?? false,
     players: (m.matchday_players ?? []).map(mp => ({
       playerId: mp.player_id,
       availableFrom: mp.available_from,
@@ -238,7 +239,7 @@ export function useMatchDays() {
         id: md.id, team_id: currentTeamId, date: md.date, opponent: md.opponent ?? null,
         start_time: md.startTime || null, location: md.location || null,
         use_goalie: md.useGoalie, use_fifth_double: md.useFifthDouble,
-        notes: md.notes ?? null, lineup: md.lineup,
+        notes: md.notes ?? null, lineup: md.lineup, lineup_locked: md.lineupLocked ?? false,
       })
       if (ins.error) throw ins.error
       await writeMatchDayAvailability(md)
@@ -255,7 +256,7 @@ export function useMatchDays() {
         date: md.date, opponent: md.opponent ?? null,
         start_time: md.startTime || null, location: md.location || null,
         use_goalie: md.useGoalie, use_fifth_double: md.useFifthDouble,
-        notes: md.notes ?? null, lineup: md.lineup,
+        notes: md.notes ?? null, lineup: md.lineup, lineup_locked: md.lineupLocked ?? false,
       }).eq('id', md.id)
       if (upd.error) throw upd.error
       await writeMatchDayAvailability(md)
@@ -281,7 +282,7 @@ export function useMatchDays() {
           id: md.id, team_id: currentTeamId, date: md.date, opponent: md.opponent ?? null,
           start_time: md.startTime || null, location: md.location || null,
           use_goalie: md.useGoalie, use_fifth_double: md.useFifthDouble,
-          notes: md.notes ?? null, lineup: md.lineup,
+          notes: md.notes ?? null, lineup: md.lineup, lineup_locked: md.lineupLocked ?? false,
         })
         if (ins.error) throw ins.error
         await writeMatchDayAvailability(md)
@@ -294,6 +295,9 @@ export function useMatchDays() {
     matchDays,
     isLoading: scopeLoading || query.isLoading,
     error: query.error as Error | null,
+    // Schreibfehler nach außen geben: seit 0014 kann die DB ein Update ablehnen
+    // (gesperrte Aufstellung) – das darf nicht still verpuffen.
+    writeError: (updateMut.error ?? addMut.error ?? deleteMut.error) as Error | null,
     addMatchDay: (md: MatchDay) => addMut.mutate(md),
     updateMatchDay: (md: MatchDay) => updateMut.mutate(md),
     deleteMatchDay: (id: string) => deleteMut.mutate(id),

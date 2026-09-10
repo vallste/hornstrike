@@ -14,6 +14,7 @@ const CUSTOM: Record<string, string> = {
   'cannot remove the last admin of the club': 'Der letzte Vereins-Admin kann nicht entfernt werden. Ernenne zuerst eine weitere Person zum Vereins-Admin.',
   'invalid role': 'Diese Rolle kann hier nicht vergeben werden.',
   'team not found': 'Team nicht gefunden.',
+  'lineup is locked': 'Die Aufstellung ist gesperrt. Zum Ändern zuerst entsperren.',
   'club not found': 'Verein nicht gefunden.',
   // Client-seitige Bildaufbereitung (src/lib/avatars.ts).
   'avatar: not an image': 'Bitte eine Bilddatei auswählen.',

@@ -9,6 +9,7 @@ interface Context {
   doublesCount: Record<string, number>
   doublePairs: Set<string>
   targetLoad: number   // Ziel-Spielanzahl pro Spieler (für Gleichverteilung)
+  jitter: number       // 0 = deterministisch; > 0 streut die Scores (siehe VARIATION_JITTER)
 }
 
 function pairKey(a: string, b: string) {
@@ -93,7 +94,8 @@ function totalScore(
   context: Context,
   totalGames: number,
 ): number {
-  return preferenceScore(player, slot, position, partner, totalGames) - loadPenalty(player.id, context)
+  const jitter = context.jitter ? (Math.random() - 0.5) * context.jitter : 0
+  return preferenceScore(player, slot, position, partner, totalGames) - loadPenalty(player.id, context) + jitter
 }
 
 // ─── Verfügbarkeits-Filter ────────────────────────────────────────────────────
@@ -123,11 +125,18 @@ function maxGamesForCount(count: number): number {
 
 // ─── Hauptfunktion ────────────────────────────────────────────────────────────
 
+/**
+ * Berechnet die Aufstellung. Ohne `jitter` ist das Ergebnis vollständig
+ * deterministisch: gleiche Eingaben → exakt gleiche Aufstellung. Für die
+ * Erstberechnung ist das gewollt (bestes Ergebnis), für „Neu berechnen" nicht –
+ * dafür gibt es generateLineupVariant().
+ */
 export function generateLineup(
   players: Player[],
   matchDayPlayers: MatchDayPlayer[],
   useGoalie = false,
   useFifthDouble = false,
+  jitter = 0,
 ): GameSlot[] {
   const GAME_SEQUENCE = getGameSequence(useFifthDouble)
   const maxGames = maxGamesForCount(matchDayPlayers.length)
@@ -146,6 +155,7 @@ export function generateLineup(
     doublesCount: {},
     doublePairs: new Set(),
     targetLoad,
+    jitter,
   }
 
   for (const game of GAME_SEQUENCE) {
@@ -228,4 +238,47 @@ export function generateLineup(
   }
 
   return context.slots
+}
+
+// ─── Variante (für „Neu berechnen") ──────────────────────────────────────────
+
+/**
+ * Streuung der Scores für eine Variante. Gemessen an einem 6er-Kader:
+ *
+ *   Jitter |  versch. Aufstellungen /20  |  Satz-Spanne  |  Positionswunsch
+ *        0 |          1                  |       2       |       50 %
+ *        4 |         20                  |       2       |       50 %
+ *       12 |         20                  |       2       |       45 %
+ *       40 |         20                  |       2       |       39 %
+ *
+ * 4 reicht also für jedes Mal eine andere Aufstellung, ohne dass Präferenzen
+ * oder Gleichverteilung messbar leiden – der Lastausgleich wiegt 65 Punkte pro
+ * Satz und dominiert diese Streuung mühelos. Größere Werte kosten nur Qualität,
+ * ohne mehr Abwechslung zu bringen.
+ */
+export const VARIATION_JITTER = 4
+
+/**
+ * Wie generateLineup, aber bewusst mit Abwechslung: Ergibt sich zufällig exakt
+ * die übergebene `current`-Aufstellung, wird neu gewürfelt. Eine Berechnung
+ * kostet < 1 ms, die Wiederholungen fallen also nicht ins Gewicht.
+ *
+ * Die Spielregeln (max. 2 Einzel / 2 Doppel, jedes Doppel-Paar nur einmal,
+ * Verfügbarkeiten) gelten unverändert – der Jitter wirkt nur auf die Auswahl
+ * unter den erlaubten Kandidaten.
+ */
+export function generateLineupVariant(
+  players: Player[],
+  matchDayPlayers: MatchDayPlayer[],
+  useGoalie = false,
+  useFifthDouble = false,
+  current: GameSlot[] | null = null,
+  attempts = 6,
+): GameSlot[] {
+  const before = current ? JSON.stringify(current) : null
+  let lineup = generateLineup(players, matchDayPlayers, useGoalie, useFifthDouble, VARIATION_JITTER)
+  for (let i = 1; i < attempts && before !== null && JSON.stringify(lineup) === before; i++) {
+    lineup = generateLineup(players, matchDayPlayers, useGoalie, useFifthDouble, VARIATION_JITTER)
+  }
+  return lineup
 }
