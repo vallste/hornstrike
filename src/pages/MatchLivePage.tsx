@@ -452,7 +452,7 @@ function SetList({
                 key={slot}
                 value={live.data.opponents.find(o => o.gameIndex === g.gameIndex && o.slot === slot)?.name ?? ''}
                 disabled={!canEdit}
-                placeholder={g.type === 'doubles' ? (slot === 0 ? 'Gegner Sturm' : 'Gegner Tor') : 'Gegner'}
+                placeholder={g.type === 'doubles' ? (slot === 0 ? 'Gegner:in Sturm' : 'Gegner:in Tor') : 'Gegner:in'}
                 onCommit={name => live.setOpponent({ gameIndex: g.gameIndex, slot, name })}
               />
             ))}

@@ -163,7 +163,7 @@ export default function MatchStatsPage() {
             )}
 
             {singles.length > 0 && (
-              <Section title="Einzel" hint="Satzquote im Einzel je Spieler.">
+              <Section title="Einzel" hint="Satzquote im Einzel je Spieler:in.">
                 {singles.map(p => (
                   <BalanceRow key={p.playerId} label={playerName(p.playerId)} balance={p} />
                 ))}
@@ -173,7 +173,7 @@ export default function MatchStatsPage() {
             {hasDetail ? (
               <>
                 {scorers.length > 0 && (
-                  <Section title="Torschützen" hint="Aus dem Tor-für-Tor-Protokoll – nur wo live mitgetippt wurde.">
+                  <Section title="Torschütz:innen" hint="Aus dem Tor-für-Tor-Protokoll – nur wo live mitgetippt wurde.">
                     {scorers.map(s => (
                       <div key={s.playerId} className="px-4 py-2.5 border-b border-fg/5 last:border-b-0 flex items-center gap-3">
                         <div className="flex-1 min-w-0">
@@ -214,7 +214,7 @@ export default function MatchStatsPage() {
               <div className="bg-surface rounded-2xl px-4 py-4">
                 <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Noch mehr geht</p>
                 <p className="text-fg/50 text-[13px] leading-snug">
-                  Torschützen, Timeout-Wirkung und Positionswechsel entstehen erst, wenn bei einer Begegnung
+                  Torschütz:innen, Timeout-Wirkung und Positionswechsel entstehen erst, wenn bei einer Begegnung
                   live Tor für Tor mitgetippt wird. Die Bilanzen oben brauchen das nicht.
                 </p>
               </div>

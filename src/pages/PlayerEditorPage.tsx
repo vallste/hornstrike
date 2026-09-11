@@ -182,7 +182,7 @@ function PlayerEditorForm() {
     <div className="min-h-screen bg-app pb-32">
       <div className="absolute w-[360px] h-[360px] rounded-full bg-unicorn-violet/40 blur-[140px] top-0 right-0 pointer-events-none" />
 
-      <Header title={isNew ? 'Neuer Spieler' : (existing?.name ?? 'Spieler')} back />
+      <Header title={isNew ? 'Neue:r Spieler:in' : (existing?.name ?? 'Spieler:in')} back />
 
       <div className="relative px-6 mt-4">
         {!editable && (
@@ -217,7 +217,7 @@ function PlayerEditorForm() {
           />
         ) : (
           <p className="text-fg/35 text-xs bg-fg/5 rounded-xl px-3 py-2">
-            Ein Profilbild kannst du hinzufügen, sobald der Spieler gespeichert ist.
+            Ein Profilbild kannst du hinzufügen, sobald das Profil gespeichert ist.
           </p>
         )}
 
@@ -309,7 +309,7 @@ function PlayerEditorForm() {
         {/* Partner preferences */}
         <div className="bg-surface rounded-2xl overflow-hidden">
           <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Bevorzugte Partner</p>
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase">Bevorzugte Partner:innen</p>
             {prefs.partnerPreferences.length > 0 && (
               <p className="text-fg/30 text-[12px]">{prefs.partnerPreferences.length} ausgewählt</p>
             )}
@@ -386,7 +386,7 @@ function PlayerEditorForm() {
 
           {otherPlayers.length === 0 && prefs.partnerPreferences.length === 0 && (
             <p className="px-4 py-3 text-fg/25 text-[13px] border-t border-fg/5">
-              {players.length <= 1 ? 'Erst weitere Spieler anlegen' : 'Alle Spieler bereits ausgewählt'}
+              {players.length <= 1 ? 'Erst weitere Spieler:innen anlegen' : 'Alle Spieler:innen bereits ausgewählt'}
             </p>
           )}
         </div>
@@ -409,7 +409,7 @@ function PlayerEditorForm() {
                     <button onClick={copyLink} className="flex-1 py-2.5 rounded-xl bg-unicorn-violet text-white text-sm font-semibold">{copied ? 'Kopiert ✓' : 'Kopieren'}</button>
                     <button onClick={shareLink} className="flex-1 py-2.5 rounded-xl bg-unicorn-pink text-white text-sm font-semibold">Teilen</button>
                   </div>
-                  <p className="text-fg/35 text-xs">Link an den Spieler schicken (z. B. WhatsApp). 30 Tage gültig, einmalig.</p>
+                  <p className="text-fg/35 text-xs">Link an die eingeladene Person schicken (z. B. WhatsApp). 30 Tage gültig, einmalig.</p>
                 </div>
               )}
               {inviteErr && <p className="text-red-400 text-xs mt-2">{inviteErr}</p>}
@@ -428,7 +428,7 @@ function PlayerEditorForm() {
             <div className="text-left">
               <p className="text-fg font-semibold text-[15px]">⏸ Inaktiv setzen</p>
               <p className="text-fg/40 text-xs mt-0.5">
-                {active ? 'Spieler erscheint aktuell bei der Spieltag-Planung' : 'Spieler ist inaktiv und wird nicht angezeigt'}
+                {active ? 'Erscheint aktuell bei der Spieltag-Planung' : 'Ist inaktiv und wird nicht angezeigt'}
               </p>
             </div>
             <div className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${!active ? 'bg-amber-500' : 'bg-surface2'}`}>
@@ -443,7 +443,7 @@ function PlayerEditorForm() {
               className="w-full bg-surface rounded-2xl px-4 py-3.5 flex items-center gap-3"
             >
               <span className="w-9 h-9 rounded-xl bg-red-500/15 flex items-center justify-center text-xl flex-shrink-0">🗑</span>
-              <p className="text-red-400 font-semibold text-[15px]">Spieler löschen</p>
+              <p className="text-red-400 font-semibold text-[15px]">Spieler:in löschen</p>
             </button>
           ) : (
             <div className="bg-red-900/30 border border-red-500/30 rounded-2xl px-4 py-4">
@@ -471,7 +471,7 @@ function PlayerEditorForm() {
             disabled={!name.trim()}
             className="w-full py-4 rounded-3xl bg-unicorn-pink text-white font-bold text-[17px] disabled:opacity-40 shadow-xl shadow-unicorn-pink/40"
           >
-            {isNew ? 'Spieler anlegen' : 'Änderungen speichern'}
+            {isNew ? 'Spieler:in anlegen' : 'Änderungen speichern'}
           </button>
         </div>
       )}

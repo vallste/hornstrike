@@ -77,11 +77,11 @@ export default function LineupDetailModal({ gameIndex, gameLabel, slot, matchDay
           {/* Player 1 – beim Doppel = Sturm */}
           <div>
             <label className="block text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-2">
-              {isDouble ? '⚔ Sturm' : 'Spieler'}
+              {isDouble ? '⚔ Sturm' : 'Spieler:in'}
             </label>
             <SelectMenu<string>
               variant="block"
-              ariaLabel={isDouble ? 'Sturm' : 'Spieler'}
+              ariaLabel={isDouble ? 'Sturm' : 'Spieler:in'}
               value={player1}
               options={playerOptions(isDouble ? player2 : undefined)}
               onChange={setPlayer1}

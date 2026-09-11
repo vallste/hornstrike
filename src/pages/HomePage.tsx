@@ -68,7 +68,7 @@ export default function HomePage() {
           className="flex-1 bg-surface rounded-2xl p-4 text-left"
         >
           <div className="w-11 h-11 rounded-full bg-unicorn-cyan/20 flex items-center justify-center text-2xl mb-4">👥</div>
-          <p className="text-fg font-semibold text-lg">Spieler</p>
+          <p className="text-fg font-semibold text-lg">Spieler:innen</p>
           <p className="text-fg/55 text-xs mt-0.5">{players.length} im Kader</p>
           <div className="mt-3 h-0.5 w-full rounded bg-unicorn-cyan" />
         </button>
@@ -107,7 +107,7 @@ export default function HomePage() {
             className="w-full bg-surface rounded-2xl p-4 text-left"
           >
             <p className="text-fg font-semibold">{formatDate(lastMatch.date)}</p>
-            <p className="text-accent-cyan text-sm mt-1">{lastMatch.players.length} Spieler · Aufstellung ansehen</p>
+            <p className="text-accent-cyan text-sm mt-1">{lastMatch.players.length} Spieler:innen · Aufstellung ansehen</p>
           </button>
         ) : (
           <div className="bg-surface rounded-2xl p-4">
@@ -120,7 +120,7 @@ export default function HomePage() {
       <div className="relative px-6 mt-4">
         <div className="bg-surface2 rounded-xl px-4 py-3">
           <p className="text-fg/65 text-[13px] leading-relaxed">
-            🦄 Lege zuerst alle Spieler mit ihren Präferenzen an – dann berechnet Hornstrike die optimale Aufstellung für jeden Spieltag.
+            🦄 Lege zuerst alle Spieler:innen mit ihren Präferenzen an – dann berechnet Hornstrike die optimale Aufstellung für jeden Spieltag.
           </p>
         </div>
       </div>

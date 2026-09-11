@@ -52,7 +52,7 @@ export const ROLE_LABEL: Record<Role, string> = {
   club_admin: 'Vereins-Admin',
   team_admin: 'Captain',
   co_captain: 'Co-Captain',
-  player: 'Spieler',
+  player: 'Spieler:in',
 }
 
 type MembershipRow = { role: Role; team_id: string | null; club_id: string | null; user_id: string }

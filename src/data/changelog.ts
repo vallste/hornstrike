@@ -30,10 +30,11 @@ export interface ChangelogEntry {
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'feat', text: 'Ergebnisse erfassen: Jeder Spieltag hat jetzt eine Ergebnis-Ansicht mit allen 16 Sätzen. Du kannst nur den Endstand eines Satzes eintippen – oder im Live-Modus Tor für Tor mitschreiben, mit einem Tipp pro Tor. Wer aus welcher Position getroffen hat, weiß die App aus der Aufstellung' },
-  { type: 'feat', text: 'Im Live-Modus lassen sich außerdem Timeouts, Positionswechsel und Eigentore festhalten, dazu die gegnerischen Spieler je Partie (die stehen ja erst fest, wenn beide Spielpläne freigegeben sind – nachtragen geht jederzeit). Jeder Fehltipp lässt sich einzeln zurücknehmen' },
+  { type: 'feat', text: 'Im Live-Modus lassen sich außerdem Timeouts, Positionswechsel und Eigentore festhalten, dazu die gegnerischen Spieler:innen je Partie (die stehen ja erst fest, wenn beide Spielpläne freigegeben sind – nachtragen geht jederzeit). Jeder Fehltipp lässt sich einzeln zurücknehmen' },
   { type: 'feat', text: 'Neue Auswertungen (Spieltage → 📊): Welche Doppel harmonieren, wie die Einzelbilanzen aussehen, wer trifft – und ob nach einem Timeout oder Positionswechsel das nächste Tor an euch ging. Quoten mit zu dünner Datenlage werden ausgegraut statt schöngerechnet' },
-  { type: 'improve', text: 'Die Erfassung ist in jeder Feinheit freiwillig: nur Satzendstände reichen für Doppel- und Einzelbilanzen. Torschützen und Timeout-Wirkung entstehen erst dort, wo live mitgetippt wurde – beides lässt sich innerhalb einer Begegnung mischen' },
+  { type: 'improve', text: 'Die Erfassung ist in jeder Feinheit freiwillig: nur Satzendstände reichen für Doppel- und Einzelbilanzen. Torschütz:innen und Timeout-Wirkung entstehen erst dort, wo live mitgetippt wurde – beides lässt sich innerhalb einer Begegnung mischen' },
   { type: 'improve', text: 'Spieltagsliste und Aufstellung zeigen das Ergebnis auf einen Blick, der Teilen-Text nimmt Satzpunkte und Tore mit. „Begegnung starten" sperrt die Aufstellung gleich mit' },
+  { type: 'improve', text: 'Die Oberfläche spricht jetzt alle an: durchgehend „Spieler:innen" statt „Spieler" – mit Doppelpunkt, quer durch App, Onboarding, Einstellungen und Datenschutzerklärung' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
@@ -41,11 +42,11 @@ const HISTORY: ChangelogEntry[] = [
     version: '26.3.3',
     date: '2026-09-10',
     changes: [
-      { type: 'feat', text: 'Liga-Verknüpfung: Im Spielerprofil und beim Team lässt sich die Seite des Hamburger Verbands hinterlegen – einfach den Link von kickern-hamburg.de einfügen, die ID wird herausgelesen. Danach führt ein Tipp direkt zu den eigenen Statistiken bzw. zu Tabelle und Ansetzungen. Die App ruft dort keine Daten ab, sie verlinkt nur' },
-      { type: 'feat', text: 'Aufstellung sperren: Ist die Aufstellung fertig, lässt sie sich mit einem Tipp sperren – dann verschiebt kein versehentlicher Fingertipp mehr einen Spieler und „Neu berechnen" ist aus. Sperren und Entsperren dürfen Captain und Co-Captain; die Sperre gilt auch auf dem Server, nicht nur in der Ansicht' },
+      { type: 'feat', text: 'Liga-Verknüpfung: Im Spieler:innen-Profil und beim Team lässt sich die Seite des Hamburger Verbands hinterlegen – einfach den Link von kickern-hamburg.de einfügen, die ID wird herausgelesen. Danach führt ein Tipp direkt zu den eigenen Statistiken bzw. zu Tabelle und Ansetzungen. Die App ruft dort keine Daten ab, sie verlinkt nur' },
+      { type: 'feat', text: 'Aufstellung sperren: Ist die Aufstellung fertig, lässt sie sich mit einem Tipp sperren – dann verschiebt kein versehentlicher Fingertipp mehr eine:n Spieler:in und „Neu berechnen" ist aus. Sperren und Entsperren dürfen Captain und Co-Captain; die Sperre gilt auch auf dem Server, nicht nur in der Ansicht' },
       { type: 'improve', text: 'Bei gesperrter Aufstellung bleibt der Bildschirm an, solange sie geöffnet ist – praktisch am Tisch. Braucht iPhone mit iOS 18.4 oder neuer bzw. Android; auf älteren Geräten bleibt es beim gewohnten Verhalten' },
       { type: 'fix', text: '„Neu berechnen" liefert jetzt zuverlässig eine andere Aufstellung. Bisher kam bei unveränderten Eingaben immer exakt dasselbe Ergebnis heraus, der Knopf wirkte dadurch kaputt – jetzt wird gezielt eine Variante gewürfelt, ohne dass Gleichverteilung oder Präferenzen darunter leiden' },
-      { type: 'feat', text: 'Profilbilder: Spieler, Teams und Vereine können ein Bild bekommen. Spieler pflegen ihr eigenes, Captains und Co-Captains auch das der Mitspieler; das Team-Logo setzt der Captain (Einstellungen → Verein), das Vereinslogo der Vereins-Admin' },
+      { type: 'feat', text: 'Profilbilder: Spieler:innen, Teams und Vereine können ein Bild bekommen. Spieler:innen pflegen ihr eigenes, Captains und Co-Captains auch das der Mitspieler:innen; das Team-Logo setzt der Captain (Einstellungen → Verein), das Vereinslogo der Vereins-Admin' },
       { type: 'improve', text: 'Bilder werden direkt auf dem Gerät quadratisch zugeschnitten und verkleinert – auch iPhone-Fotos landen so klein und im richtigen Format im Speicher' },
       { type: 'improve', text: 'Profilbilder bleiben privat: sie liegen in einem nicht öffentlichen Speicher und sind ausschließlich für das eigene Team bzw. den eigenen Verein sichtbar' },
     ],
@@ -59,10 +60,10 @@ const HISTORY: ChangelogEntry[] = [
       { type: 'fix', text: 'Alle Auswahl-Menüs (Rollen, Aufstellungs-Slot, Vorschau, Workspace-Wechsel) öffnen jetzt zuverlässig auf dem Smartphone – einheitliches Menü statt nativem Auswahlfeld' },
       { type: 'fix', text: 'Letzter-Admin-/Captain-Schutz auch bei gleichzeitigen Änderungen sicher (serverseitig serialisiert)' },
       { type: 'improve', text: 'Allgemeinere Formulierungen – Hornstrike ist ein Team-Manager für die Hamburger Liga (nicht mehr auf ein einzelnes Team gemünzt); geteilte Aufstellungen zeigen jetzt euren eigenen Teamnamen' },
-      { type: 'improve', text: 'Doppel einheitlich: oben immer Sturm, unten Tor – gleiche Reihenfolge (Sturm links, Tor rechts) in Editor und Aufstellungsliste; ein Spieler kann nicht mehr doppelt oder zweimal dieselbe Position belegen' },
+      { type: 'improve', text: 'Doppel einheitlich: oben immer Sturm, unten Tor – gleiche Reihenfolge (Sturm links, Tor rechts) in Editor und Aufstellungsliste; ein:e Spieler:in kann nicht mehr doppelt oder zweimal dieselbe Position belegen' },
       { type: 'improve', text: 'In „Mitglieder & Einladungen" ist der eigene Eintrag jetzt mit „Du" hervorgehoben' },
       { type: 'feat', text: 'Neue Rolle „Co-Captain": darf Kader, Spieltage, Umfragen & Aufstellungen verwalten, aber keine Mitglieder einladen oder Rollen vergeben' },
-      { type: 'feat', text: 'Rollen von Mitgliedern zuweisen (Captain/Co-Captain/Spieler) unter Mitglieder & Einladungen; der letzte Captain eines Teams bleibt geschützt' },
+      { type: 'feat', text: 'Rollen von Mitgliedern zuweisen (Captain/Co-Captain/Spieler:in) unter Mitglieder & Einladungen; der letzte Captain eines Teams bleibt geschützt' },
       { type: 'fix', text: 'Einladung annehmen führt jetzt direkt ins Team; Vereins-Umbenennen als Plattform-Admin wieder möglich' },
       { type: 'feat', text: 'Impressum & Datenschutzerklärung ergänzt; Anmeldung/Beitritt erst nach Zustimmung zur Datenschutzerklärung' },
       { type: 'improve', text: 'Schriftart wird selbst ausgeliefert (kein Aufruf an Google Fonts) – datenschutzfreundlicher' },
@@ -86,7 +87,7 @@ const HISTORY: ChangelogEntry[] = [
       { type: 'fix', text: 'Goalie-Badge (🥅) wird auch nach nachträglicher Goalie-Aktivierung korrekt angezeigt' },
       { type: 'fix', text: 'Warnung wenn Spielfolge (Standard ↔ 5. Doppel) nachträglich geändert wurde und Aufstellung neu berechnet werden muss' },
       { type: 'improve', text: 'Regelverstoß- und Spielfolge-Banner sind schließbar; ⚠-Icon im Header zeigt aktive Regelverstöße dauerhaft an' },
-      { type: 'improve', text: 'Spieler mit Goalie-Präferenz werden mit sehr hoher Priorität auf E5/E6 gesetzt' },
+      { type: 'improve', text: 'Spieler:innen mit Goalie-Präferenz werden mit sehr hoher Priorität auf E5/E6 gesetzt' },
     ],
   },
   {
@@ -101,9 +102,9 @@ const HISTORY: ChangelogEntry[] = [
     version: '0.1.5',
     date: '2026-05-28',
     changes: [
-      { type: 'feat', text: 'Spieler können im Kader als inaktiv markiert werden (z.B. bei Verletzung) – erscheinen dann nicht mehr bei der Spieltag-Planung' },
+      { type: 'feat', text: 'Spieler:innen können im Kader als inaktiv markiert werden (z.B. bei Verletzung) – erscheinen dann nicht mehr bei der Spieltag-Planung' },
       { type: 'feat', text: 'Einstellungen: „App neu laden"-Button als manueller Fallback für SW-Updates' },
-      { type: 'improve', text: 'Inaktiv-Toggle und Löschen-Button in den Spieler-Editor verschoben' },
+      { type: 'improve', text: 'Inaktiv-Toggle und Löschen-Button in den Spieler:innen-Editor verschoben' },
       { type: 'fix', text: 'Splash Screen: Titel auf kleinen Mobilgeräten nicht mehr abgeschnitten (responsive Schriftgröße)' },
       { type: 'fix', text: 'Zurück-Button aus Einstellungen-Header entfernt' },
     ],
@@ -119,12 +120,12 @@ const HISTORY: ChangelogEntry[] = [
     version: '0.1.3',
     date: '2026-05-28',
     changes: [
-      { type: 'feat', text: 'Neue Spieler-Präferenzen: Kein Starter (E1/E2) und Kein Finisher (letzte Spiele)' },
+      { type: 'feat', text: 'Neue Spieler:innen-Präferenzen: Kein Starter (E1/E2) und Kein Finisher (letzte Spiele)' },
       { type: 'feat', text: 'Aufstellung teilen via Web Share API (WhatsApp, Telegram, …) oder Zwischenablage' },
-      { type: 'feat', text: 'Onboarding-Guide für neue Nutzer (6 Slides), jederzeit neu startbar' },
+      { type: 'feat', text: 'Onboarding-Guide für neue Nutzer:innen (6 Slides), jederzeit neu startbar' },
       { type: 'feat', text: 'Changelog als eigene Seite in den Einstellungen' },
       { type: 'feat', text: 'Home-Tab in der Bottom-Navigation' },
-      { type: 'feat', text: 'Spieler-Pills in der Aufstellung in individuellen Farben pro Spieler' },
+      { type: 'feat', text: 'Spieler:innen-Pills in der Aufstellung in individuellen Farben pro Spieler:in' },
       { type: 'improve', text: 'Gleichverteilungs-Algorithmus zählt jetzt Sätze statt Spiele – dominiert alle Präferenzen' },
       { type: 'improve', text: 'Einheitliches Seiten-Layout: Header-Abstände, Content-Spacing und Glow-Positionen' },
       { type: 'fix', text: 'Satz-Zähler aktualisiert sich sofort nach Drag & Drop' },
@@ -135,8 +136,8 @@ const HISTORY: ChangelogEntry[] = [
     version: '0.1.2',
     date: '2026-05-28',
     changes: [
-      { type: 'improve', text: 'Spieler-Editor komplett überarbeitet: 5-stufige Präferenz-Skala, Toggle-Switch für Goalie, tippbare Partner-Pills' },
-      { type: 'improve', text: 'Abschnitte: „Bevorzugte Position", „Bevorzugter Spieltyp", „Bevorzugte Partner"' },
+      { type: 'improve', text: 'Spieler:innen-Editor komplett überarbeitet: 5-stufige Präferenz-Skala, Toggle-Switch für Goalie, tippbare Partner:innen-Pills' },
+      { type: 'improve', text: 'Abschnitte: „Bevorzugte Position", „Bevorzugter Spieltyp", „Bevorzugte Partner:innen"' },
     ],
   },
   {
@@ -147,18 +148,18 @@ const HISTORY: ChangelogEntry[] = [
       { type: 'feat', text: 'PWA Update-Banner bei neuer App-Version' },
       { type: 'feat', text: 'App-Version und Datenformat-Version sichtbar in den Einstellungen' },
       { type: 'feat', text: 'Neues App-Icon: Twemoji-Einhorn auf dunklem Violett-Hintergrund' },
-      { type: 'improve', text: 'Algorithmus: Ratio-basierte Penalty verhindert Dominanz einzelner Spieler' },
+      { type: 'improve', text: 'Algorithmus: Ratio-basierte Penalty verhindert Dominanz einzelner Spieler:innen' },
     ],
   },
   {
     version: '0.1.0',
     date: '2026-05-28',
     changes: [
-      { type: 'feat', text: 'Spielerverwaltung mit dauerhaften Präferenzen (Position, Spieltyp, Goalie, Partner)' },
+      { type: 'feat', text: 'Spieler:innen-Verwaltung mit dauerhaften Präferenzen (Position, Spieltyp, Goalie, Partner:innen)' },
       { type: 'feat', text: 'Spieltag-Planung mit Verfügbarkeit, Gegner, Datum, Goalie-Modus, 5. Doppel' },
       { type: 'feat', text: 'Automatische Aufstellung nach Hamburger Liga-Regeln' },
       { type: 'feat', text: 'Drag & Drop, Slot-Editor, Regelverstoß-Erkennung, Kampflos-Markierung' },
-      { type: 'feat', text: 'Export & Import (JSON), Spieler sortierbar' },
+      { type: 'feat', text: 'Export & Import (JSON), Spieler:innen sortierbar' },
       { type: 'feat', text: 'PWA: installierbar auf iOS & Android, offline-fähig' },
       { type: 'feat', text: 'Deploy auf GitHub Pages via GitHub Actions' },
     ],
@@ -166,7 +167,7 @@ const HISTORY: ChangelogEntry[] = [
 ]
 
 // Datum des aktuellen Releases – beim `npm version`-Bump auf das Datum setzen
-const CURRENT_DATE = '2026-09-10'
+const CURRENT_DATE = '2026-09-11'
 
 export const CHANGELOG: ChangelogEntry[] = [
   ...(CURRENT_CHANGES.length > 0 ? [{

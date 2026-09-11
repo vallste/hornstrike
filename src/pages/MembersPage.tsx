@@ -13,7 +13,7 @@ import SelectMenu from '../components/SelectMenu'
 const ROLE_OPTIONS: { value: Role; label: string }[] = [
   { value: 'team_admin', label: 'Captain' },
   { value: 'co_captain', label: 'Co-Captain' },
-  { value: 'player', label: 'Spieler' },
+  { value: 'player', label: 'Spieler:in' },
 ]
 
 type MembershipRow = { user_id: string; role: Role }

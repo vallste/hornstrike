@@ -393,7 +393,7 @@ function LineupView() {
               <span className="text-fg/60 text-sm"> · vs. <span className="text-accent-cyan font-medium">{matchDay.opponent}</span></span>
             )}
           </div>
-          <span className="text-fg/60 text-sm">{matchDay.players.length} Spieler</span>
+          <span className="text-fg/60 text-sm">{matchDay.players.length} Spieler:innen</span>
         </div>
       </div>
 
@@ -455,7 +455,7 @@ function LineupView() {
       {setEntries.length > 0 && (
         <div className="relative px-6 mb-3">
           <div className="bg-surface rounded-xl px-4 py-3">
-            <p className="text-fg/40 text-[11px] font-semibold tracking-wider uppercase mb-2">Sätze pro Spieler</p>
+            <p className="text-fg/40 text-[11px] font-semibold tracking-wider uppercase mb-2">Sätze pro Spieler:in</p>
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               {setEntries.map(([pid, sets]) => (
                 <div key={pid} className="flex items-center gap-1.5">

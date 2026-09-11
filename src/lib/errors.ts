@@ -9,7 +9,7 @@ const CUSTOM: Record<string, string> = {
   'not authorized': 'Dafür fehlt dir die Berechtigung.',
   'invite invalid, expired, or already used': 'Diese Einladung ist ungültig, abgelaufen oder bereits eingelöst.',
   'invite email mismatch': 'Diese Einladung wurde an eine andere E-Mail-Adresse ausgestellt – bitte mit genau dieser Adresse anmelden.',
-  'player already claimed': 'Dieser Spieler ist bereits mit einem Konto verknüpft.',
+  'player already claimed': 'Diese:r Spieler:in ist bereits mit einem Konto verknüpft.',
   'cannot remove the last captain of the team': 'Der letzte Captain eines Teams kann nicht entfernt werden. Ernenne zuerst eine weitere Person zum Captain.',
   'cannot remove the last admin of the club': 'Der letzte Vereins-Admin kann nicht entfernt werden. Ernenne zuerst eine weitere Person zum Vereins-Admin.',
   'invalid role': 'Diese Rolle kann hier nicht vergeben werden.',

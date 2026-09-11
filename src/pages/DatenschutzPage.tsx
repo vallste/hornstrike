@@ -27,7 +27,7 @@ export default function DatenschutzPage() {
           <H>2. Welche Daten wir verarbeiten</H>
           <ul className="list-disc pl-5 mt-1.5 space-y-1">
             <Li><b>Kontodaten:</b> E-Mail-Adresse (für den passwortlosen Login) sowie technische Anmeldedaten.</Li>
-            <Li><b>Spielerprofile:</b> Name, Positions- und Spieltyp-Vorlieben, Torwart-Präferenz, Partnerwünsche, Verfügbarkeiten.</Li>
+            <Li><b>Spieler:innen-Profile:</b> Name, Positions- und Spieltyp-Vorlieben, Goalie-Präferenz, Wunschpartner:innen, Verfügbarkeiten.</Li>
             <Li><b>Team-/Vereinsdaten:</b> Vereine, Teams, Mitgliedschaften/Rollen, Spieltage, Aufstellungen, Umfragen und Antworten.</Li>
             <Li><b>Nutzungsdaten:</b> pseudonyme Ereignisse zur Reichweitenmessung und Produktverbesserung – z.&nbsp;B. aufgerufene Seiten als <i>Muster</i> (ohne konkrete IDs, z.&nbsp;B. „/players/:id“), ausgelöste Aktionen, Zeitpunkt und Anzeige-Modus. Es werden dabei <b>keine</b> Namen, E-Mails oder Klartext-Inhalte gespeichert.</Li>
           </ul>
@@ -50,15 +50,15 @@ export default function DatenschutzPage() {
 
           <H>5. Speicherdauer</H>
           <P>
-            Konto-, Spieler- und Vereinsdaten werden gespeichert, solange das Konto bzw. die Team-Zugehörigkeit
+            Konto-, Spieler:innen- und Vereinsdaten werden gespeichert, solange das Konto bzw. die Team-Zugehörigkeit
             besteht. Nutzungsereignisse werden nach 180 Tagen automatisch gelöscht. Bei Löschung
             eines Kontos wird der Personenbezug in verbleibenden Ereignissen entfernt.
           </P>
 
           <H>6. Minderjährige</H>
           <P>
-            Für Spielerinnen und Spieler unter 16 Jahren ist die Einwilligung der Erziehungsberechtigten
-            erforderlich. Die Namen jugendlicher Spieler werden ausschließlich durch die jeweils
+            Für Spieler:innen unter 16 Jahren ist die Einwilligung der Erziehungsberechtigten
+            erforderlich. Die Namen jugendlicher Spieler:innen werden ausschließlich durch die jeweils
             verantwortliche Team-Leitung (Captain bzw. Vereins-Admin) eingetragen. Diese ist dafür
             verantwortlich, vor der Eingabe die erforderliche Einwilligung der Erziehungsberechtigten
             einzuholen und nachzuweisen.

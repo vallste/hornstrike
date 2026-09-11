@@ -28,9 +28,9 @@ const SLIDES = [
   },
   {
     icon: '👥',
-    title: 'Spieler anlegen',
-    body: 'Lege einmalig alle Spieler eures Kaders an. Jeder Spieler bekommt Präferenzen: bevorzugte Position, Einzel oder Doppel, Goalie – und mehr.',
-    hint: '→ Tab „Spieler" → + Neuer Spieler',
+    title: 'Spieler:innen anlegen',
+    body: 'Lege einmalig alle Spieler:innen eures Kaders an. Jede:r bekommt Präferenzen: bevorzugte Position, Einzel oder Doppel, Goalie – und mehr.',
+    hint: '→ Tab „Spieler:innen" → + Neue:r Spieler:in',
   },
   {
     icon: '📅',
@@ -41,13 +41,13 @@ const SLIDES = [
   {
     icon: '✨',
     title: 'Aufstellung berechnen',
-    body: 'Hornstrike berechnet automatisch die optimale Aufstellung – unter Berücksichtigung aller Präferenzen und der Liga-Regeln (max. 2 Einzel + 2 Doppel pro Spieler, keine doppelten Pärchen).',
+    body: 'Hornstrike berechnet automatisch die optimale Aufstellung – unter Berücksichtigung aller Präferenzen und der Liga-Regeln (max. 2 Einzel + 2 Doppel pro Spieler:in, keine doppelten Pärchen).',
     hint: '→ „Aufstellung berechnen"',
   },
   {
     icon: '✏️',
     title: 'Manuell anpassen',
-    body: 'Du kannst die Aufstellung jederzeit manuell ändern: Spieler per Drag & Drop tauschen, einzelne Slots tippen zum Bearbeiten, oder die ganze Aufstellung neu berechnen lassen.',
+    body: 'Du kannst die Aufstellung jederzeit manuell ändern: Spieler:innen per Drag & Drop tauschen, einzelne Slots tippen zum Bearbeiten, oder die ganze Aufstellung neu berechnen lassen.',
     hint: '→ Pill ziehen · ✎ tippen · ⟳ Neu',
   },
   {

@@ -128,7 +128,7 @@ export default function PlayersPage() {
       <div className="absolute w-[380px] h-[380px] rounded-full bg-unicorn-violet/35 blur-[130px] -top-20 right-0 pointer-events-none" />
 
       <Header
-        title="Spieler"
+        title="Spieler:innen"
         right={
           <Can cap="team:editRoster">
             <button
@@ -143,8 +143,8 @@ export default function PlayersPage() {
         {players.length === 0 && (
           <div className="bg-surface rounded-2xl p-6 text-center">
             <p className="text-4xl mb-3">👥</p>
-            <p className="text-fg font-semibold">Noch keine Spieler</p>
-            <p className="text-fg/45 text-sm mt-1">Tippe auf + um den ersten Spieler anzulegen.</p>
+            <p className="text-fg font-semibold">Noch keine Spieler:innen</p>
+            <p className="text-fg/45 text-sm mt-1">Tippe auf + um die ersten Spieler:innen anzulegen.</p>
           </div>
         )}
 

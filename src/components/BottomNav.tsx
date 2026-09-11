@@ -20,7 +20,7 @@ const ICONS: Record<string, ReactNode> = {
 
 const baseTabs = [
   { to: '/home', icon: 'home', label: 'Home' },
-  { to: '/players', icon: 'players', label: 'Spieler' },
+  { to: '/players', icon: 'players', label: 'Spieler:innen' },
   { to: '/matchday', icon: 'match', label: 'Spieltag' },
 ]
 

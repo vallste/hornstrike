@@ -78,7 +78,7 @@ export default function MatchDayListPage() {
                       <p className="text-accent-cyan text-sm mt-0.5">vs. {md.opponent}</p>
                     )}
                     <p className="text-fg/45 text-xs mt-1.5">
-                      {activeNames.join(', ')}{more > 0 ? ` +${more}` : ''} · {md.players.length} Spieler
+                      {activeNames.join(', ')}{more > 0 ? ` +${more}` : ''} · {md.players.length} Spieler:innen
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">

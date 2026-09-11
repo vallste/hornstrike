@@ -87,7 +87,7 @@ export default function RequestClubPage() {
             </button>
             {error && <p className="text-red-400 text-sm text-center">{error}</p>}
             <p className="text-fg/40 text-xs text-center px-2">
-              Nach der Freigabe wirst du Vereins-Admin und kannst Teams anlegen und Spieler einladen.
+              Nach der Freigabe wirst du Vereins-Admin und kannst Teams anlegen und Spieler:innen einladen.
             </p>
           </>
         )}

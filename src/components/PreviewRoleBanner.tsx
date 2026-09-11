@@ -8,7 +8,7 @@ export default function PreviewRoleBanner() {
   const { players } = usePlayers()
   if (!previewRole) return null
   const who = previewPlayerId
-    ? (players.find(p => p.id === previewPlayerId)?.name ?? 'Spieler')
+    ? (players.find(p => p.id === previewPlayerId)?.name ?? 'Spieler:in')
     : ROLE_LABEL[previewRole]
   return (
     <div className="fixed top-0 inset-x-0 z-[60] bg-unicorn-gold text-[#1a0533] text-[13px] font-bold px-4 py-1.5 flex items-center justify-center gap-3 shadow-md">

@@ -131,7 +131,7 @@ export default function AdminStatsPage() {
   ].sort((x, y) => (x.at < y.at ? 1 : -1)).slice(0, 14)
 
   const healthChips: { label: string; warn: boolean }[] = [
-    { label: `Teams ohne Spieler: ${h.teams_without_players}`, warn: h.teams_without_players > 0 },
+    { label: `Teams ohne Spieler:innen: ${h.teams_without_players}`, warn: h.teams_without_players > 0 },
     { label: `Vereine ohne Team: ${h.clubs_without_teams}`, warn: h.clubs_without_teams > 0 },
     { label: `Umfragen ohne Antwort: ${h.polls_without_responses}`, warn: h.polls_without_responses > 0 },
     { label: `Offene Anträge: ${h.club_requests_pending}${h.club_requests_pending ? ` (ältester ${dur(h.club_requests_oldest_pending_seconds)})` : ''}`, warn: h.club_requests_pending > 0 },
@@ -157,11 +157,11 @@ export default function AdminStatsPage() {
 
         {/* (a) KPIs */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <StatTile label="Nutzer" value={a.users_total} />
+          <StatTile label="Nutzer:innen" value={a.users_total} />
           <StatTile label={activeLabel} value={activeCount} accent="cyan" />
           <StatTile label="Vereine" value={a.clubs_total} />
           <StatTile label="Teams" value={a.teams_total} />
-          <StatTile label="Spieler" value={a.players_total} hint={`${a.players_claimed} mit Account · ${a.players_ghost} ohne`} />
+          <StatTile label="Spieler:innen" value={a.players_total} hint={`${a.players_claimed} mit Account · ${a.players_ghost} ohne`} />
           <StatTile label="Plattform-Admins" value={a.platform_admins} />
         </div>
 
@@ -185,7 +185,7 @@ export default function AdminStatsPage() {
         {/* (c) Wachstum */}
         <SectionCard title="Wachstum (pro Monat)">
           <div className="space-y-4">
-            <div><p className="text-fg/55 text-xs mb-1.5">Neue Nutzer</p><BarChart data={bars(data.growth.monthly.signups)} accent="cyan" /></div>
+            <div><p className="text-fg/55 text-xs mb-1.5">Neue Nutzer:innen</p><BarChart data={bars(data.growth.monthly.signups)} accent="cyan" /></div>
             <div><p className="text-fg/55 text-xs mb-1.5">Neue Teams</p><BarChart data={bars(data.growth.monthly.teams)} accent="gold" /></div>
             <div><p className="text-fg/55 text-xs mb-1.5">Neue Spieltage</p><BarChart data={bars(data.growth.monthly.matchdays)} accent="pink" /></div>
           </div>
@@ -203,8 +203,8 @@ export default function AdminStatsPage() {
               <FunnelBar accent="cyan" stages={[{ label: 'Gestellt', value: act.club_requests.pending + act.club_requests.approved + act.club_requests.rejected }, { label: 'Genehmigt', value: act.club_requests.approved }]} />
             </div>
             <div>
-              <p className="text-fg/55 text-xs mb-1.5">Account-Adoption (Spieler mit Account)</p>
-              <FunnelBar accent="pink" stages={[{ label: 'Spieler gesamt', value: a.players_total }, { label: 'Mit Account', value: a.players_claimed }]} />
+              <p className="text-fg/55 text-xs mb-1.5">Account-Adoption (Spieler:innen mit Account)</p>
+              <FunnelBar accent="pink" stages={[{ label: 'Spieler:innen gesamt', value: a.players_total }, { label: 'Mit Account', value: a.players_claimed }]} />
             </div>
           </div>
         </SectionCard>

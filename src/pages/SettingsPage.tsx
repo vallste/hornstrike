@@ -79,7 +79,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
     replacePlayers(importPreview.players)
     replaceMatchDays(importPreview.matchDays)
     setImportPreview(null)
-    showToast(`${importPreview.players.length} Spieler + ${importPreview.matchDays.length} Spieltage importiert ✓`)
+    showToast(`${importPreview.players.length} Spieler:innen + ${importPreview.matchDays.length} Spieltage importiert ✓`)
   }
 
   const handleDeleteAll = () => {
@@ -121,11 +121,11 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
               <p className="text-fg/45 text-xs mb-1.5">Vorschau (nur Ansicht)</p>
               <SelectMenu<string>
                 variant="block"
-                ariaLabel="Vorschau als Spieler"
+                ariaLabel="Vorschau als Spieler:in"
                 value={previewRole === 'player' && previewPlayerId ? previewPlayerId : ''}
                 options={[
                   { value: '', label: 'Normal (als du)' },
-                  ...players.map(p => ({ value: p.id, label: `Als Spieler: ${p.name}` })),
+                  ...players.map(p => ({ value: p.id, label: `Als Spieler:in ${p.name}` })),
                 ]}
                 onChange={v => (v ? setPreview('player', v) : setPreview(null))}
               />
@@ -200,7 +200,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
             <span className="w-9 h-9 rounded-xl bg-unicorn-cyan/15 flex items-center justify-center text-xl">📊</span>
             <div className="flex-1 text-left">
               <p className="text-fg font-semibold text-[15px]">Auswertungen</p>
-              <p className="text-fg/40 text-xs mt-0.5">Doppel-Harmonie, Einzelbilanzen, Torschützen</p>
+              <p className="text-fg/40 text-xs mt-0.5">Doppel-Harmonie, Einzelbilanzen, Torschütz:innen</p>
             </div>
             <span className="text-fg/25 text-lg">›</span>
           </button>
@@ -255,7 +255,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
           <div className="flex gap-6">
             <div>
               <p className="text-fg font-bold text-2xl">{players.length}</p>
-              <p className="text-fg/50 text-xs">Spieler</p>
+              <p className="text-fg/50 text-xs">Spieler:innen</p>
             </div>
             <div>
               <p className="text-fg font-bold text-2xl">{matchDays.length}</p>
@@ -276,7 +276,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
             <span className="w-9 h-9 rounded-xl bg-unicorn-cyan/15 flex items-center justify-center text-xl">📤</span>
             <div className="flex-1 text-left">
               <p className="text-fg font-semibold text-[15px]">Exportieren</p>
-              <p className="text-fg/40 text-xs mt-0.5">Alle Spieler + Spieltage als JSON-Datei</p>
+              <p className="text-fg/40 text-xs mt-0.5">Alle Spieler:innen + Spieltage als JSON-Datei</p>
             </div>
             <span className="text-fg/25 text-lg">›</span>
           </button>
@@ -318,7 +318,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
               </p>
             )}
             <p className="text-fg/60 text-[13px]">
-              {importPreview.players.length} Spieler · {importPreview.matchDays.length} Spieltage
+              {importPreview.players.length} Spieler:innen · {importPreview.matchDays.length} Spieltage
             </p>
             <p className="text-fg/40 text-xs mt-1">
               Exportiert: {new Date(importPreview.exportedAt).toLocaleString('de-DE')}
@@ -428,7 +428,7 @@ export default function SettingsPage({ onStartTour }: { onStartTour?: () => void
               <span className="w-9 h-9 rounded-xl bg-red-500/15 flex items-center justify-center text-xl">🗑</span>
               <div className="flex-1 text-left">
                 <p className="text-red-400 font-semibold text-[15px]">Alle Daten löschen</p>
-                <p className="text-fg/40 text-xs mt-0.5">Spieler und Spieltage unwiderruflich entfernen</p>
+                <p className="text-fg/40 text-xs mt-0.5">Spieler:innen und Spieltage unwiderruflich entfernen</p>
               </div>
             </button>
           ) : (

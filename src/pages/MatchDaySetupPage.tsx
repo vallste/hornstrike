@@ -131,7 +131,7 @@ export default function MatchDaySetupPage() {
           <div className="text-left">
             <p className="text-fg font-semibold text-[15px]">🎯 5. Doppel (D5)</p>
             <p className="text-fg/40 text-xs mt-0.5">
-              {activePlayers.length < 5 ? 'Mindestens 5 Spieler erforderlich' : 'E3 + E4 werden durch D5 ersetzt'}
+              {activePlayers.length < 5 ? 'Mindestens 5 Spieler:innen erforderlich' : 'E3 + E4 werden durch D5 ersetzt'}
             </p>
           </div>
           <div className={`w-12 h-6 rounded-full transition-colors relative ${useFifthDouble ? 'bg-unicorn-cyan' : 'bg-surface2'}`}>
@@ -143,7 +143,7 @@ export default function MatchDaySetupPage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="text-fg/45 text-[13px] font-semibold tracking-widest uppercase">
-              Aktive Spieler ({activePlayers.length})
+              Aktive Spieler:innen ({activePlayers.length})
             </p>
             <button
               onClick={() => {
@@ -160,7 +160,7 @@ export default function MatchDaySetupPage() {
 
           {rosterPlayers.length === 0 && (
             <p className="text-fg/40 text-sm bg-surface rounded-xl p-4">
-              Noch keine Spieler angelegt.{' '}
+              Noch keine Spieler:innen angelegt.{' '}
               <button className="text-accent-cyan underline" onClick={() => navigate('/players')}>
                 Jetzt hinzufügen →
               </button>
