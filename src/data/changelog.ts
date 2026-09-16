@@ -29,6 +29,7 @@ export interface ChangelogEntry {
  */
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
+  { type: 'fix', text: 'Geht eine Begegnung nicht glatt auf – fünf Personen teilen sich 24 Sätze nun einmal ungleich –, wandert die Mehrlast jetzt bei jedem „Neu berechnen" zu jemand anderem. Vorher landete sie fast immer bei derselben Person, weil die Präferenzen schwerer wogen als der Zufall. An der Verteilung selbst ändert das nichts: 4/4/5/5/6 bleibt bei fünf Personen das rechnerische Optimum, nur die Besetzung wechselt' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
@@ -174,7 +175,7 @@ const HISTORY: ChangelogEntry[] = [
 ]
 
 // Datum des aktuellen Releases – beim `npm version`-Bump auf das Datum setzen
-const CURRENT_DATE = '2026-09-11'
+const CURRENT_DATE = '2026-09-16'
 
 export const CHANGELOG: ChangelogEntry[] = [
   ...(CURRENT_CHANGES.length > 0 ? [{
