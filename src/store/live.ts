@@ -1,4 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback, useMemo, useSyncExternalStore } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 import { useSession } from '../context/SessionProvider'
 import { useScope } from '../context/ScopeProvider'
@@ -7,6 +8,10 @@ import type {
   OpponentName, OpponentSlot, SetNo,
 } from '../types'
 import { setFinished } from '../types'
+import {
+  enqueue, dismissRejected, getQueueState, subscribe,
+  type OpBody, type QueuedOp,
+} from '../lib/liveQueue'
 
 // Datenschicht für die Live-Erfassung (Migration 0016).
 //
@@ -91,21 +96,64 @@ function applyEvent(data: LiveData, ev: MatchEvent): LiveData {
   return { ...data, sets, events: [...data.events, ev] }
 }
 
-function removeLastEvent(data: LiveData, gameIndex: number, setNo: SetNo): LiveData {
-  const inSet = eventsOfSet(data, gameIndex, setNo)
-  const last = inSet[inSet.length - 1]
-  if (!last) return data
+/** Ein bestimmtes Ereignis entfernen – über die Position, nicht „das letzte".
+ *  Wichtig fuer die Warteschlange: dort kann zwischen Einreihen und Senden
+ *  laengst etwas anderes obenauf liegen. */
+function removeEventAt(data: LiveData, gameIndex: number, setNo: SetNo, seq: number): LiveData {
+  const target = data.events.find(e => sameSet(e, { gameIndex, setNo }) && e.seq === seq)
+  if (!target) return data
   return {
     ...data,
-    events: data.events.filter(e => e.id !== last.id),
-    sets: data.sets.map(s => (sameSet(s, last) && last.kind === 'goal'
+    events: data.events.filter(e => e.id !== target.id),
+    sets: data.sets.map(s => (sameSet(s, target) && target.kind === 'goal'
       ? {
         ...s,
-        goalsFor: Math.max(0, s.goalsFor - (last.side === 'us' ? 1 : 0)),
-        goalsAgainst: Math.max(0, s.goalsAgainst - (last.side === 'them' ? 1 : 0)),
+        goalsFor: Math.max(0, s.goalsFor - (target.side === 'us' ? 1 : 0)),
+        goalsAgainst: Math.max(0, s.goalsAgainst - (target.side === 'them' ? 1 : 0)),
       }
       : s)),
   }
+}
+
+/** Naechste freie Position in einem Satz – zaehlt Server-Stand UND Warteschlange. */
+export function nextSeq(data: LiveData, gameIndex: number, setNo: SetNo): number {
+  return Math.max(0, ...eventsOfSet(data, gameIndex, setNo).map(e => e.seq)) + 1
+}
+
+/**
+ * Einen wartenden Vorgang auf den Server-Stand legen. Damit zeigt die App
+ * genau das, was nach erfolgreichem Senden dastehen wird – und zwar auch nach
+ * einem Neustart, weil die Warteschlange auf der Platte liegt.
+ */
+export function applyQueued(data: LiveData, op: QueuedOp): LiveData {
+  const b = op.body
+
+  if (b.kind === 'event') {
+    return applyEvent(data, {
+      id: op.id, matchdayId: op.matchdayId,
+      gameIndex: b.gameIndex, setNo: b.setNo, seq: b.seq,
+      kind: b.eventKind, side: b.side,
+      playerId: b.playerId, role: b.role, opponentSlot: b.opponentSlot,
+    })
+  }
+  if (b.kind === 'undo') return removeEventAt(data, b.gameIndex, b.setNo, b.seq)
+  if (b.kind === 'score') {
+    const next: MatchSet = {
+      gameIndex: b.gameIndex, setNo: b.setNo, goalsFor: b.goalsFor, goalsAgainst: b.goalsAgainst,
+    }
+    return {
+      ...data,
+      sets: data.sets.some(s => sameSet(s, next))
+        ? data.sets.map(s => (sameSet(s, next) ? next : s))
+        : [...data.sets, next],
+    }
+  }
+  if (b.kind === 'opponent') {
+    const name = b.name.trim()
+    const rest = data.opponents.filter(o => !(o.gameIndex === b.gameIndex && o.slot === b.slot))
+    return { ...data, opponents: name ? [...rest, { gameIndex: b.gameIndex, slot: b.slot, name }] : rest }
+  }
+  return data
 }
 
 // ── Hook ─────────────────────────────────────────────────────────────────────
@@ -120,8 +168,17 @@ export interface RecordEventInput {
   opponentSlot?: OpponentSlot | null
 }
 
+/**
+ * Live-Daten eines Spieltags: Server-Stand plus alles, was noch in der
+ * Warteschlange liegt.
+ *
+ * Es gibt hier bewusst keine optimistischen Mutationen mehr. Jede Eingabe
+ * wandert in die dauerhafte Warteschlange (lib/liveQueue.ts) und wird von dort
+ * der Reihe nach gesendet; angezeigt wird Server-Stand + Warteschlange. Das
+ * ergibt dieselbe sofortige Rueckmeldung wie vorher, ueberlebt aber einen
+ * Neustart der App und behaelt die Reihenfolge bei.
+ */
 export function useMatchLive(matchdayId: string | undefined) {
-  const qc = useQueryClient()
   const { session } = useSession()
   const key = liveKey(matchdayId)
   const enabled = isSupabaseConfigured && !!session && !!matchdayId
@@ -133,152 +190,101 @@ export function useMatchLive(matchdayId: string | undefined) {
     // Am Tisch tippt vielleicht jemand anders mit – regelmäßig nachziehen.
     refetchInterval: 30_000,
   })
-  const data = query.data ?? EMPTY
 
-  const snapshot = async () => {
-    await qc.cancelQueries({ queryKey: key })
-    return qc.getQueryData<LiveData>(key) ?? EMPTY
-  }
-  const rollback = (ctx: { prev?: LiveData } | undefined) => {
-    if (ctx?.prev) qc.setQueryData(key, ctx.prev)
-  }
-  const settle = () => {
-    void qc.invalidateQueries({ queryKey: key })
-    // Spieltagsliste und Aufstellung führen die Satzstände mit. refetchType
-    // 'none' markiert sie nur als veraltet: kein Nachladen bei jedem Tipp,
-    // aber frische Zahlen, sobald man dorthin zurückkehrt.
-    void qc.invalidateQueries({ queryKey: ['matchDays'], refetchType: 'none' })
-  }
+  const queue = useSyncExternalStore(subscribe, getQueueState, getQueueState)
 
-  const recordMut = useMutation({
-    // Wacklige Hallen-Verbindungen sind der Normalfall – lieber ein paar Mal
-    // nachfassen, bevor ein Tor verloren geht.
-    retry: 3,
-    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 8000),
-    mutationFn: async (input: RecordEventInput) => {
-      const { error } = await getSupabase().rpc('record_match_event', {
-        p_matchday: matchdayId,
-        p_game: input.gameIndex,
-        p_set: input.setNo,
-        p_kind: input.kind,
-        p_side: input.side,
-        p_player: input.playerId ?? null,
-        p_role: input.role ?? null,
-        p_opponent_slot: input.opponentSlot ?? null,
-      })
-      if (error) throw error
-    },
-    onMutate: async (input: RecordEventInput) => {
-      const prev = await snapshot()
-      const seq = Math.max(0, ...eventsOfSet(prev, input.gameIndex, input.setNo).map(e => e.seq)) + 1
-      const optimistic: MatchEvent = {
-        id: `pending-${input.gameIndex}-${input.setNo}-${seq}`,
-        matchdayId: matchdayId as string,
-        gameIndex: input.gameIndex, setNo: input.setNo, seq,
-        kind: input.kind, side: input.side,
-        playerId: input.playerId ?? null, role: input.role ?? null,
-        opponentSlot: input.opponentSlot ?? null,
-      }
-      qc.setQueryData<LiveData>(key, applyEvent(prev, optimistic))
-      return { prev }
-    },
-    onError: (_e, _v, ctx) => rollback(ctx),
-    onSettled: settle,
-  })
+  const pending = useMemo(
+    () => queue.pending.filter(op => op.matchdayId === matchdayId),
+    [queue.pending, matchdayId],
+  )
+  const rejected = useMemo(
+    () => queue.rejected.filter(op => op.matchdayId === matchdayId),
+    [queue.rejected, matchdayId],
+  )
 
-  const undoMut = useMutation({
-    retry: 3,
-    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 8000),
-    mutationFn: async (input: { gameIndex: number; setNo: SetNo }) => {
-      const { error } = await getSupabase().rpc('undo_match_event', {
-        p_matchday: matchdayId, p_game: input.gameIndex, p_set: input.setNo,
-      })
-      if (error) throw error
-    },
-    onMutate: async (input) => {
-      const prev = await snapshot()
-      qc.setQueryData<LiveData>(key, removeLastEvent(prev, input.gameIndex, input.setNo))
-      return { prev }
-    },
-    onError: (_e, _v, ctx) => rollback(ctx),
-    onSettled: settle,
-  })
+  const data = useMemo(
+    () => pending.reduce(applyQueued, query.data ?? EMPTY),
+    [query.data, pending],
+  )
 
-  const scoreMut = useMutation({
-    retry: 2,
-    mutationFn: async (input: MatchSet) => {
-      const { error } = await getSupabase().from('matchday_sets').upsert({
-        matchday_id: matchdayId,
-        game_index: input.gameIndex,
-        set_no: input.setNo,
-        goals_for: input.goalsFor,
-        goals_against: input.goalsAgainst,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'matchday_id,game_index,set_no' })
-      if (error) throw error
-    },
-    onMutate: async (input: MatchSet) => {
-      const prev = await snapshot()
-      const sets = prev.sets.some(s => sameSet(s, input))
-        ? prev.sets.map(s => (sameSet(s, input) ? input : s))
-        : [...prev.sets, input]
-      qc.setQueryData<LiveData>(key, { ...prev, sets })
-      return { prev }
-    },
-    onError: (_e, _v, ctx) => rollback(ctx),
-    onSettled: settle,
-  })
+  /** IDs der noch nicht bestaetigten Ereignisse – die Liste markiert sie. */
+  const pendingIds = useMemo(
+    () => new Set(pending.filter(op => op.body.kind === 'event').map(op => op.id)),
+    [pending],
+  )
 
-  const opponentMut = useMutation({
-    mutationFn: async (input: OpponentName) => {
-      const sb = getSupabase()
-      const name = input.name.trim()
-      if (!name) {
-        const { error } = await sb.from('matchday_opponents').delete()
-          .eq('matchday_id', matchdayId).eq('game_index', input.gameIndex).eq('slot', input.slot)
-        if (error) throw error
-        return
-      }
-      const { error } = await sb.from('matchday_opponents').upsert({
-        matchday_id: matchdayId, game_index: input.gameIndex, slot: input.slot, name,
-      }, { onConflict: 'matchday_id,game_index,slot' })
-      if (error) throw error
-    },
-    onMutate: async (input: OpponentName) => {
-      const prev = await snapshot()
-      const name = input.name.trim()
-      const rest = prev.opponents.filter(o => !(o.gameIndex === input.gameIndex && o.slot === input.slot))
-      qc.setQueryData<LiveData>(key, { ...prev, opponents: name ? [...rest, { ...input, name }] : rest })
-      return { prev }
-    },
-    onError: (_e, _v, ctx) => rollback(ctx),
-    onSettled: settle,
-  })
+  /** Ein Statuswechsel wartet noch – die Seite zeigt ihn trotzdem schon. */
+  const pendingStatus = useMemo(() => {
+    const last = [...pending].reverse().find(op => op.body.kind === 'status')
+    return last ? (last.body as { status: MatchDayStatus }).status : null
+  }, [pending])
 
-  const statusMut = useMutation({
-    mutationFn: async (input: { status: MatchDayStatus; lockLineup?: boolean }) => {
-      const patch: Record<string, unknown> = { status: input.status }
-      // „Läuft" heißt: die Aufstellung steht. Das Sperren gleich mitnehmen,
-      // damit am Tisch niemand mehr aus Versehen einen Spieler verschiebt.
-      if (input.lockLineup !== undefined) patch.lineup_locked = input.lockLineup
-      const { error } = await getSupabase().from('matchdays').update(patch).eq('id', matchdayId)
-      if (error) throw error
-    },
-    onSettled: () => { void qc.invalidateQueries({ queryKey: ['matchDays'] }) },
-  })
+  const push = useCallback((body: OpBody) => {
+    if (matchdayId) enqueue(matchdayId, body)
+  }, [matchdayId])
+
+  /**
+   * Naechste Position – gegen zwei Tipps im selben Render-Durchlauf abgesichert.
+   *
+   * `data` stammt aus dem Render und ist zwischen zwei schnellen Tipps noch der
+   * alte Stand; beide bekaemen dieselbe Position und der Server wuerde das
+   * zweite Tor als „schon erfasst" abweisen. Deshalb zusaetzlich der Blick in
+   * die Warteschlange, die `enqueue` synchron fortschreibt.
+   */
+  const claimSeq = useCallback((gameIndex: number, setNo: SetNo) => {
+    const queued = getQueueState().pending
+      .filter(op => op.matchdayId === matchdayId && op.body.kind === 'event'
+        && op.body.gameIndex === gameIndex && op.body.setNo === setNo)
+      .map(op => (op.body as { seq: number }).seq)
+    return Math.max(nextSeq(data, gameIndex, setNo) - 1, ...queued) + 1
+  }, [data, matchdayId])
 
   return {
     data,
     isLoading: query.isLoading,
-    error: (query.error ?? recordMut.error ?? undoMut.error ?? scoreMut.error
-      ?? opponentMut.error ?? statusMut.error) as Error | null,
-    /** Ein Schreibvorgang ist unterwegs – für die „nicht gespeichert"-Anzeige. */
-    pending: recordMut.isPending || undoMut.isPending || scoreMut.isPending,
-    recordEvent: (input: RecordEventInput) => recordMut.mutate(input),
-    undoLast: (gameIndex: number, setNo: SetNo) => undoMut.mutate({ gameIndex, setNo }),
-    setScore: (input: MatchSet) => scoreMut.mutate(input),
-    setOpponent: (input: OpponentName) => opponentMut.mutate(input),
-    setStatus: (status: MatchDayStatus, lockLineup?: boolean) => statusMut.mutate({ status, lockLineup }),
+    error: query.error as Error | null,
+
+    /** Eingaben, die noch nicht beim Server sind. */
+    pendingCount: pending.length,
+    pending: pending.length > 0,
+    pendingIds,
+    pendingStatus,
+    /** Vom Server abgelehnt (z. B. schon von jemand anderem erfasst). */
+    rejected,
+    dismissRejected: () => { if (matchdayId) dismissRejected(matchdayId) },
+    syncing: queue.syncing,
+    online: queue.online,
+
+    recordEvent: (input: RecordEventInput) => push({
+      kind: 'event',
+      gameIndex: input.gameIndex, setNo: input.setNo,
+      seq: claimSeq(input.gameIndex, input.setNo),
+      eventKind: input.kind, side: input.side,
+      playerId: input.playerId ?? null,
+      role: input.role ?? null,
+      opponentSlot: input.opponentSlot ?? null,
+    }),
+    undoLast: (gameIndex: number, setNo: SetNo) => {
+      const inSet = eventsOfSet(data, gameIndex, setNo)
+      const last = inSet[inSet.length - 1]
+      if (!last) return
+      // Zweimal schnell getippt: dieselbe Position nicht doppelt zuruecknehmen.
+      const alreadyQueued = getQueueState().pending.some(op =>
+        op.matchdayId === matchdayId && op.body.kind === 'undo'
+        && op.body.gameIndex === gameIndex && op.body.setNo === setNo
+        && (op.body as { seq: number }).seq === last.seq)
+      if (alreadyQueued) return
+      push({ kind: 'undo', gameIndex, setNo, seq: last.seq })
+    },
+    setScore: (input: MatchSet) => push({
+      kind: 'score', gameIndex: input.gameIndex, setNo: input.setNo,
+      goalsFor: input.goalsFor, goalsAgainst: input.goalsAgainst,
+    }),
+    setOpponent: (input: OpponentName) => push({
+      kind: 'opponent', gameIndex: input.gameIndex, slot: input.slot, name: input.name,
+    }),
+    setStatus: (status: MatchDayStatus, lockLineup?: boolean) =>
+      push({ kind: 'status', status, lockLineup }),
   }
 }
 

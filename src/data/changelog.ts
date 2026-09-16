@@ -31,6 +31,8 @@ export interface ChangelogEntry {
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'fix', text: 'Geht eine Begegnung nicht glatt auf – fünf Personen teilen sich 24 Sätze nun einmal ungleich –, wandert die Mehrlast jetzt bei jedem „Neu berechnen" zu jemand anderem. Vorher landete sie fast immer bei derselben Person, weil die Präferenzen schwerer wogen als der Zufall. An der Verteilung selbst ändert das nichts: 4/4/5/5/6 bleibt bei fünf Personen das rechnerische Optimum, nur die Besetzung wechselt' },
   { type: 'improve', text: 'Neu berechnen, Verschieben per Drag & Drop und Sperren einer Aufstellung brauchen jetzt zwei statt vier Server-Anfragen. Bisher wurden dabei jedes Mal die Verfügbarkeiten gelöscht und unverändert neu geschrieben – das kostete nicht nur Zeit: bricht die Verbindung genau dazwischen ab, waren sie weg' },
+  { type: 'feat', text: 'Live-Erfassung ohne Netz: Getippte Tore liegen jetzt in einer Warteschlange auf dem Gerät und gehen raus, sobald die Verbindung zurück ist – auch wenn du die App zwischendurch schließt. Oben steht jederzeit, wie viele Eingaben noch nicht gespeichert sind; einzelne Zeilen im Protokoll sind bis dahin mit einem Punkt markiert' },
+  { type: 'fix', text: 'Tippen zwei Leute gleichzeitig dasselbe Tor mit, zählt es nur noch einmal. Dasselbe gilt, wenn eine Eingabe nach einem Verbindungsabbruch erneut gesendet wird. Wird eine Eingabe deshalb verworfen, sagt die App es – statt still einen falschen Stand stehen zu lassen' },
 ]
 
 const HISTORY: ChangelogEntry[] = [

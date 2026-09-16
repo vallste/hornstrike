@@ -27,6 +27,7 @@ import OnboardingGuide, { shouldShowOnboarding } from './components/OnboardingGu
 import ProtectedShell from './components/ProtectedShell'
 import PreviewRoleBanner from './components/PreviewRoleBanner'
 import AnalyticsMount from './components/AnalyticsMount'
+import LiveSyncMount from './components/LiveSyncMount'
 import LineupPage from './pages/LineupPage'
 import MatchLivePage from './pages/MatchLivePage'
 import MatchStatsPage from './pages/MatchStatsPage'
@@ -71,6 +72,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <AnalyticsMount />
+      <LiveSyncMount />
       <ScrollToTop />
       <PreviewRoleBanner />
       <UpdateBanner />

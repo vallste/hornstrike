@@ -40,6 +40,27 @@ export default function MatchLivePage() {
   return <MatchLiveView key={id} />
 }
 
+/**
+ * Warum eine Eingabe nicht angenommen wurde – in Worten, nicht in Codes.
+ * „seq_taken" ist der haeufigste Fall: zwei Leute haben dasselbe Tor getippt.
+ */
+const REJECTION_TEXT: Record<string, string> = {
+  seq_taken: 'war schon erfasst',
+  duplicate: 'war schon erfasst',
+  set_finished: 'Satz war bereits zu Ende',
+  already_undone: 'schon zurückgenommen',
+  nothing_to_undo: 'nichts zurückzunehmen',
+}
+
+function rejectionSummary(rejected: { reason: string }[]): string {
+  const seen: string[] = []
+  for (const r of rejected) {
+    const text = REJECTION_TEXT[r.reason] ?? 'nicht gespeichert'
+    if (!seen.includes(text)) seen.push(text)
+  }
+  return seen.join(' · ')
+}
+
 function MatchLiveView() {
   const { id } = useParams()
   const { players } = usePlayers()
@@ -47,6 +68,9 @@ function MatchLiveView() {
   const matchDay = matchDays.find(m => m.id === id)!
   const live = useMatchLive(id)
   const canEdit = useCan('team:editLineup')
+  // Ein noch wartender Statuswechsel zaehlt fuer die Anzeige schon – sonst
+  // spränge der Knopf nach dem Tippen zurueck, bis die Verbindung steht.
+  const status = live.pendingStatus ?? matchDay.status ?? 'planned'
 
   const [view, setView] = useState<'live' | 'sets'>('live')
   const [cursor, setCursor] = useState<number | null>(null)
@@ -82,9 +106,11 @@ function MatchLiveView() {
         title="Ergebnisse"
         back={`/lineup/${matchDay.id}`}
         right={
-          live.pending
-            ? <span className="text-fg/35 text-[12px]">speichert…</span>
-            : matchDay.status === 'live'
+          live.pendingCount > 0
+            ? <span className={`text-[12px] font-semibold ${live.online ? 'text-fg/45' : 'text-amber-300'}`}>
+                {live.online ? '↻' : '⏸'} {live.pendingCount}
+              </span>
+            : status === 'live'
               ? <span className="text-accent-cyan text-[12px] font-semibold">● läuft</span>
               : null
         }
@@ -131,17 +157,60 @@ function MatchLiveView() {
         </div>
         {canEdit && (
           <button
-            onClick={() => live.setStatus(matchDay.status === 'live' ? 'done' : 'live', matchDay.status === 'live' ? undefined : true)}
+            onClick={() => live.setStatus(status === 'live' ? 'done' : 'live', status === 'live' ? undefined : true)}
             className={`px-3 py-2 rounded-xl text-[13px] font-semibold border flex-shrink-0 ${
-              matchDay.status === 'live'
+              status === 'live'
                 ? 'border-accent-cyan/50 text-accent-cyan'
                 : 'border-fg/20 text-fg/60'
             }`}
           >
-            {matchDay.status === 'live' ? 'Beenden' : 'Starten'}
+            {status === 'live' ? 'Beenden' : 'Starten'}
           </button>
         )}
       </div>
+
+      {live.pendingCount > 0 && (
+        <div className="relative px-6 mb-3">
+          <div className={`rounded-xl px-3 py-2 text-[12px] border flex items-center gap-2 ${
+            live.online
+              ? 'bg-surface border-fg/10 text-fg/60'
+              : 'bg-amber-900/25 border-amber-500/40 text-amber-200/90'
+          }`}>
+            <span className={live.syncing ? 'animate-pulse' : ''}>{live.online ? '↻' : '⏸'}</span>
+            <span className="flex-1">
+              <b className="font-semibold">{live.pendingCount}</b>
+              {live.pendingCount === 1 ? ' Eingabe' : ' Eingaben'}
+              {live.online
+                ? ' noch nicht gespeichert – läuft'
+                : ' warten auf Verbindung'}
+            </span>
+          </div>
+          <p className="text-fg/30 text-[11px] mt-1 px-1">
+            Bleibt erhalten, auch wenn du die App schließt.
+          </p>
+        </div>
+      )}
+
+      {live.rejected.length > 0 && (
+        <div className="relative px-6 mb-3">
+          <div className="bg-amber-900/30 border border-amber-500/40 rounded-xl px-3 py-2">
+            <p className="text-amber-200/90 text-[12px]">
+              <b className="font-semibold">{live.rejected.length}</b>
+              {live.rejected.length === 1 ? ' Eingabe wurde' : ' Eingaben wurden'} nicht übernommen:
+              {' '}{rejectionSummary(live.rejected)}
+            </p>
+            <p className="text-amber-200/60 text-[11px] mt-1">
+              Prüf den Satzstand und trag ihn bei Bedarf unter „Alle Sätze" von Hand ein.
+            </p>
+            <button
+              onClick={live.dismissRejected}
+              className="mt-2 text-amber-200/80 text-[12px] font-semibold underline"
+            >
+              Verstanden
+            </button>
+          </div>
+        </div>
+      )}
 
       {live.error && (
         <div className="relative px-6 mb-3">
@@ -389,7 +458,7 @@ function LiveSet({
                   <span className={ev.kind === 'goal' ? 'text-fg/75' : 'text-fg/40'}>
                     {eventLabel(ev, playerName, s => opponentAt(gameIndex, s))}
                   </span>
-                  {ev.id.startsWith('pending-') && <span className="text-fg/25">·</span>}
+                  {live.pendingIds.has(ev.id) && <span className="text-fg/25" title="noch nicht gespeichert">•</span>}
                 </div>
               ))}
             </div>

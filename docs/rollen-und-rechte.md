@@ -1,6 +1,6 @@
 # Rollen & Rechte (Hornstrike)
 
-Stand: nach Migration `0016_live_scoring.sql`.
+Stand: nach Migration `0017_live_sync.sql`.
 
 ## Rollen
 
@@ -156,5 +156,22 @@ Wer nur Endstände tippt, erzeugt nie eine Protokollzeile. Beim Live-Tippen schr
 `matchday_events` ist für Clients **nur lesbar**; geschrieben wird ausschließlich über die beiden RPCs. Sätze und Gegner-Namen sind direkt schreibbar (`app.can_edit_matchday` → Captain und Co-Captain). Lesen darf jedes Teammitglied (`app.is_matchday_member`).
 
 `matchdays.status` (`planned` / `live` / `done`) steuert nur die Darstellung; „Begegnung starten" setzt zusätzlich `lineup_locked`.
+
+### Gleichzeitiges Erfassen (Migration `0017`)
+
+Zwei Fälle, die am Tisch wirklich vorkommen, und was dagegen hilft:
+
+| Fall | Ohne Schutz | Mit `0017` |
+|---|---|---|
+| Antwort geht unterwegs verloren, Client sendet erneut | Tor zählt doppelt | gleiche Vorgangs-ID → `duplicate`, stillschweigend ok |
+| Zwei Leute tippen dasselbe Tor | Zähler springt um 2 | gleiche Position → `seq_taken`, zweite Eingabe abgelehnt |
+
+Dafür vergibt **der Client** beides: eine UUID für den Vorgang (wird zur `id` der Ereigniszeile) und die Position `seq` im Satz. Der Server nimmt jede Position genau einmal an und liefert statt einer Ausnahme ein Ergebnisobjekt `{ applied, reason, seq, goals_for, goals_against }` – nur so lässt sich „war schon da" von „ging schief, bitte nochmal" unterscheiden.
+
+Grobe Eingaben (Satzendstand, Gegner:innen-Name, Status) bleiben bewusst *letzte Schreibung gewinnt*: dort gibt es nichts zu zählen.
+
+**Bewusste Grenze:** fallen zwei verschiedene Tore so schnell, dass beide Tippenden noch denselben Stand sehen, geht das zweite verloren – für den Server sieht das aus wie ein doppelt erfasstes Tor. Der Client meldet jede Ablehnung sichtbar, damit der Satzstand von Hand richtiggestellt werden kann. Die Umkehrung wäre schlechter: ein zu hoher Zähler fällt niemandem auf.
+
+Auf der Client-Seite liegen wartende Eingaben in `src/lib/liveQueue.ts` – einer Liste in `localStorage`, strikt der Reihe nach gesendet. Sie überlebt einen Neustart der App; `LiveSyncMount` arbeitet sie auch dann ab, wenn die Ergebnis-Seite gar nicht offen ist.
 
 Ein Eigentor wird als `side = 'them'` mit eigenem `player_id` und `role = 'own_goal'` erfasst: das Tor zählt für den Gegner, verursacht hat es die eigene Person. Die Rolle (Sturm/Tor) muss niemand auswählen – sie ergibt sich aus der Aufstellung plus den protokollierten Positionswechseln (`positionsAfterSwitches`).
