@@ -30,6 +30,7 @@ export interface ChangelogEntry {
 
 const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'fix', text: 'Geht eine Begegnung nicht glatt auf – fünf Personen teilen sich 24 Sätze nun einmal ungleich –, wandert die Mehrlast jetzt bei jedem „Neu berechnen" zu jemand anderem. Vorher landete sie fast immer bei derselben Person, weil die Präferenzen schwerer wogen als der Zufall. An der Verteilung selbst ändert das nichts: 4/4/5/5/6 bleibt bei fünf Personen das rechnerische Optimum, nur die Besetzung wechselt' },
+  { type: 'improve', text: 'Neu berechnen, Verschieben per Drag & Drop und Sperren einer Aufstellung brauchen jetzt zwei statt vier Server-Anfragen. Bisher wurden dabei jedes Mal die Verfügbarkeiten gelöscht und unverändert neu geschrieben – das kostete nicht nur Zeit: bricht die Verbindung genau dazwischen ab, waren sie weg' },
 ]
 
 const HISTORY: ChangelogEntry[] = [

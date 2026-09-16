@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { Player, MatchDay, GameSlot, Position, GameTypePreference } from '../types'
+import type { Player, MatchDay, MatchDayPlayer, GameSlot, Position, GameTypePreference } from '../types'
 import { normalizeDoublesOrder } from '../types'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 import { useSession } from '../context/SessionProvider'
@@ -213,6 +213,24 @@ async function fetchMatchDays(teamId: string): Promise<MatchDay[]> {
   }))
 }
 
+/**
+ * Haben sich die Verfuegbarkeiten wirklich geaendert? Reihenfolge egal.
+ *
+ * Hintergrund: updateMatchDay() ist die eine Mutation fuer alles – neu
+ * berechnen, Drag & Drop, einzelnen Slot bearbeiten, sperren. Bei all dem
+ * aendert sich nur `lineup`, nie die Verfuegbarkeit. Ohne diesen Vergleich
+ * loescht jeder dieser Vorgaenge die matchday_players-Zeilen und schreibt sie
+ * unveraendert zurueck: zwei zusaetzliche Requests – und zwischen DELETE und
+ * INSERT steht der Spieltag ohne Verfuegbarkeiten da. Bricht die Verbindung
+ * genau dort ab (Halle, schlechter Empfang), sind sie weg.
+ */
+function availabilityChanged(before: MatchDayPlayer[], after: MatchDayPlayer[]): boolean {
+  if (before.length !== after.length) return true
+  const fingerprint = (list: MatchDayPlayer[]) =>
+    list.map(p => `${p.playerId}:${p.availableFrom}:${p.availableTo}`).sort().join('|')
+  return fingerprint(before) !== fingerprint(after)
+}
+
 async function writeMatchDayAvailability(md: MatchDay) {
   const sb = getSupabase()
   const del = await sb.from('matchday_players').delete().eq('matchday_id', md.id)
@@ -267,7 +285,11 @@ export function useMatchDays() {
         notes: md.notes ?? null, lineup: md.lineup, lineup_locked: md.lineupLocked ?? false, status: md.status ?? 'planned',
       }).eq('id', md.id)
       if (upd.error) throw upd.error
-      await writeMatchDayAvailability(md)
+
+      const previous = (qc.getQueryData<MatchDay[]>(mdKey) ?? []).find(x => x.id === md.id)
+      if (!previous || availabilityChanged(previous.players, md.players)) {
+        await writeMatchDayAvailability(md)
+      }
     },
     onSuccess: invalidate,
   })
