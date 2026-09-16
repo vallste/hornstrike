@@ -65,16 +65,13 @@ function preferenceScore(
 }
 
 /**
- * Gleichverteilungs-Penalty: wächst stark sobald ein Spieler über
- * dem Ziel-Durchschnitt liegt. Verhindert, dass ein bevorzugter Spieler
- * alle Spiele dominiert.
- */
-/**
- * Satz-basierte Gleichverteilungs-Penalty.
- * Einzel = 1 Satz, Doppel = 2 Sätze – konsistent mit targetLoad.
- * Gewicht 65 pro Satz Abweichung vom Durchschnitt dominiert alle
- * Präferenz-Boni (max ~45), sodass Gleichverteilung immer Vorrang hat
- * und Präferenzen nur als Tiebreaker unter gleichbelasteten Spielern wirken.
+ * Satz-basierte Gleichverteilungs-Penalty: wächst stark, sobald jemand über
+ * dem Durchschnitt liegt. Einzel = 1 Satz, Doppel = 2 Sätze – dieselbe Einheit
+ * wie targetLoad. Gewicht 65 pro Satz Abweichung überwiegt die Präferenz-Boni,
+ * sodass Präferenzen nur unter gleich belasteten Personen entscheiden.
+ *
+ * Das reicht aber nur während des Durchlaufs; was am Ende schiefliegt, räumt
+ * rebalanceSets() auf.
  */
 function loadPenalty(playerId: string, context: Context): number {
   const currentSets =
@@ -141,11 +138,12 @@ export function generateLineup(
   const GAME_SEQUENCE = getGameSequence(useFifthDouble)
   const maxGames = maxGamesForCount(matchDayPlayers.length)
 
-  // Ziel-Last: Gesamte Spieler-Slots geteilt durch Spieleranzahl
-  // Einzel = 1 Slot, Doppel = 2 Slots
+  // Ziel-Last in SÄTZEN je Person – dieselbe Einheit wie loadPenalty().
+  // Ein Einzel bringt 1 Satz fuer 1 Person, ein Doppel 2 Saetze fuer 2 Personen,
+  // zaehlt also 4 Spieler-Saetze. Bei 12 Spielen sind das 8 + 16 = 24.
   const playableGames = GAME_SEQUENCE.filter(g => g.gameIndex <= maxGames)
-  const totalSlots = playableGames.reduce((sum, g) => sum + (g.type === 'singles' ? 1 : 2), 0)
-  const targetLoad = matchDayPlayers.length > 0 ? totalSlots / matchDayPlayers.length : 2
+  const totalSets = playableGames.reduce((sum, g) => sum + (g.type === 'singles' ? 1 : 4), 0)
+  const targetLoad = matchDayPlayers.length > 0 ? totalSets / matchDayPlayers.length : 2
 
   const context: Context = {
     players,
@@ -237,7 +235,230 @@ export function generateLineup(
     }
   }
 
+  rebalanceSets(context, maxGames)
   return context.slots
+}
+
+// ─── Ausgleich der Satzverteilung ────────────────────────────────────────────
+
+/**
+ * Saetze je Person aus der fertigen Aufstellung. Einzel = 1, Doppel = 2 –
+ * das ist die Zahl, die in der Aufstellung unter „Saetze pro Spieler:in" steht.
+ */
+function setsByPlayer(context: Context): Record<string, number> {
+  const sets: Record<string, number> = {}
+  for (const mdp of context.matchDayPlayers) sets[mdp.playerId] = 0
+  for (const slot of context.slots) {
+    if (slot.forfeit) continue
+    const weight = slot.type === 'singles' ? 1 : 2
+    for (const pid of slot.players) if (pid in sets) sets[pid] += weight
+  }
+  return sets
+}
+
+/** Streuungsmass: Summe der quadrierten Abweichungen vom Schnitt. 0 = alle gleich. */
+function spreadCost(sets: Record<string, number>): number {
+  const values = Object.values(sets)
+  if (values.length === 0) return 0
+  const mean = values.reduce((a, b) => a + b, 0) / values.length
+  return values.reduce((sum, v) => sum + (v - mean) ** 2, 0)
+}
+
+/** Darf `candidate` in diesem Slot fuer `replacedId` uebernehmen? */
+function canTakeOver(candidate: Player, slot: GameSlot, replacedId: string, context: Context): boolean {
+  const mdp = context.matchDayPlayers.find(m => m.playerId === candidate.id)
+  if (!mdp) return false
+  if (slot.gameIndex < mdp.availableFrom || slot.gameIndex > mdp.availableTo) return false
+  if (slot.players.includes(candidate.id)) return false
+  if (slot.type === 'singles') return (context.singlesCount[candidate.id] ?? 0) < 2
+  if ((context.doublesCount[candidate.id] ?? 0) >= 2) return false
+  const partner = slot.players.find(id => id !== replacedId)
+  // Das aufzuloesende Paar steht unter einem anderen Schluessel – kein Konflikt mit sich selbst.
+  return !partner || !context.doublePairs.has(pairKey(candidate.id, partner))
+}
+
+function applyTakeOver(slot: GameSlot, replacedId: string, candidate: Player, context: Context): void {
+  const index = slot.players.indexOf(replacedId)
+  slot.players[index] = candidate.id
+
+  if (slot.type === 'singles') {
+    context.singlesCount[replacedId] = (context.singlesCount[replacedId] ?? 1) - 1
+    context.singlesCount[candidate.id] = (context.singlesCount[candidate.id] ?? 0) + 1
+    return
+  }
+
+  const partner = slot.players.find(id => id !== candidate.id)
+  context.doublesCount[replacedId] = (context.doublesCount[replacedId] ?? 1) - 1
+  context.doublesCount[candidate.id] = (context.doublesCount[candidate.id] ?? 0) + 1
+  if (partner) {
+    context.doublePairs.delete(pairKey(replacedId, partner))
+    context.doublePairs.add(pairKey(candidate.id, partner))
+
+    // Positionen neu bewerten: wer neu im Doppel steht, muss nicht auf die
+    // Position der ersetzten Person passen. Sturm bleibt Index 0.
+    const a = context.players.find(p => p.id === slot.players[0])
+    const b = context.players.find(p => p.id === slot.players[1])
+    if (a && b) {
+      const asIs   = preferenceScore(a, slot, 'attack',  b, 0) + preferenceScore(b, slot, 'defense', a, 0)
+      const swapped = preferenceScore(b, slot, 'attack',  a, 0) + preferenceScore(a, slot, 'defense', b, 0)
+      if (swapped > asIs) slot.players = [slot.players[1], slot.players[0]]
+    }
+  }
+}
+
+/**
+ * Kreuztausch zweier Personen zwischen einem Einzel und einem Doppel.
+ * Noetig, weil das blosse Ersetzen stecken bleibt, sobald beide an ihren
+ * Limits haengen: Wer 2 Einzel hat, kann kein drittes uebernehmen, wer
+ * 2 Doppel hat, kein drittes – dann bewegt nur noch ein Tausch etwas.
+ */
+function canExchange(
+  x: Player, slotX: GameSlot, y: Player, slotY: GameSlot, context: Context,
+): boolean {
+  if (x.id === y.id || slotX === slotY) return false
+  if (slotX.type === slotY.type) return false            // gleiche Satzzahl, bringt nichts
+  if (slotX.players.includes(y.id) || slotY.players.includes(x.id)) return false
+
+  const mdpX = context.matchDayPlayers.find(m => m.playerId === x.id)
+  const mdpY = context.matchDayPlayers.find(m => m.playerId === y.id)
+  if (!mdpX || !mdpY) return false
+  if (slotY.gameIndex < mdpX.availableFrom || slotY.gameIndex > mdpX.availableTo) return false
+  if (slotX.gameIndex < mdpY.availableFrom || slotX.gameIndex > mdpY.availableTo) return false
+
+  // Limits fuer den jeweils NEUEN Spieltyp – der alte wird ja frei.
+  const intoDoubles = slotX.type === 'singles' ? x : y
+  const intoSingles = slotX.type === 'singles' ? y : x
+  if ((context.doublesCount[intoDoubles.id] ?? 0) >= 2) return false
+  if ((context.singlesCount[intoSingles.id] ?? 0) >= 2) return false
+
+  // Genau einer der beiden Slots ist ein Doppel – nur dort gibt es ein Paar.
+  const doublesSlot = slotX.type === 'doubles' ? slotX : slotY
+  const leaving = slotX.type === 'doubles' ? x.id : y.id
+  const partner = doublesSlot.players.find(id => id !== leaving)
+  return !partner || !context.doublePairs.has(pairKey(intoDoubles.id, partner))
+}
+
+/**
+ * Nachbesserung nach dem Greedy-Durchlauf: gleicht die Satzverteilung aus.
+ *
+ * Warum noetig: der Durchlauf entscheidet Spiel fuer Spiel und sieht nicht,
+ * was am Ende uebrig bleibt. Die letzten Partien (E7/E8/D4) treffen dann auf
+ * einen Rest, der durch die Limits (max. 2 Einzel, 2 Doppel, jedes Paar nur
+ * einmal) kaum noch Wahl laesst – so entstand regelmaessig 3/4/4/4/4/5,
+ * obwohl bei sechs Personen 4/4/4/4/4/4 moeglich ist.
+ *
+ * Verfahren: wiederholt den einen Wechsel suchen, der die Streuung am
+ * staerksten senkt, und ihn anwenden. Unter gleich guten Wechseln entscheidet
+ * die Praeferenz (plus Jitter, damit „Neu berechnen" verschiedene, aber
+ * gleich ausgeglichene Aufstellungen liefert). Endet, sobald kein Wechsel die
+ * Verteilung mehr verbessert – ein theoretisches Optimum wird nicht erzwungen,
+ * denn Verfuegbarkeiten und Limits koennen es unmoeglich machen.
+ */
+function rebalanceSets(context: Context, totalGames: number): void {
+  const byId = new Map(context.players.map(p => [p.id, p]))
+
+  // Obergrenze rein als Sicherheitsnetz – jede Runde senkt die Streuung echt,
+  // die Schleife endet in der Praxis nach wenigen Durchlaeufen von selbst.
+  for (let round = 0; round < 40; round++) {
+    const sets = setsByPlayer(context)
+    const cost = spreadCost(sets)
+    if (cost === 0) return
+
+    let best: {
+      kind: 'replace' | 'exchange'
+      slot: GameSlot; replacedId: string; candidate: Player
+      otherSlot?: GameSlot; otherId?: string
+      gain: number; tiebreak: number
+    } | null = null
+
+    for (const slot of context.slots) {
+      if (slot.forfeit || slot.players.length === 0) continue
+      const weight = slot.type === 'singles' ? 1 : 2
+
+      for (const replacedId of slot.players) {
+        for (const mdp of context.matchDayPlayers) {
+          if (mdp.playerId === replacedId) continue
+          const candidate = byId.get(mdp.playerId)
+          if (!candidate || !(replacedId in sets) || !(candidate.id in sets)) continue
+
+          const trial = { ...sets }
+          trial[replacedId] -= weight
+          trial[candidate.id] += weight
+          const gain = cost - spreadCost(trial)
+          if (gain <= 0) continue
+          if (!canTakeOver(candidate, slot, replacedId, context)) continue
+
+          const position: 'attack' | 'defense' = slot.type === 'doubles'
+            ? (slot.positions?.[slot.players.indexOf(replacedId)] ?? 'attack')
+            : 'attack'
+          const partner = slot.type === 'doubles'
+            ? (byId.get(slot.players.find(id => id !== replacedId) ?? '') ?? null)
+            : null
+          // Feinauswahl: was der Wechsel praeferenzseitig netto kostet oder bringt –
+          // wer hineinkommt, minus wer weichen muss. Sonst wuerde ein Wechsel
+          // bevorzugt, der zwar gut fuer die neue Person ist, aber einen
+          // erfuellten Partnerwunsch zerreisst.
+          const leaving = byId.get(replacedId)
+          const jitter = context.jitter ? (Math.random() - 0.5) * context.jitter : 0
+          const tiebreak =
+            preferenceScore(candidate, slot, position, partner, totalGames)
+            - (leaving ? preferenceScore(leaving, slot, position, partner, totalGames) : 0)
+            + jitter
+
+          if (!best || gain > best.gain || (gain === best.gain && tiebreak > best.tiebreak)) {
+            best = { kind: 'replace', slot, replacedId, candidate, gain, tiebreak }
+          }
+        }
+      }
+    }
+
+    // Zweiter Zugtyp: Kreuztausch Einzel ↔ Doppel zwischen zwei Personen.
+    for (const slotX of context.slots) {
+      if (slotX.forfeit || slotX.players.length === 0) continue
+      const weightX = slotX.type === 'singles' ? 1 : 2
+      for (const xId of slotX.players) {
+        const x = byId.get(xId)
+        if (!x || !(xId in sets)) continue
+        for (const slotY of context.slots) {
+          if (slotY.forfeit || slotY.players.length === 0 || slotY.type === slotX.type) continue
+          const weightY = slotY.type === 'singles' ? 1 : 2
+          for (const yId of slotY.players) {
+            const y = byId.get(yId)
+            if (!y || !(yId in sets)) continue
+
+            const trial = { ...sets }
+            trial[xId] += weightY - weightX
+            trial[yId] += weightX - weightY
+            const gain = cost - spreadCost(trial)
+            if (gain <= 0) continue
+            if (!canExchange(x, slotX, y, slotY, context)) continue
+
+            const jitter = context.jitter ? (Math.random() - 0.5) * context.jitter : 0
+            const tiebreak =
+              preferenceScore(x, slotY, 'attack', null, totalGames)
+              + preferenceScore(y, slotX, 'attack', null, totalGames)
+              - preferenceScore(x, slotX, 'attack', null, totalGames)
+              - preferenceScore(y, slotY, 'attack', null, totalGames)
+              + jitter
+
+            if (!best || gain > best.gain || (gain === best.gain && tiebreak > best.tiebreak)) {
+              best = { kind: 'exchange', slot: slotX, replacedId: xId, candidate: y, otherSlot: slotY, otherId: yId, gain, tiebreak }
+            }
+          }
+        }
+      }
+    }
+
+    if (!best) return
+    if (best.kind === 'exchange' && best.otherSlot && best.otherId) {
+      const x = byId.get(best.replacedId)
+      if (!x) return
+      applyTakeOver(best.slot, best.replacedId, best.candidate, context)
+      applyTakeOver(best.otherSlot, best.otherId, x, context)
+    } else {
+      applyTakeOver(best.slot, best.replacedId, best.candidate, context)
+    }
+  }
 }
 
 // ─── Variante (für „Neu berechnen") ──────────────────────────────────────────
@@ -246,15 +467,16 @@ export function generateLineup(
  * Streuung der Scores für eine Variante. Gemessen an einem 6er-Kader:
  *
  *   Jitter |  versch. Aufstellungen /20  |  Satz-Spanne  |  Positionswunsch
- *        0 |          1                  |       2       |       50 %
- *        4 |         20                  |       2       |       50 %
- *       12 |         20                  |       2       |       45 %
- *       40 |         20                  |       2       |       39 %
+ *        0 |          1                  |       0       |       88 %
+ *        4 |         20                  |       0       |       94 %
+ *       12 |         20                  |       0       |       90 %
+ *       40 |         20                  |       0       |       75 %
  *
  * 4 reicht also für jedes Mal eine andere Aufstellung, ohne dass Präferenzen
- * oder Gleichverteilung messbar leiden – der Lastausgleich wiegt 65 Punkte pro
- * Satz und dominiert diese Streuung mühelos. Größere Werte kosten nur Qualität,
- * ohne mehr Abwechslung zu bringen.
+ * leiden. Die Satzverteilung bleibt in jedem Fall unberührt, weil
+ * rebalanceSets() nach dem Durchlauf ohnehin ausgleicht – der Jitter entscheidet
+ * nur, WER die Sätze bekommt, nicht wie viele. Größere Werte kosten nur
+ * Qualität, ohne mehr Abwechslung zu bringen.
  */
 export const VARIATION_JITTER = 4
 

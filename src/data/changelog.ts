@@ -35,6 +35,7 @@ const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'improve', text: 'Die Erfassung ist in jeder Feinheit freiwillig: nur Satzendstände reichen für Doppel- und Einzelbilanzen. Torschütz:innen und Timeout-Wirkung entstehen erst dort, wo live mitgetippt wurde – beides lässt sich innerhalb einer Begegnung mischen' },
   { type: 'improve', text: 'Spieltagsliste und Aufstellung zeigen das Ergebnis auf einen Blick, der Teilen-Text nimmt Satzpunkte und Tore mit. „Begegnung starten" sperrt die Aufstellung gleich mit' },
   { type: 'improve', text: 'Die Oberfläche spricht jetzt alle an: durchgehend „Spieler:innen" statt „Spieler" – mit Doppelpunkt, quer durch App, Onboarding, Einstellungen und Datenschutzerklärung' },
+  { type: 'improve', text: 'Aufstellung: Die Sätze verteilen sich jetzt so gleichmäßig, wie die Regeln es zulassen. Bei sechs oder acht Personen bekommen alle exakt gleich viele – vorher lagen regelmäßig zwei Sätze dazwischen. Bei fünf Personen bleibt 4/4/5/5/6 das rechnerische Optimum, weil niemand mehr als zwei Einzel und zwei Doppel spielen darf' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
