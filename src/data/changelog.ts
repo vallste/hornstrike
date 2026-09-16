@@ -34,6 +34,9 @@ const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'feat', text: 'Live-Erfassung ohne Netz: Getippte Tore liegen jetzt in einer Warteschlange auf dem Gerät und gehen raus, sobald die Verbindung zurück ist – auch wenn du die App zwischendurch schließt. Oben steht jederzeit, wie viele Eingaben noch nicht gespeichert sind; einzelne Zeilen im Protokoll sind bis dahin mit einem Punkt markiert' },
   { type: 'fix', text: 'Tippen zwei Leute gleichzeitig dasselbe Tor mit, zählt es nur noch einmal. Dasselbe gilt, wenn eine Eingabe nach einem Verbindungsabbruch erneut gesendet wird. Wird eine Eingabe deshalb verworfen, sagt die App es – statt still einen falschen Stand stehen zu lassen' },
   { type: 'improve', text: 'Erfassen zwei Leute gemeinsam, erscheinen die Eingaben der anderen Seite jetzt sofort statt erst nach bis zu 30 Sekunden – dieselbe Technik, mit der sich die Terminumfragen schon von selbst aktualisieren. Fällt die Verbindung aus, gleicht die App weiter im Hintergrund ab' },
+  { type: 'feat', text: 'Zwischen zwei Sätzen zeigt die Live-Erfassung jetzt einen Zwischenschirm: das Ergebnis des Satzes davor, wer als Nächstes am Tisch steht und auf welcher Position – und einen großen „Go“-Knopf, der den Satz anpfeift' },
+  { type: 'feat', text: 'Die Dauer eines Satzes wird mitgeschrieben: „Go“ setzt den Anpfiff, das entscheidende Tor den Abpfiff. In der Satzliste steht sie neben den Satzpunkten. Der Zeitpunkt jedes Tores kommt jetzt vom Gerät statt vom Server – sonst wäre eine Eingabe aus dem Funkloch Minuten zu spät vermerkt' },
+  { type: 'improve', text: 'Die Tor-Knöpfe sind neu geordnet: zwei Bereiche, „Wir“ und „Gegner“, mit jeweils denselben fünf Eingaben – Tor der beiden Spielenden, Eigentor der anderen Seite, Timeout, Positionswechsel. Eigentore, Timeouts und Wechsel lagen vorher verstreut dazwischen' },
 ]
 
 const HISTORY: ChangelogEntry[] = [

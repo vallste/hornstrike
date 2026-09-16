@@ -37,13 +37,16 @@ export interface EventBody {
   playerId: string | null
   role: GoalRole | null
   opponentSlot: OpponentSlot | null
+  /** Moment des Tippens. Muss mitreisen: die Schlange kann Minuten spaeter senden. */
+  occurredAt: string
 }
+export interface StartSetBody { kind: 'startSet'; gameIndex: number; setNo: SetNo; at: string }
 export interface UndoBody     { kind: 'undo'; gameIndex: number; setNo: SetNo; seq: number }
 export interface ScoreBody    { kind: 'score'; gameIndex: number; setNo: SetNo; goalsFor: number; goalsAgainst: number }
 export interface OpponentBody { kind: 'opponent'; gameIndex: number; slot: OpponentSlot; name: string }
 export interface StatusBody   { kind: 'status'; status: MatchDayStatus; lockLineup?: boolean }
 
-export type OpBody = EventBody | UndoBody | ScoreBody | OpponentBody | StatusBody
+export type OpBody = EventBody | StartSetBody | UndoBody | ScoreBody | OpponentBody | StatusBody
 
 export interface QueuedOp {
   /** Zugleich die Ereignis-ID auf dem Server – macht Wiederholungen harmlos. */
@@ -149,10 +152,19 @@ async function send(op: QueuedOp): Promise<Outcome> {
       p_kind: b.eventKind, p_side: b.side,
       p_event_id: op.id, p_seq: b.seq,
       p_player: b.playerId, p_role: b.role, p_opponent_slot: b.opponentSlot,
+      p_occurred_at: b.occurredAt,
     })
     if (error) throw error
     const res = (data ?? {}) as { applied?: boolean; reason?: string | null }
     return { applied: !!res.applied, reason: res.reason ?? null }
+  }
+
+  if (b.kind === 'startSet') {
+    const { error } = await sb.rpc('start_match_set', {
+      p_matchday: op.matchdayId, p_game: b.gameIndex, p_set: b.setNo, p_at: b.at,
+    })
+    if (error) throw error
+    return { applied: true, reason: null }
   }
 
   if (b.kind === 'undo') {

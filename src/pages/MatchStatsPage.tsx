@@ -111,7 +111,8 @@ export default function MatchStatsPage() {
   const scorers = useMemo(() => scorerStats(events), [events])
   const toUs = useMemo(() => timeoutEffect(events, 'us'), [events])
   const toThem = useMemo(() => timeoutEffect(events, 'them'), [events])
-  const switches = useMemo(() => switchEffect(events), [events])
+  const switchesUs = useMemo(() => switchEffect(events, 'us'), [events])
+  const switchesThem = useMemo(() => switchEffect(events, 'them'), [events])
 
   const hasDetail = events.length > 0
 
@@ -204,8 +205,13 @@ export default function MatchStatsPage() {
                     hint={`Erst ab ${MIN_SAMPLE} Fällen aussagekräftig.`}
                   />
                   <AfterEventCard
-                    title="Nach Positionswechsel"
-                    stat={switches}
+                    title="Nach eigenem Positionswechsel"
+                    stat={switchesUs}
+                    hint={`Erst ab ${MIN_SAMPLE} Fällen aussagekräftig.`}
+                  />
+                  <AfterEventCard
+                    title="Nach gegnerischem Positionswechsel"
+                    stat={switchesThem}
                     hint={`Erst ab ${MIN_SAMPLE} Fällen aussagekräftig.`}
                   />
                 </Section>

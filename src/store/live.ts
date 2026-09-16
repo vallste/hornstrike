@@ -27,11 +27,11 @@ export interface LiveData {
 
 const EMPTY: LiveData = { sets: [], events: [], opponents: [] }
 
-type SetRow = { game_index: number; set_no: number; goals_for: number; goals_against: number }
+type SetRow = { game_index: number; set_no: number; goals_for: number; goals_against: number; started_at: string | null; ended_at: string | null }
 type EventRow = {
   id: string; matchday_id: string; game_index: number; set_no: number; seq: number
   kind: EventKind; side: EventSide; player_id: string | null
-  role: GoalRole | null; opponent_slot: number | null
+  role: GoalRole | null; opponent_slot: number | null; occurred_at: string | null
 }
 type OpponentRow = { game_index: number; slot: number; name: string }
 
@@ -40,8 +40,8 @@ const liveKey = (matchdayId: string | undefined) => ['matchLive', matchdayId] as
 async function fetchLive(matchdayId: string): Promise<LiveData> {
   const sb = getSupabase()
   const [sets, events, opponents] = await Promise.all([
-    sb.from('matchday_sets').select('game_index,set_no,goals_for,goals_against').eq('matchday_id', matchdayId),
-    sb.from('matchday_events').select('id,matchday_id,game_index,set_no,seq,kind,side,player_id,role,opponent_slot')
+    sb.from('matchday_sets').select('game_index,set_no,goals_for,goals_against,started_at,ended_at').eq('matchday_id', matchdayId),
+    sb.from('matchday_events').select('id,matchday_id,game_index,set_no,seq,kind,side,player_id,role,opponent_slot,occurred_at')
       .eq('matchday_id', matchdayId).order('game_index').order('set_no').order('seq'),
     sb.from('matchday_opponents').select('game_index,slot,name').eq('matchday_id', matchdayId),
   ])
@@ -53,11 +53,12 @@ async function fetchLive(matchdayId: string): Promise<LiveData> {
     sets: ((sets.data ?? []) as SetRow[]).map(r => ({
       gameIndex: r.game_index, setNo: r.set_no as SetNo,
       goalsFor: r.goals_for, goalsAgainst: r.goals_against,
+      startedAt: r.started_at, endedAt: r.ended_at,
     })),
     events: ((events.data ?? []) as EventRow[]).map(r => ({
       id: r.id, matchdayId: r.matchday_id, gameIndex: r.game_index, setNo: r.set_no as SetNo, seq: r.seq,
       kind: r.kind, side: r.side, playerId: r.player_id, role: r.role,
-      opponentSlot: r.opponent_slot as OpponentSlot | null,
+      opponentSlot: r.opponent_slot as OpponentSlot | null, occurredAt: r.occurred_at,
     })),
     opponents: ((opponents.data ?? []) as OpponentRow[]).map(r => ({
       gameIndex: r.game_index, slot: r.slot as OpponentSlot, name: r.name,
@@ -135,6 +136,15 @@ export function applyQueued(data: LiveData, op: QueuedOp): LiveData {
       kind: b.eventKind, side: b.side,
       playerId: b.playerId, role: b.role, opponentSlot: b.opponentSlot,
     })
+  }
+  if (b.kind === 'startSet') {
+    const exists = data.sets.some(s => sameSet(s, b))
+    return {
+      ...data,
+      sets: exists
+        ? data.sets.map(s => (sameSet(s, b) ? { ...s, startedAt: s.startedAt ?? b.at } : s))
+        : [...data.sets, { gameIndex: b.gameIndex, setNo: b.setNo, goalsFor: 0, goalsAgainst: 0, startedAt: b.at, endedAt: null }],
+    }
   }
   if (b.kind === 'undo') return removeEventAt(data, b.gameIndex, b.setNo, b.seq)
   if (b.kind === 'score') {
@@ -314,7 +324,11 @@ export function useMatchLive(matchdayId: string | undefined) {
       playerId: input.playerId ?? null,
       role: input.role ?? null,
       opponentSlot: input.opponentSlot ?? null,
+      occurredAt: new Date().toISOString(),
     }),
+    /** „Go" zwischen zwei Saetzen – haelt den Anpfiff fest. */
+    startSet: (gameIndex: number, setNo: SetNo) =>
+      push({ kind: 'startSet', gameIndex, setNo, at: new Date().toISOString() }),
     undoLast: (gameIndex: number, setNo: SetNo) => {
       const inSet = eventsOfSet(data, gameIndex, setNo)
       const last = inSet[inSet.length - 1]
@@ -359,13 +373,13 @@ export function useTeamEvents() {
     queryFn: async (): Promise<MatchEvent[]> => {
       const { data, error } = await getSupabase()
         .from('matchday_events')
-        .select('id,matchday_id,game_index,set_no,seq,kind,side,player_id,role,opponent_slot,matchdays!inner(team_id)')
+        .select('id,matchday_id,game_index,set_no,seq,kind,side,player_id,role,opponent_slot,occurred_at,matchdays!inner(team_id)')
         .eq('matchdays.team_id', currentTeamId as string)
       if (error) throw error
       return ((data ?? []) as EventRow[]).map(r => ({
         id: r.id, matchdayId: r.matchday_id, gameIndex: r.game_index, setNo: r.set_no as SetNo,
         seq: r.seq, kind: r.kind, side: r.side, playerId: r.player_id, role: r.role,
-        opponentSlot: r.opponent_slot as OpponentSlot | null,
+        opponentSlot: r.opponent_slot as OpponentSlot | null, occurredAt: r.occurred_at,
       }))
     },
   })

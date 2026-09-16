@@ -10,8 +10,9 @@ import { useCan } from '../lib/permissions'
 import { errorMessage } from '../lib/errors'
 import {
   getGameSequence, matchSetSlots, matchTotals, setFinished, setPoints, positionsAfterSwitches,
+  setDuration, formatDuration,
 } from '../types'
-import type { GameSlot, MatchEvent, OpponentSlot, SetNo } from '../types'
+import type { GameSlot, MatchEvent, MatchSet, OpponentSlot, SetNo } from '../types'
 
 // Live-Erfassung einer Begegnung (Migration 0016).
 //
@@ -24,8 +25,12 @@ const ROLE_LABEL: Record<string, string> = { attack: 'Sturm', defense: 'Tor', ow
 
 function eventLabel(ev: MatchEvent, playerName: (id: string) => string, opponentName: (slot: OpponentSlot) => string): string {
   if (ev.kind === 'timeout') return `Timeout ${ev.side === 'us' ? 'wir' : 'Gegner'}`
-  if (ev.kind === 'switch') return 'Positionswechsel'
-  if (ev.role === 'own_goal') return `Eigentor ${ev.playerId ? playerName(ev.playerId) : ''}`.trim()
+  if (ev.kind === 'switch') return `Positionswechsel ${ev.side === 'us' ? 'wir' : 'Gegner'}`
+  if (ev.role === 'own_goal') {
+    // Eigentor von uns: zaehlt fuer sie, verursacht von unserer Person.
+    // Eigentor des Gegners: zaehlt fuer uns, ohne Namen – wir kennen ihn nicht.
+    return ev.playerId ? `Eigentor ${playerName(ev.playerId)}` : 'Eigentor des Gegners'
+  }
   if (ev.side === 'us') {
     return ev.playerId ? `Tor ${playerName(ev.playerId)}${ev.role ? ` (${ROLE_LABEL[ev.role]})` : ''}` : 'Tor für uns'
   }
@@ -226,6 +231,12 @@ function MatchLiveView() {
           setNo={current.setNo}
           label={sequence.find(g => g.gameIndex === current.gameIndex)?.label ?? ''}
           lineupSlot={matchDay.lineup.find(s => s.gameIndex === current.gameIndex)}
+          prev={index > 0 ? {
+            label: sequence.find(g => g.gameIndex === slots[index - 1].gameIndex)?.label ?? '',
+            setNo: slots[index - 1].setNo,
+            sameGame: slots[index - 1].gameIndex === current.gameIndex,
+            score: findSet(live.data, slots[index - 1].gameIndex, slots[index - 1].setNo),
+          } : null}
           live={live}
           canEdit={canEdit}
           playerName={playerName}
@@ -262,13 +273,14 @@ function MatchLiveView() {
 // ── Live-Erfassung eines Satzes ─────────────────────────────────────────────
 
 function LiveSet({
-  gameIndex, setNo, label, lineupSlot, live, canEdit, playerName, opponentAt,
+  gameIndex, setNo, label, lineupSlot, prev, live, canEdit, playerName, opponentAt,
   ownGoalOpen, setOwnGoalOpen, atStart, atEnd, onPrev, onNext, onJumpAuto, isAuto,
 }: {
   gameIndex: number
   setNo: SetNo
   label: string
   lineupSlot: GameSlot | undefined
+  prev: { label: string; setNo: SetNo; sameGame: boolean; score: MatchSet } | null
   live: ReturnType<typeof useMatchLive>
   canEdit: boolean
   playerName: (id: string) => string
@@ -285,7 +297,9 @@ function LiveSet({
   const score = findSet(live.data, gameIndex, setNo)
   const events = eventsOfSet(live.data, gameIndex, setNo)
   const finished = setFinished(score.goalsFor, score.goalsAgainst)
+  const started = !!score.startedAt
   const isDouble = lineupSlot?.type === 'doubles'
+  const duration = setDuration(score)
 
   const switchCount = events.filter(e => e.kind === 'switch' && e.side === 'us').length
   const positions = positionsAfterSwitches(lineupSlot, switchCount)
@@ -293,14 +307,30 @@ function LiveSet({
   const timeoutsThem = events.filter(e => e.kind === 'timeout' && e.side === 'them').length
 
   const opponents: OpponentSlot[] = isDouble ? [0, 1] : [0]
-  const named = opponents.filter(s => opponentAt(gameIndex, s) !== '')
   const last = events[events.length - 1]
+
+  const opponentLabel = (slot: OpponentSlot) =>
+    opponentAt(gameIndex, slot) || (isDouble ? (slot === 0 ? 'Gegner:in Sturm' : 'Gegner:in Tor') : 'Gegner:in')
 
   const goal = (side: 'us' | 'them', playerId?: string, role?: 'attack' | 'defense' | 'own_goal', opponentSlot?: OpponentSlot) => {
     if (!canEdit || finished) return
     live.recordEvent({ gameIndex, setNo, kind: 'goal', side, playerId, role, opponentSlot })
     setOwnGoalOpen(false)
   }
+  const mark = (kind: 'timeout' | 'switch', side: 'us' | 'them') => {
+    if (!canEdit || finished) return
+    live.recordEvent({ gameIndex, setNo, kind, side })
+  }
+  // Eigentor von uns: im Einzel eindeutig, im Doppel muss die Person gewählt werden.
+  const ownGoalByUs = () => {
+    if (!canEdit || finished) return
+    if (positions.length === 1) goal('them', positions[0].playerId, 'own_goal')
+    else setOwnGoalOpen(!ownGoalOpen)
+  }
+
+  const sideBox = 'bg-surface rounded-2xl p-3'
+  const bigBtn = 'rounded-2xl px-3 py-4 text-left active:opacity-70'
+  const smallBtn = 'rounded-xl px-2 py-3 text-[12px] font-semibold active:opacity-70 disabled:opacity-25'
 
   return (
     <div className="relative px-6 space-y-3">
@@ -327,8 +357,10 @@ function LiveSet({
         </p>
         <p className="text-fg/40 text-[12px] mt-2">
           {finished
-            ? `Satz beendet · Satzpunkte ${setPoints(score.goalsFor, score.goalsAgainst).join(':')}`
-            : `noch offen · bis 6 Tore, Ende spätestens bei 5:5`}
+            ? `Satz beendet · Satzpunkte ${setPoints(score.goalsFor, score.goalsAgainst).join(':')}${duration ? ` · ${formatDuration(duration)} min` : ''}`
+            : started
+              ? 'läuft · bis 6 Tore, Ende spätestens bei 5:5'
+              : 'noch nicht angepfiffen'}
         </p>
       </div>
 
@@ -336,98 +368,154 @@ function LiveSet({
         <p className="text-fg/40 text-xs bg-fg/5 rounded-xl px-3 py-2">👁 Nur Ansicht</p>
       )}
 
-      {canEdit && !finished && (
-        <>
-          {/* Tore für uns – ein Tipp je Tor, Rolle kommt aus der Aufstellung */}
-          <div>
-            <p className="text-fg/45 text-[11px] font-semibold tracking-wider uppercase mb-1.5">Tor für uns</p>
-            <div className="grid grid-cols-2 gap-2">
-              {positions.map(p => (
-                <button
-                  key={p.playerId}
-                  onClick={() => goal('us', p.playerId, p.role)}
-                  className="bg-surface border border-accent-cyan/30 rounded-2xl px-3 py-4 text-left active:bg-surface2"
-                >
-                  <p className="text-fg font-semibold text-[15px] truncate">{playerName(p.playerId)}</p>
-                  <p className="text-accent-cyan text-[11px] mt-0.5">{ROLE_LABEL[p.role]}</p>
-                </button>
-              ))}
-              {positions.length === 0 && (
-                <button onClick={() => goal('us')} className="bg-surface rounded-2xl px-3 py-4 text-fg text-[15px] font-semibold col-span-2">
-                  Tor für uns
-                </button>
-              )}
+      {/* Zwischenschirm: Ergebnis davor, wer jetzt spielt, „Go".
+          `!finished` ist wichtig fuer Altbestand: Saetze aus der Zeit vor 0019
+          haben keinen Anpfiff und wuerden sonst rueckwirkend einen anbieten. */}
+      {canEdit && !started && !finished && (
+        <div className="bg-surface rounded-2xl px-4 py-5 space-y-4">
+          {prev && setFinished(prev.score.goalsFor, prev.score.goalsAgainst) && (
+            <div className="text-center">
+              <p className="text-fg/40 text-[11px] font-semibold tracking-wider uppercase">
+                {prev.sameGame ? `${prev.label} · Satz ${prev.setNo}` : `davor: ${prev.label} · Satz ${prev.setNo}`}
+              </p>
+              <p className="text-fg/80 text-[20px] font-bold mt-1 tabular-nums">
+                {prev.score.goalsFor} : {prev.score.goalsAgainst}
+                <span className="text-fg/35 text-[13px] font-medium">
+                  {' '}({setPoints(prev.score.goalsFor, prev.score.goalsAgainst).join(':')})
+                </span>
+              </p>
+            </div>
+          )}
+
+          <div className="border-t border-fg/10 pt-4">
+            <p className="text-fg/40 text-[11px] font-semibold tracking-wider uppercase text-center mb-3">
+              {prev?.sameGame ? 'Jetzt: zweiter Satz' : 'Jetzt am Tisch'}
+            </p>
+            <div className="flex items-stretch gap-2">
+              <div className="flex-1 space-y-1">
+                {positions.length > 0 ? positions.map(p => (
+                  <div key={p.playerId} className="bg-surface2 rounded-xl px-3 py-2">
+                    <p className="text-fg text-[14px] font-semibold truncate">{playerName(p.playerId)}</p>
+                    <p className="text-accent-cyan text-[11px]">{ROLE_LABEL[p.role]}</p>
+                  </div>
+                )) : (
+                  <div className="bg-surface2 rounded-xl px-3 py-2">
+                    <p className="text-fg/35 text-[13px]">niemand aufgestellt</p>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center text-fg/25 text-[13px] font-bold">vs</div>
+              <div className="flex-1 space-y-1">
+                {opponents.map(slot => (
+                  <div key={slot} className="bg-surface2 rounded-xl px-3 py-2">
+                    <p className={`text-[14px] font-semibold truncate ${opponentAt(gameIndex, slot) ? 'text-fg' : 'text-fg/35'}`}>
+                      {opponentLabel(slot)}
+                    </p>
+                    {isDouble && <p className="text-fg/35 text-[11px]">{slot === 0 ? 'Sturm' : 'Tor'}</p>}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Gegentore */}
-          <div>
-            <p className="text-fg/45 text-[11px] font-semibold tracking-wider uppercase mb-1.5">Tor für den Gegner</p>
+          <button
+            onClick={() => live.startSet(gameIndex, setNo)}
+            className="w-full rounded-2xl py-4 bg-accent-cyan text-[#1a0533] text-[17px] font-bold active:opacity-80"
+          >
+            Go
+          </button>
+          <p className="text-fg/30 text-[11px] text-center">
+            Startet die Zeitmessung für diesen Satz.
+          </p>
+        </div>
+      )}
+
+      {canEdit && started && !finished && (
+        <>
+          {/* ── Wir ──────────────────────────────────────────────────────── */}
+          <div className={sideBox}>
+            <p className="text-accent-cyan text-[11px] font-semibold tracking-wider uppercase mb-2">Wir</p>
             <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => goal('them')}
-                className="bg-surface border border-fg/15 rounded-2xl px-3 py-4 text-fg/80 text-[15px] font-semibold active:bg-surface2"
-              >
-                Gegentor
+              {positions.length > 0 ? positions.map(p => (
+                <button
+                  key={p.playerId}
+                  onClick={() => goal('us', p.playerId, p.role)}
+                  className={`${bigBtn} bg-surface2 border border-accent-cyan/40`}
+                >
+                  <p className="text-fg font-semibold text-[15px] truncate">{playerName(p.playerId)}</p>
+                  <p className="text-accent-cyan text-[11px] mt-0.5">Tor · {ROLE_LABEL[p.role]}</p>
+                </button>
+              )) : (
+                <button onClick={() => goal('us')} className={`${bigBtn} bg-surface2 border border-accent-cyan/40 col-span-2 text-center`}>
+                  <p className="text-fg font-semibold text-[15px]">Tor für uns</p>
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              <button onClick={() => goal('us', undefined, 'own_goal')} className={`${smallBtn} bg-surface2 text-fg/70`}>
+                Eigentor Gegner
               </button>
-              <button
-                onClick={() => setOwnGoalOpen(!ownGoalOpen)}
-                className="bg-surface border border-fg/15 rounded-2xl px-3 py-4 text-fg/60 text-[14px] font-semibold active:bg-surface2"
-              >
-                Eigentor …
+              <button onClick={() => mark('timeout', 'us')} className={`${smallBtn} bg-surface2 text-fg/70`}>
+                ⏱ Timeout{timeoutsUs > 0 ? ` (${timeoutsUs})` : ''}
+              </button>
+              <button onClick={() => mark('switch', 'us')} disabled={!isDouble} className={`${smallBtn} bg-surface2 text-fg/70`}>
+                ⇄ Wechsel
               </button>
             </div>
-            {named.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {named.map(slot => (
-                  <button
-                    key={slot}
-                    onClick={() => goal('them', undefined, undefined, slot)}
-                    className="bg-surface2 rounded-xl px-3 py-2 text-fg/70 text-[13px]"
-                  >
-                    durch {opponentAt(gameIndex, slot)}
-                  </button>
-                ))}
-              </div>
-            )}
-            {ownGoalOpen && (
-              <div className="flex flex-wrap gap-2 mt-2">
+          </div>
+
+          {/* ── Gegner ───────────────────────────────────────────────────── */}
+          <div className={sideBox}>
+            <p className="text-fg/45 text-[11px] font-semibold tracking-wider uppercase mb-2">Gegner</p>
+            <div className="grid grid-cols-2 gap-2">
+              {opponents.map(slot => (
+                <button
+                  key={slot}
+                  onClick={() => goal('them', undefined, undefined, slot)}
+                  className={`${bigBtn} bg-surface2 border border-fg/15 ${opponents.length === 1 ? 'col-span-2 text-center' : ''}`}
+                >
+                  <p className={`font-semibold text-[15px] truncate ${opponentAt(gameIndex, slot) ? 'text-fg/85' : 'text-fg/55'}`}>
+                    {opponentLabel(slot)}
+                  </p>
+                  <p className="text-fg/35 text-[11px] mt-0.5">Tor{isDouble ? ` · ${slot === 0 ? 'Sturm' : 'Tor'}` : ''}</p>
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              <button onClick={ownGoalByUs} className={`${smallBtn} bg-amber-900/30 border border-amber-500/30 text-amber-200/90`}>
+                Eigentor von uns
+              </button>
+              <button onClick={() => mark('timeout', 'them')} className={`${smallBtn} bg-surface2 text-fg/70`}>
+                ⏱ Timeout{timeoutsThem > 0 ? ` (${timeoutsThem})` : ''}
+              </button>
+              <button onClick={() => mark('switch', 'them')} disabled={!isDouble} className={`${smallBtn} bg-surface2 text-fg/70`}>
+                ⇄ Wechsel
+              </button>
+            </div>
+            {ownGoalOpen && positions.length > 1 && (
+              <div className="flex gap-2 mt-2">
                 {positions.map(p => (
                   <button
                     key={p.playerId}
                     onClick={() => goal('them', p.playerId, 'own_goal')}
-                    className="bg-amber-900/40 border border-amber-500/40 rounded-xl px-3 py-2 text-amber-200 text-[13px]"
+                    className="flex-1 bg-amber-900/40 border border-amber-500/40 rounded-xl px-3 py-2.5 text-amber-200 text-[13px] font-semibold truncate"
                   >
-                    Eigentor {playerName(p.playerId)}
+                    {playerName(p.playerId)}
                   </button>
                 ))}
               </div>
             )}
           </div>
-
-          {/* Timeouts und Positionswechsel */}
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              onClick={() => live.recordEvent({ gameIndex, setNo, kind: 'timeout', side: 'us' })}
-              className="bg-surface rounded-xl px-2 py-3 text-fg/70 text-[13px] font-semibold"
-            >
-              ⏱ wir{timeoutsUs > 0 ? ` (${timeoutsUs})` : ''}
-            </button>
-            <button
-              onClick={() => live.recordEvent({ gameIndex, setNo, kind: 'timeout', side: 'them' })}
-              className="bg-surface rounded-xl px-2 py-3 text-fg/70 text-[13px] font-semibold"
-            >
-              ⏱ sie{timeoutsThem > 0 ? ` (${timeoutsThem})` : ''}
-            </button>
-            <button
-              onClick={() => live.recordEvent({ gameIndex, setNo, kind: 'switch', side: 'us' })}
-              disabled={!isDouble}
-              className="bg-surface rounded-xl px-2 py-3 text-fg/70 text-[13px] font-semibold disabled:opacity-30"
-            >
-              ⇄ Wechsel
-            </button>
-          </div>
         </>
+      )}
+
+      {canEdit && finished && !atEnd && (
+        <button
+          onClick={onNext}
+          className="w-full rounded-2xl py-3.5 bg-surface border border-accent-cyan/40 text-accent-cyan text-[15px] font-bold active:opacity-70"
+        >
+          Weiter zum nächsten Satz ›
+        </button>
       )}
 
       {/* Protokoll mit Rücknahme */}
@@ -580,6 +668,7 @@ function SetRowEditor({ gameIndex, setNo, live, canEdit, onOpenLive, showSetNo }
   const events = eventsOfSet(live.data, gameIndex, setNo)
   const goals = events.filter(e => e.kind === 'goal').length
   const total = score.goalsFor + score.goalsAgainst
+  const duration = setDuration(score)
   const [pf, pa] = setPoints(score.goalsFor, score.goalsAgainst)
 
   const bump = (field: 'goalsFor' | 'goalsAgainst', delta: number) => {
@@ -599,7 +688,11 @@ function SetRowEditor({ gameIndex, setNo, live, canEdit, onOpenLive, showSetNo }
       </div>
       <div className="flex-1 min-w-0 text-right">
         {setFinished(score.goalsFor, score.goalsAgainst) && (
-          <span className="text-fg/45 text-[11px]">{pf}:{pa} Punkte</span>
+          <span className="text-fg/45 text-[11px]">
+            {pf}:{pa} Punkte
+            {/* Dauer gibt es nur, wo jemand „Go" gedrückt oder live getippt hat. */}
+            {duration ? ` · ${formatDuration(duration)}` : ''}
+          </span>
         )}
         {goals > 0 && goals !== total && (
           <span className="text-amber-400/80 text-[11px] block">

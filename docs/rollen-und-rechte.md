@@ -1,6 +1,6 @@
 # Rollen & Rechte (Hornstrike)
 
-Stand: nach Migration `0018_live_realtime.sql`.
+Stand: nach Migration `0019_set_timing.sql`.
 
 ## Rollen
 
@@ -171,6 +171,20 @@ Dafür vergibt **der Client** beides: eine UUID für den Vorgang (wird zur `id` 
 Grobe Eingaben (Satzendstand, Gegner:innen-Name, Status) bleiben bewusst *letzte Schreibung gewinnt*: dort gibt es nichts zu zählen.
 
 **Bewusste Grenze:** fallen zwei verschiedene Tore so schnell, dass beide Tippenden noch denselben Stand sehen, geht das zweite verloren – für den Server sieht das aus wie ein doppelt erfasstes Tor. Der Client meldet jede Ablehnung sichtbar, damit der Satzstand von Hand richtiggestellt werden kann. Die Umkehrung wäre schlechter: ein zu hoher Zähler fällt niemandem auf.
+
+### Zeiten je Satz (Migration `0019`)
+
+| Spalte | Wer setzt sie | Wofür |
+|---|---|---|
+| `matchday_sets.started_at` | der „Go"-Knopf zwischen zwei Sätzen, ersatzweise das erste Tor | Anpfiff |
+| `matchday_sets.ended_at` | `record_match_event`, sobald der Satz entschieden ist | Abpfiff |
+| `matchday_events.occurred_at` | **der Client**, im Moment des Tippens | wann das Tor wirklich fiel |
+
+`occurred_at` muss vom Client kommen: seit der Warteschlange (0017) kann zwischen Tippen und Schreiben eine beliebige Zeit liegen, `created_at` wäre also die Ankunfts-, nicht die Ereigniszeit.
+
+`started_at` wird nie überschrieben – zweimal „Go", oder zwei Leute gleichzeitig, verschieben den Anpfiff nicht. `ended_at` wird beim Zurücknehmen des entscheidenden Tores wieder geleert.
+
+Dauer = `ended_at − started_at`, in der App über `setDuration()`. Sätze aus der Zeit vor dieser Migration haben keine Zeiten und zeigen keine Dauer.
 
 ### Abgleich zwischen Geräten (Migration `0018`)
 

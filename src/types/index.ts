@@ -58,6 +58,24 @@ export interface MatchSet {
   setNo: SetNo
   goalsFor: number
   goalsAgainst: number
+  /** Anpfiff („Go") bzw. ersatzweise das erste Tor – siehe 0019_set_timing.sql. */
+  startedAt?: string | null
+  /** Gesetzt, sobald der Satz entschieden ist. */
+  endedAt?: string | null
+}
+
+/** Dauer eines Satzes in Sekunden, solange beide Zeiten vorliegen. */
+export function setDuration(set: MatchSet | undefined): number | null {
+  if (!set?.startedAt || !set.endedAt) return null
+  const seconds = (Date.parse(set.endedAt) - Date.parse(set.startedAt)) / 1000
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : null
+}
+
+/** mm:ss – Sätze dauern Minuten, nicht Stunden. */
+export function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = Math.round(seconds % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 export interface MatchDay {
@@ -159,6 +177,8 @@ export interface MatchEvent {
   playerId: string | null
   role: GoalRole | null
   opponentSlot: OpponentSlot | null
+  /** Vom Client im Moment des Tippens gesetzt – nicht die Ankunftszeit. */
+  occurredAt?: string | null
 }
 
 export interface OpponentName {

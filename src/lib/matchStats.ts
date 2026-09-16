@@ -183,8 +183,12 @@ export function timeoutEffect(events: MatchEvent[], side: 'us' | 'them'): AfterE
   return effectAfter(events, ev => ev.kind === 'timeout' && ev.side === side)
 }
 
-export function switchEffect(events: MatchEvent[]): AfterEventStat {
-  return effectAfter(events, ev => ev.kind === 'switch')
+/**
+ * Seit der Zwei-Bereiche-Erfassung koennen auch gegnerische Wechsel notiert
+ * werden – die duerfen nicht mit den eigenen in einen Topf.
+ */
+export function switchEffect(events: MatchEvent[], side: 'us' | 'them' = 'us'): AfterEventStat {
+  return effectAfter(events, ev => ev.kind === 'switch' && ev.side === side)
 }
 
 /**
