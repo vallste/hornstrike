@@ -1,6 +1,6 @@
 # Rollen & Rechte (Hornstrike)
 
-Stand: nach Migration `0017_live_sync.sql`.
+Stand: nach Migration `0018_live_realtime.sql`.
 
 ## Rollen
 
@@ -171,6 +171,14 @@ Dafür vergibt **der Client** beides: eine UUID für den Vorgang (wird zur `id` 
 Grobe Eingaben (Satzendstand, Gegner:innen-Name, Status) bleiben bewusst *letzte Schreibung gewinnt*: dort gibt es nichts zu zählen.
 
 **Bewusste Grenze:** fallen zwei verschiedene Tore so schnell, dass beide Tippenden noch denselben Stand sehen, geht das zweite verloren – für den Server sieht das aus wie ein doppelt erfasstes Tor. Der Client meldet jede Ablehnung sichtbar, damit der Satzstand von Hand richtiggestellt werden kann. Die Umkehrung wäre schlechter: ein zu hoher Zähler fällt niemandem auf.
+
+### Abgleich zwischen Geräten (Migration `0018`)
+
+`matchday_sets`, `matchday_events`, `matchday_opponents` und `matchdays` liegen in der Realtime-Publikation; `useMatchLive` abonniert sie **auf den einen Spieltag gefiltert** (anders als die Umfragen, die ungefiltert lauschen) und lädt bei einer Meldung neu, gebündelt über 250 ms. Der Zeittakt bleibt als Netz: 120 s solange die WebSocket-Verbindung steht, 15 s wenn nicht.
+
+Nutzlasten werden absichtlich nicht in den Cache gerechnet, sondern nur als Anlass zum Nachladen genommen – der angezeigte Stand ist *Server-Stand + eigene Warteschlange*, und dieses Zusammenspiel soll an genau einer Stelle entstehen.
+
+Zur Replica Identity: sie bleibt auf dem Standard. `replica identity full` würde bei `matchday_events` die vollständige gelöschte Zeile verschicken, und auf DELETE-Ereignisse wendet Supabase keine RLS an – das ginge an alle Abonnenten der Tabelle, auch aus fremden Teams. So wird nur eine nackte UUID verschickt; der Client hört darauf ungefiltert und lädt nach.
 
 Auf der Client-Seite liegen wartende Eingaben in `src/lib/liveQueue.ts` – einer Liste in `localStorage`, strikt der Reihe nach gesendet. Sie überlebt einen Neustart der App; `LiveSyncMount` arbeitet sie auch dann ab, wenn die Ergebnis-Seite gar nicht offen ist.
 

@@ -33,6 +33,7 @@ const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'improve', text: 'Neu berechnen, Verschieben per Drag & Drop und Sperren einer Aufstellung brauchen jetzt zwei statt vier Server-Anfragen. Bisher wurden dabei jedes Mal die Verfügbarkeiten gelöscht und unverändert neu geschrieben – das kostete nicht nur Zeit: bricht die Verbindung genau dazwischen ab, waren sie weg' },
   { type: 'feat', text: 'Live-Erfassung ohne Netz: Getippte Tore liegen jetzt in einer Warteschlange auf dem Gerät und gehen raus, sobald die Verbindung zurück ist – auch wenn du die App zwischendurch schließt. Oben steht jederzeit, wie viele Eingaben noch nicht gespeichert sind; einzelne Zeilen im Protokoll sind bis dahin mit einem Punkt markiert' },
   { type: 'fix', text: 'Tippen zwei Leute gleichzeitig dasselbe Tor mit, zählt es nur noch einmal. Dasselbe gilt, wenn eine Eingabe nach einem Verbindungsabbruch erneut gesendet wird. Wird eine Eingabe deshalb verworfen, sagt die App es – statt still einen falschen Stand stehen zu lassen' },
+  { type: 'improve', text: 'Erfassen zwei Leute gemeinsam, erscheinen die Eingaben der anderen Seite jetzt sofort statt erst nach bis zu 30 Sekunden – dieselbe Technik, mit der sich die Terminumfragen schon von selbst aktualisieren. Fällt die Verbindung aus, gleicht die App weiter im Hintergrund ab' },
 ]
 
 const HISTORY: ChangelogEntry[] = [

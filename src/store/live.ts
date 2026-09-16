@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useSyncExternalStore } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase'
 import { useSession } from '../context/SessionProvider'
 import { useScope } from '../context/ScopeProvider'
@@ -179,17 +179,68 @@ export interface RecordEventInput {
  * Neustart der App und behaelt die Reihenfolge bei.
  */
 export function useMatchLive(matchdayId: string | undefined) {
+  const qc = useQueryClient()
   const { session } = useSession()
   const key = liveKey(matchdayId)
   const enabled = isSupabaseConfigured && !!session && !!matchdayId
+
+  // Steht die Realtime-Verbindung? Dann genuegt ein seltener Kontrollblick.
+  const [linked, setLinked] = useState(false)
 
   const query = useQuery({
     queryKey: key,
     enabled,
     queryFn: () => fetchLive(matchdayId as string),
-    // Am Tisch tippt vielleicht jemand anders mit – regelmäßig nachziehen.
-    refetchInterval: 30_000,
+    // Nur noch Sicherheitsnetz. Ohne Realtime (Hallen-WLAN, blockierte
+    // WebSockets) faengt der Takt den Abgleich weiterhin auf – dann aber
+    // doppelt so schnell wie frueher, weil er die einzige Quelle ist.
+    refetchInterval: linked ? 120_000 : 15_000,
   })
+
+  /**
+   * Aenderungen anderer Geraete kommen ueber Supabase Realtime (WebSocket).
+   *
+   * Es wird bewusst nur die Nutzlast als Anlass genommen und danach neu
+   * geladen, statt sie in den Cache zu rechnen: der angezeigte Stand ist
+   * Server-Stand + eigene Warteschlange, und dieses Zusammenspiel soll an
+   * genau einer Stelle entstehen.
+   */
+  useEffect(() => {
+    if (!enabled || !matchdayId) return
+    const sb = getSupabase()
+    let timer: ReturnType<typeof setTimeout> | undefined
+
+    // Buendelt Stoesse: tippt drueben jemand schnell, waere es sonst ein
+    // Nachladen pro Tor.
+    const refresh = () => {
+      if (timer) return
+      timer = setTimeout(() => {
+        timer = undefined
+        void qc.invalidateQueries({ queryKey: liveKey(matchdayId) })
+      }, 250)
+    }
+
+    const mine = `matchday_id=eq.${matchdayId}`
+    const channel = sb
+      .channel(`live-${matchdayId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'matchday_sets', filter: mine }, refresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'matchday_events', filter: mine }, refresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'matchday_opponents', filter: mine }, refresh)
+      // Ruecknahmen: ein DELETE traegt hier nur die id, nicht die matchday_id
+      // (Begruendung in 0018_live_realtime.sql). Also ungefiltert lauschen –
+      // die nackte UUID genuegt als Anlass zum Nachladen.
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'matchday_events' }, refresh)
+      // „Starten" / „Beenden" vom anderen Geraet.
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'matchdays', filter: `id=eq.${matchdayId}` },
+        () => { void qc.invalidateQueries({ queryKey: ['matchDays'] }) })
+      .subscribe(status => setLinked(status === 'SUBSCRIBED'))
+
+    return () => {
+      if (timer) clearTimeout(timer)
+      setLinked(false)
+      void sb.removeChannel(channel)
+    }
+  }, [enabled, matchdayId, qc])
 
   const queue = useSyncExternalStore(subscribe, getQueueState, getQueueState)
 
