@@ -230,15 +230,20 @@ export interface SquadLoad {
  * genau diese Person ist ja gemeint.
  *
  * Spieltage ohne Aufstellung bleiben außen vor; sie würden jeden Schnitt
- * verwässern, ohne etwas auszusagen.
+ * verwässern, ohne etwas auszusagen. Ebenso alles ab `until` (ausschließend) –
+ * in der Regel der heutige Tag.
  */
-export function squadLoad(matchDays: MatchDay[], since?: string): SquadLoad[] {
+export function squadLoad(matchDays: MatchDay[], since?: string, until?: string): SquadLoad[] {
   const byPlayer = new Map<string, SquadLoad>()
   const touch = (id: string) =>
     byPlayer.get(id) ?? { playerId: id, sets: 0, matchdays: 0 }
 
   for (const md of matchDays) {
     if (since && md.date < since) continue
+    // `until` ist ausschliessend: der heutige Spieltag zaehlt nicht mit. Sonst
+    // saehe man beim Aufstellen die Wirkung der Entscheidung, die man gerade
+    // trifft – die Uebersicht soll den Stand DAVOR zeigen.
+    if (until && md.date >= until) continue
     const sets = setsFromLineup(md.lineup ?? [])
     if (Object.keys(sets).length === 0) continue
 

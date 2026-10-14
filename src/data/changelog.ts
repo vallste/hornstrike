@@ -38,7 +38,7 @@ const CURRENT_CHANGES: ChangelogEntry['changes'] = [
   { type: 'feat', text: 'Die Dauer eines Satzes wird mitgeschrieben: „Go“ setzt den Anpfiff, das entscheidende Tor den Abpfiff. In der Satzliste steht sie neben den Satzpunkten. Der Zeitpunkt jedes Tores kommt jetzt vom Gerät statt vom Server – sonst wäre eine Eingabe aus dem Funkloch Minuten zu spät vermerkt' },
   { type: 'improve', text: 'Die Tor-Knöpfe sind neu geordnet: zwei Bereiche, „Wir“ und „Gegner“, mit jeweils denselben fünf Eingaben – Tor der beiden Spielenden, Eigentor der anderen Seite, Timeout, Positionswechsel. Eigentore, Timeouts und Wechsel lagen vorher verstreut dazwischen' },
   { type: 'fix', text: 'Uhrzeit und Ort lassen sich jetzt auch beim Bearbeiten eines Spieltags sehen und ändern. Bisher kamen sie nur aus der Terminfindung und waren danach unsichtbar – der Spieltag trug sie still mit sich herum' },
-  { type: 'feat', text: 'Über das 📊 neben der Spieler:innen-Auswahl (und in der Aufstellung neben „Sätze pro Spieler:in“) zeigt die App, wer über die Saison wie viel gespielt hat – wer am wenigsten dran war, steht oben. Wahlweise für die laufende Saison, insgesamt oder ab einem Datum' },
+  { type: 'feat', text: 'Über das 📊 neben der Spieler:innen-Auswahl (und in der Aufstellung neben „Sätze pro Spieler:in“) zeigt die App, wer über die Saison wie viel gespielt hat – wer am wenigsten dran war, steht oben. Wahlweise für die laufende Saison (ab 1. August), insgesamt oder ab einem frei gewählten Datum – der Zeitraum steht immer dabei. Gezählt werden nur vergangene Spieltage, der heutige also noch nicht' },
 ]
 
 const HISTORY: ChangelogEntry[] = [
