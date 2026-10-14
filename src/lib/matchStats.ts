@@ -1,4 +1,4 @@
-import type { MatchDay, MatchEvent, MatchSet } from '../types'
+import type { GameSlot, MatchDay, MatchEvent, MatchSet } from '../types'
 import { setFinished, setPoints } from '../types'
 
 // Auswertungen über erfasste Ergebnisse (Migration 0016).
@@ -196,3 +196,70 @@ export function switchEffect(events: MatchEvent[], side: 'us' | 'them' = 'us'): 
  * Darunter ist jede Prozentangabe Zufall – die Oberfläche blendet sie ab.
  */
 export const MIN_SAMPLE = 5
+
+// ── Einsatzverteilung über die Saison ───────────────────────────────────────
+
+/** Sätze aus einer Aufstellung: Einzel = 1, Doppel = 2 je beteiligter Person. */
+export function setsFromLineup(lineup: GameSlot[]): Record<string, number> {
+  const acc: Record<string, number> = {}
+  for (const slot of lineup) {
+    if (slot.forfeit || slot.players.length === 0) continue
+    const sets = slot.type === 'singles' ? 1 : 2
+    for (const pid of slot.players) acc[pid] = (acc[pid] ?? 0) + sets
+  }
+  return acc
+}
+
+export interface SquadLoad {
+  playerId: string
+  /** Sätze insgesamt im betrachteten Zeitraum. */
+  sets: number
+  /** Spieltage, an denen die Person im Kader stand – auch ohne Einsatz. */
+  matchdays: number
+}
+
+/**
+ * Wer kam wie viel zum Einsatz?
+ *
+ * Gezählt wird die AUFSTELLUNG, nicht das Ergebnis: es geht um die Frage, wer
+ * beim nächsten Spieltag Vortritt haben sollte, und dafür zählt, wer am Tisch
+ * stand – unabhängig davon, ob der Satz später erfasst wurde.
+ *
+ * Der Nenner ist „Spieltage im Kader", nicht „Spieltage mit Einsatz". Wer
+ * dabei war und nicht spielen durfte, soll den Schnitt nach unten ziehen –
+ * genau diese Person ist ja gemeint.
+ *
+ * Spieltage ohne Aufstellung bleiben außen vor; sie würden jeden Schnitt
+ * verwässern, ohne etwas auszusagen.
+ */
+export function squadLoad(matchDays: MatchDay[], since?: string): SquadLoad[] {
+  const byPlayer = new Map<string, SquadLoad>()
+  const touch = (id: string) =>
+    byPlayer.get(id) ?? { playerId: id, sets: 0, matchdays: 0 }
+
+  for (const md of matchDays) {
+    if (since && md.date < since) continue
+    const sets = setsFromLineup(md.lineup ?? [])
+    if (Object.keys(sets).length === 0) continue
+
+    for (const mdp of md.players ?? []) {
+      const entry = touch(mdp.playerId)
+      entry.matchdays += 1
+      entry.sets += sets[mdp.playerId] ?? 0
+      byPlayer.set(mdp.playerId, entry)
+    }
+    // Aufgestellt, aber nicht im Kader vermerkt – kommt bei Altdaten vor.
+    for (const [pid, count] of Object.entries(sets)) {
+      if ((md.players ?? []).some(m => m.playerId === pid)) continue
+      const entry = touch(pid)
+      entry.matchdays += 1
+      entry.sets += count
+      byPlayer.set(pid, entry)
+    }
+  }
+
+  return [...byPlayer.values()]
+}
+
+export const averageSets = (load: SquadLoad): number =>
+  load.matchdays === 0 ? 0 : load.sets / load.matchdays

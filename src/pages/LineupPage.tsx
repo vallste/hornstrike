@@ -15,6 +15,7 @@ import { validateLineup } from '../utils/validateLineup'
 import { getGameSequence, isGoalieGameIndex, matchTotals } from '../types'
 import type { GameSlot } from '../types'
 import LineupDetailModal from './LineupDetailModal'
+import SquadLoadSheet from '../components/SquadLoadSheet'
 import LineupShareCard from '../components/LineupShareCard'
 import LoadingScreen from '../components/LoadingScreen'
 import { useCan } from '../lib/permissions'
@@ -118,6 +119,7 @@ function LineupView() {
   const shareCardRef = useRef<HTMLDivElement>(null)
   const [violationsDismissed, setViolationsDismissed] = useState(false)
   const [writeErrorDismissed, setWriteErrorDismissed] = useState(false)
+  const [loadOpen, setLoadOpen] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -455,7 +457,14 @@ function LineupView() {
       {setEntries.length > 0 && (
         <div className="relative px-6 mb-3">
           <div className="bg-surface rounded-xl px-4 py-3">
-            <p className="text-fg/40 text-[11px] font-semibold tracking-wider uppercase mb-2">Sätze pro Spieler:in</p>
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <p className="text-fg/40 text-[11px] font-semibold tracking-wider uppercase">Sätze pro Spieler:in</p>
+              {/* Dieser Spieltag zeigt nur den Moment – der Knopf stellt ihn
+                  in den Zusammenhang der ganzen Saison. */}
+              <button onClick={() => setLoadOpen(true)} className="text-accent-cyan text-[11px] font-semibold flex-shrink-0">
+                📊 über die Saison
+              </button>
+            </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               {setEntries.map(([pid, sets]) => (
                 <div key={pid} className="flex items-center gap-1.5">
@@ -618,6 +627,10 @@ function LineupView() {
       </div>
 
       <BottomNav />
+
+      <AnimatePresence>
+        {loadOpen && <SquadLoadSheet onClose={() => setLoadOpen(false)} />}
+      </AnimatePresence>
 
       <AnimatePresence>
         {editingSlot !== null && (

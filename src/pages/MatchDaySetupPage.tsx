@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import SquadLoadSheet from '../components/SquadLoadSheet'
 import TimeField from '../components/TimeField'
 import { usePlayers, useMatchDays } from '../store'
 import type { MatchDayPlayer } from '../types'
@@ -22,6 +24,7 @@ export default function MatchDaySetupPage() {
   const [date, setDate] = useState(prefill.date ?? new Date().toISOString().split('T')[0])
   const [startTime, setStartTime] = useState(prefill.time ?? '')
   const [venue, setVenue] = useState(prefill.location ?? '')
+  const [loadOpen, setLoadOpen] = useState(false)
   const [opponent, setOpponent] = useState(prefill.opponent ?? '')
   const [useGoalie, setUseGoalie] = useState(false)
   const [useFifthDouble, setUseFifthDouble] = useState(false)
@@ -141,10 +144,19 @@ export default function MatchDaySetupPage() {
 
         {/* Players */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-fg/45 text-[13px] font-semibold tracking-widest uppercase">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <p className="text-fg/45 text-[13px] font-semibold tracking-widest uppercase flex-1 truncate">
               Aktive Spieler:innen ({activePlayers.length})
             </p>
+            {/* Nur das Symbol: die Überschrift plus „Alle auswählen" füllt
+                eine schmale Zeile sonst schon aus. */}
+            <button
+              onClick={() => setLoadOpen(true)}
+              aria-label="Einsätze über die Saison"
+              className="text-[15px] flex-shrink-0 px-1"
+            >
+              📊
+            </button>
             <button
               onClick={() => {
                 const allSelected = rosterPlayers.every(p => selected[p.id])
@@ -241,6 +253,11 @@ export default function MatchDaySetupPage() {
           Aufstellung berechnen ✨
         </button>
       </div>
+
+
+      <AnimatePresence>
+        {loadOpen && <SquadLoadSheet onClose={() => setLoadOpen(false)} />}
+      </AnimatePresence>
 
       <BottomNav />
     </div>

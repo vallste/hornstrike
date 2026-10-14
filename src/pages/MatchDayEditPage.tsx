@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
 import Header from '../components/Header'
+import TimeField from '../components/TimeField'
+import SquadLoadSheet from '../components/SquadLoadSheet'
 import LoadingScreen from '../components/LoadingScreen'
 import { usePlayers, useMatchDays } from '../store'
 import type { MatchDayPlayer } from '../types'
@@ -27,6 +30,10 @@ function MatchDayEditForm() {
 
   const [date, setDate] = useState(matchDay.date ?? '')
   const [opponent, setOpponent] = useState(matchDay.opponent ?? '')
+  // Kamen bisher nur aus der Terminfindung und liessen sich danach weder
+  // sehen noch aendern – der Spieltag trug sie still mit sich herum.
+  const [startTime, setStartTime] = useState(matchDay.startTime ?? '')
+  const [venue, setVenue] = useState(matchDay.location ?? '')
   const [useGoalie, setUseGoalie] = useState(matchDay.useGoalie ?? false)
   const [useFifthDouble, setUseFifthDouble] = useState(matchDay.useFifthDouble ?? false)
   const [selected, setSelected] = useState<Record<string, boolean>>(
@@ -36,6 +43,7 @@ function MatchDayEditForm() {
     Object.fromEntries((matchDay.players ?? []).map(p => [p.playerId, { from: p.availableFrom, to: p.availableTo }]))
   )
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [loadOpen, setLoadOpen] = useState(false)
 
   const activePlayers = players.filter(p => selected[p.id])
 
@@ -64,7 +72,13 @@ function MatchDayEditForm() {
       availableTo: availability[p.id]?.to ?? maxGame,
     }))
     // Lineup bleibt unverändert – Neuberechnung erfolgt manuell über "⟳ Neu" in der Aufstellung
-    updateMatchDay({ ...matchDay, date, opponent: opponent.trim() || undefined, useGoalie, useFifthDouble, players: mdPlayers })
+    updateMatchDay({
+      ...matchDay, date,
+      startTime: startTime || null,
+      location: venue.trim() || null,
+      opponent: opponent.trim() || undefined,
+      useGoalie, useFifthDouble, players: mdPlayers,
+    })
     navigate(`/lineup/${matchDay.id}`)
   }
 
@@ -92,6 +106,24 @@ function MatchDayEditForm() {
             onClick={e => e.currentTarget.showPicker?.()}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
+        </div>
+
+        {/* Uhrzeit + Ort */}
+        <div className="flex gap-3">
+          <div className="flex-1 bg-surface rounded-2xl px-4 py-3.5">
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Uhrzeit</p>
+            <TimeField value={startTime} onChange={setStartTime} className="w-full" />
+          </div>
+          <div className="flex-[1.4] bg-surface rounded-2xl px-4 py-3.5">
+            <p className="text-fg/45 text-[12px] font-semibold tracking-widest uppercase mb-1.5">Ort</p>
+            <input
+              type="text"
+              value={venue}
+              onChange={e => setVenue(e.target.value)}
+              placeholder="Sporthalle…"
+              className="w-full bg-transparent text-fg placeholder-fg/25 text-base outline-none"
+            />
+          </div>
         </div>
 
         {/* Opponent */}
@@ -133,8 +165,17 @@ function MatchDayEditForm() {
 
         {/* Players */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-fg/45 text-[13px] font-semibold tracking-widest uppercase">Aktive Spieler:innen ({activePlayers.length})</p>
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <p className="text-fg/45 text-[13px] font-semibold tracking-widest uppercase flex-1 truncate">Aktive Spieler:innen ({activePlayers.length})</p>
+            {/* Nur das Symbol: die Überschrift plus „Alle auswählen" füllt
+                eine schmale Zeile sonst schon aus. */}
+            <button
+              onClick={() => setLoadOpen(true)}
+              aria-label="Einsätze über die Saison"
+              className="text-[15px] flex-shrink-0 px-1"
+            >
+              📊
+            </button>
             <button
               onClick={() => {
                 const allSelected = players.every(p => selected[p.id])
@@ -214,6 +255,10 @@ function MatchDayEditForm() {
           Speichern
         </button>
       </div>
+
+      <AnimatePresence>
+        {loadOpen && <SquadLoadSheet onClose={() => setLoadOpen(false)} />}
+      </AnimatePresence>
     </div>
   )
 }
